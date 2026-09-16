@@ -207,6 +207,11 @@ export default async function AccueilPage() {
               <span aria-hidden>→</span>
             </Link>
           </Button>
+          {/* Un lien dans une phrase ne peut pas faire 48 px de haut sans casser
+              le paragraphe : sur la landing, une action est un bouton. */}
+          <Button asChild taille="lg" variant="secondaire" className="mt-3 w-full md:w-auto">
+            <Link href="/inscription">Créer mon compte</Link>
+          </Button>
           <ul className="mt-6 flex flex-wrap justify-center gap-2 text-xs text-gris-300">
             <li className="rounded-full border border-gris-700 px-3 py-1.5">Sans inscription</li>
             <li className="rounded-full border border-gris-700 px-3 py-1.5">Sans carte bancaire</li>
@@ -221,6 +226,7 @@ export default async function AccueilPage() {
           {/* Section 2.2 : 48 px de zone tactile, y compris dans le pied de page. */}
           <nav className="mt-4 flex flex-wrap gap-x-6 text-xs text-gris-300">
             {[
+              { href: '/inscription', label: 'Créer un compte' },
               { href: '/garantie', label: 'La garantie' },
               { href: '/legal/mentions', label: 'Mentions légales' },
               { href: '/legal/cgv', label: 'Conditions de vente' },

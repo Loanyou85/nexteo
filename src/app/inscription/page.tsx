@@ -26,7 +26,7 @@ export default async function InscriptionPage({
         <p className="mt-2 text-sm text-gris-300">
           {idea
             ? `On garde « ${idea.title} » et tout ce que tu as répondu. Trente secondes.`
-            : 'Prénom, adresse, mot de passe. Rien d’autre.'}
+            : 'Prénom, adresse, mot de passe. Rien d’autre. Tu choisiras ton idée ensuite.'}
         </p>
 
         <div className="mt-8">

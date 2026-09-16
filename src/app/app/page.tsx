@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
 import { AppShell } from '@/components/app/app-shell';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -25,7 +24,26 @@ export default async function AujourdhuiPage({
   const { bienvenue } = await searchParams;
   const user = await requireUser();
   const parcours = await parcoursDe(user.id);
-  if (!parcours) redirect('/mes-idees');
+
+  // Pas encore d'idée choisie : on ne renvoie pas vers le diagnostic en
+  // boucle, on l'accueille et on lui donne la seule action qui compte.
+  if (!parcours) {
+    return (
+      <AppShell actif="/app">
+        <h1 className="text-xl font-extrabold text-white">Bienvenue{user.name ? `, ${user.name}` : ''}.</h1>
+        <p className="mt-3 text-sm text-gris-300">
+          Ton compte est créé. Il te manque une idée à construire : le diagnostic prend une dizaine
+          de minutes et ne demande rien de plus que ce que tu sais déjà.
+        </p>
+        <Button asChild taille="bloc" className="mt-8">
+          <Link href="/diagnostic">Trouver mon idée</Link>
+        </Button>
+        <Button asChild taille="bloc" variant="secondaire" className="mt-3">
+          <Link href="/app/compte">Voir mon compte</Link>
+        </Button>
+      </AppShell>
+    );
+  }
 
   const etapes = etapesApplicables(parcours);
   const parId = new Map(parcours.steps.map((s) => [s.stepId, s]));

@@ -331,3 +331,42 @@ test.describe('quand quelque chose casse', () => {
     expect(texte).not.toMatch(/stack|webpack|\.tsx|at Object\./i);
   });
 });
+
+test.describe('créer un compte sans passer par les questions', () => {
+  test.use({ viewport: MOBILE });
+
+  test('la connexion mène à l’inscription, et l’inscription ne boucle pas', async ({ page }) => {
+    test.setTimeout(120_000);
+    const email = adresseDeTest('direct');
+
+    // Depuis n'importe quel écran public, le bouton de l'en-tête ramène au compte.
+    await page.goto('/');
+    await page.getByRole('link', { name: 'Se connecter' }).click();
+    await page.waitForURL('**/connexion');
+
+    await page.getByRole('link', { name: 'Créer un compte' }).click();
+    await page.waitForURL('**/inscription');
+
+    await page.getByLabel('Ton prénom').fill('Alex');
+    await page.getByLabel('Ton adresse e-mail').fill(email);
+    await page.getByLabel('Ton mot de passe').fill('un-mot-de-passe-assez-long');
+    await page.getByRole('checkbox').check();
+    await page.getByRole('button', { name: 'Créer mon compte' }).click();
+
+    // Sans idée choisie, on arrive chez soi — pas dans une boucle de
+    // redirections vers le diagnostic.
+    await page.waitForURL('**/app', { timeout: 30_000 });
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Bienvenue');
+    await expect(page.getByRole('link', { name: 'Trouver mon idée' })).toBeVisible();
+
+    // Les autres écrans de l'application tiennent aussi sans idée.
+    await page.goto('/mes-idees');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('après le diagnostic');
+
+    await page.goto('/app/compte');
+    await expect(page.getByText(email)).toBeVisible();
+
+    await page.goto('about:blank');
+    await supprimerCompteDeTest(email);
+  });
+});

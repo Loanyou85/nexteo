@@ -115,6 +115,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
 });
 
+/**
+ * Session, ou null si la pile d'authentification est indisponible.
+ *
+ * Le diagnostic est public et ne demande aucun compte. Il n'a pourtant aucune
+ * raison de tomber si l'authentification est mal configurée — secret absent,
+ * hôte non reconnu derrière un proxy, fournisseur externe en panne. Ces
+ * erreurs-là doivent coûter la session, pas le parcours.
+ */
+export async function sessionOuNull() {
+  try {
+    return await auth();
+  } catch (error) {
+    console.error('[auth] session indisponible, on continue en anonyme', error);
+    return null;
+  }
+}
+
 /** Session obligatoire : lève si l'utilisateur n'est pas connecté. */
 export async function requireUser() {
   const session = await auth();

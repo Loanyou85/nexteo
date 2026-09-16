@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { cookies } from 'next/headers';
 import type { Profile } from '@prisma/client';
 import { db } from '@/server/db';
-import { auth } from '@/server/auth';
+import { sessionOuNull } from '@/server/auth';
 import { QUESTIONS, indexOfQuestion } from '@/lib/diagnostic/questions';
 
 /**
@@ -20,13 +20,19 @@ export async function anonId(): Promise<string | null> {
 
 /** Profil courant, sans en créer : pour les écrans qui lisent seulement. */
 export async function currentProfile(): Promise<Profile | null> {
-  const session = await auth();
-  if (session?.user?.id) {
-    const parUser = await db.profile.findUnique({ where: { userId: session.user.id } });
-    if (parUser) return parUser;
-  }
+  // Le cookie anonyme d'abord : c'est le cas courant, et il n'a besoin de rien
+  // d'autre que la base.
   const id = await anonId();
-  return id ? db.profile.findUnique({ where: { anonId: id } }) : null;
+  if (id) {
+    const anonyme = await db.profile.findUnique({ where: { anonId: id } });
+    if (anonyme) return anonyme;
+  }
+
+  const session = await sessionOuNull();
+  if (session?.user?.id) {
+    return db.profile.findUnique({ where: { userId: session.user.id } });
+  }
+  return null;
 }
 
 /**
@@ -38,7 +44,7 @@ export async function ensureProfile(): Promise<Profile> {
   const existant = await currentProfile();
   if (existant) return existant;
 
-  const session = await auth();
+  const session = await sessionOuNull();
   if (session?.user?.id) {
     return db.profile.create({ data: { userId: session.user.id } });
   }

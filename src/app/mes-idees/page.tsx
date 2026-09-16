@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
 import { TopBar } from '@/components/shell/top-bar';
 import { Button } from '@/components/ui/button';
 import { Card, CardText, CardTitle } from '@/components/ui/card';
@@ -22,8 +21,25 @@ export default async function MesIdeesPage({
 }) {
   const { completer } = await searchParams;
   const profile = await currentProfile();
-  if (!profile) redirect('/diagnostic');
-  if (!profile.completedAt) redirect('/diagnostic');
+
+  if (!profile || !profile.completedAt) {
+    return (
+      <>
+        <TopBar />
+        <main className="mx-auto max-w-md px-4 py-10">
+          <h1 className="text-xl font-extrabold text-white">Tes idées arrivent après le diagnostic.</h1>
+          <p className="mt-3 text-sm text-gris-300">
+            {profile
+              ? 'Tu l’as commencé sans le finir. On reprend là où tu t’es arrêté, rien n’est perdu.'
+              : 'Seize questions, une dizaine de minutes, aucune inscription demandée.'}
+          </p>
+          <Button asChild taille="bloc" className="mt-8">
+            <Link href="/diagnostic">{profile ? 'Reprendre le diagnostic' : 'Trouver mon idée'}</Link>
+          </Button>
+        </main>
+      </>
+    );
+  }
 
   const filtre = profile.userId ? { userId: profile.userId } : { anonId: profile.anonId! };
   const idees = await db.idea.findMany({
