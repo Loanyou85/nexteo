@@ -111,6 +111,12 @@ test.describe('le diagnostic', () => {
     await page.getByRole('button', { name: 'Suivant' }).click();
     await page.waitForURL(/q=9/);
 
+    // Les bornes du curseur de revenu sont vérifiées au passage.
+    const bornes = async () => {
+      const barre = page.getByRole('slider');
+      return { min: await barre.getAttribute('min'), max: await barre.getAttribute('max') };
+    };
+
     // 9 à 15
     await page.getByRole('button', { name: '10 à 15 heures' }).click();
     await page.waitForURL(/q=10/);
@@ -118,6 +124,7 @@ test.describe('le diagnostic', () => {
     await page.waitForURL(/q=11/);
     await page.getByRole('button', { name: 'Je bidouille des tableurs et des outils en ligne' }).click();
     await page.waitForURL(/q=12/);
+    expect(await bornes()).toEqual({ min: '0', max: '20000' });
     await page.getByRole('button', { name: 'Suivant' }).click();
     await page.waitForURL(/q=13/);
     await page.getByRole('button', { name: 'Dans trois à six mois' }).click();

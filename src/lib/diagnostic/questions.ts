@@ -171,8 +171,10 @@ export const QUESTIONS: Question[] = [
     key: 'goalRevenue',
     kind: 'slider',
     min: 0,
-    max: 5000,
-    step: 100,
+    max: 20000,
+    // Un pas de 250 € sur vingt mille : assez fin pour viser juste, assez
+    // large pour se contrôler au pouce sur un écran de 390 px.
+    step: 250,
     defaultValue: 1000,
     unit: '€ par mois',
     title: 'Tu vises combien par mois ?',
