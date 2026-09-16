@@ -1,4 +1,5 @@
 import NextAuth, { type DefaultSession, type NextAuthConfig } from 'next-auth';
+import { redirect } from 'next/navigation';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import Credentials from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
@@ -116,25 +117,47 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 });
 
 /**
- * Session, ou null si la pile d'authentification est indisponible.
+ * Session vérifiée, ou null.
  *
- * Le diagnostic est public et ne demande aucun compte. Il n'a pourtant aucune
- * raison de tomber si l'authentification est mal configurée — secret absent,
- * hôte non reconnu derrière un proxy, fournisseur externe en panne. Ces
- * erreurs-là doivent coûter la session, pas le parcours.
+ * Deux raisons de renvoyer null plutôt que de laisser passer.
+ *
+ * La première : le diagnostic est public et ne demande aucun compte. Il n'a
+ * aucune raison de tomber si l'authentification est mal configurée — secret
+ * absent, hôte non reconnu derrière un proxy. Ces erreurs coûtent la session,
+ * pas le parcours.
+ *
+ * La seconde, et c'est celle qui a mordu : **une session est un jeton signé,
+ * pas une preuve que le compte existe encore.** Les sessions sont sans état,
+ * donc le jeton survit dans le navigateur à la suppression du compte — et à
+ * une base remise à zéro par une migration. Il se décode parfaitement et
+ * désigne un compte disparu. Toute écriture qui s'y fie échoue alors sur une
+ * clé étrangère, loin de la cause, avec un message que personne ne relie au
+ * problème. On vérifie donc que la ligne existe avant de la croire.
  */
 export async function sessionOuNull() {
   try {
-    return await auth();
+    const session = await auth();
+    if (!session?.user?.id) return null;
+
+    const existe = await db.user.findUnique({
+      where: { id: session.user.id },
+      select: { id: true },
+    });
+    if (!existe) {
+      console.warn('[auth] jeton valide pour un compte disparu, session ignorée');
+      return null;
+    }
+
+    return session;
   } catch (error) {
     console.error('[auth] session indisponible, on continue en anonyme', error);
     return null;
   }
 }
 
-/** Session obligatoire : lève si l'utilisateur n'est pas connecté. */
+/** Session obligatoire. Renvoie vers la connexion si le compte n'existe plus. */
 export async function requireUser() {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error('UNAUTHENTICATED');
+  const session = await sessionOuNull();
+  if (!session?.user?.id) redirect('/connexion');
   return session.user;
 }

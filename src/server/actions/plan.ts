@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import type { Plan } from '@prisma/client';
 import { db } from '@/server/db';
-import { auth } from '@/server/auth';
+import { sessionOuNull } from '@/server/auth';
 import { getStripe, priceIdFor, stripeEnabled } from '@/server/stripe';
 import { absoluteUrl } from '@/lib/site';
 import { offerFor } from '@/lib/offers';
@@ -20,7 +20,7 @@ export async function choisirOffre(formData: FormData): Promise<void> {
   const plan = String(formData.get('plan') ?? '') as Plan;
   if (!offerFor(plan)) redirect('/offres');
 
-  const session = await auth();
+  const session = await sessionOuNull();
   if (!session?.user?.id) redirect(`/connexion?suite=${encodeURIComponent('/offres')}`);
   const userId = session.user.id;
 
@@ -61,7 +61,7 @@ export async function choisirOffre(formData: FormData): Promise<void> {
 
 /** Portail de facturation : changer de carte, voir ses factures, résilier. */
 export async function ouvrirPortail(): Promise<void> {
-  const session = await auth();
+  const session = await sessionOuNull();
   if (!session?.user?.id) redirect('/connexion');
 
   const stripe = getStripe();

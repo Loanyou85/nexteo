@@ -146,6 +146,24 @@ page d'administration à déclencher à la main, c'est accepter qu'un déploieme
 mette le site en ligne vide. Le garde d'idempotence rend les builds suivants
 gratuits.
 
+**Une session n'est jamais une preuve que le compte existe.** Les sessions sont
+sans état : le jeton est signé, stocké dans le navigateur, et valable trente
+jours. Il survit donc à la suppression du compte — et à une base remise à zéro
+par une migration. Il se décode parfaitement et désigne un compte disparu.
+
+C'est ce qui a cassé le site en production. La migration de bascule a vidé la
+table des comptes ; le navigateur du fondateur a gardé son jeton ; la première
+question du diagnostic a tenté de créer un profil rattaché à ce compte fantôme
+et a échoué sur une clé étrangère. Le symptôme était à des kilomètres de la
+cause : la page d'accueil marchait, la première question s'affichait, et le
+premier clic mourait — sans jamais se reproduire en local, puisqu'un navigateur
+de test n'a pas de jeton périmé.
+
+`sessionOuNull()` vérifie donc que la ligne existe avant de croire le jeton, et
+c'est le seul point d'entrée des sessions dans le code. Tout appel direct à
+`auth()` hors de ce fichier a été supprimé : la vérification ne doit pas être
+quelque chose qu'on pense à faire.
+
 **Le webhook Stripe reste le seul endroit qui ouvre un accès payant.** Une
 redirection de retour peut être fabriquée, une signature Stripe non.
 

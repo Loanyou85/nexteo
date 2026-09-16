@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { db } from '@/server/db';
-import { auth } from '@/server/auth';
+import { sessionOuNull } from '@/server/auth';
 import { currentProfile } from '@/server/diagnostic';
 import { genererIdees, redigerJustification } from '@/server/ideas';
 import { demarrerParcours } from '@/server/journey';
@@ -30,7 +30,7 @@ export async function choisirIdee(formData: FormData): Promise<void> {
   await db.idea.updateMany({ where: { ...filtre, status: 'selected' }, data: { status: 'proposed' } });
   await db.idea.update({ where: { id: idea.id }, data: { status: 'selected' } });
 
-  const session = await auth();
+  const session = await sessionOuNull();
   if (!session?.user?.id) redirect(`/inscription?idee=${idea.id}`);
 
   await demarrerParcours(session.user.id, idea.id);

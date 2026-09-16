@@ -393,3 +393,45 @@ test.describe('l’écran de panne', () => {
     expect(texte).not.toMatch(/postgres(ql)?:\/\/|sk_|whsec_/);
   });
 });
+
+test.describe('une session qui désigne un compte disparu', () => {
+  test.use({ viewport: MOBILE });
+
+  /**
+   * Régression exacte de la panne vécue en production. Les sessions sont sans
+   * état : le jeton signé survit dans le navigateur à la suppression du
+   * compte — et à une base remise à zéro par une migration. Il se décode
+   * parfaitement et désigne un compte qui n'existe plus.
+   *
+   * Avant correction, la première question du diagnostic tentait de créer un
+   * profil rattaché à ce compte fantôme et mourait sur une clé étrangère
+   * (P2003), très loin de la cause.
+   */
+  test('ne bloque ni le diagnostic ni l’application', async ({ page }) => {
+    test.setTimeout(120_000);
+    const email = adresseDeTest('fantome');
+
+    await page.goto('/inscription');
+    await page.getByLabel('Ton prénom').fill('Sam');
+    await page.getByLabel('Ton adresse e-mail').fill(email);
+    await page.getByLabel('Ton mot de passe').fill('un-mot-de-passe-assez-long');
+    await page.getByRole('checkbox').check();
+    await page.getByRole('button', { name: 'Créer mon compte' }).click();
+    await page.waitForURL('**/app', { timeout: 30_000 });
+
+    // Le compte disparaît, le jeton reste dans le navigateur.
+    await supprimerCompteDeTest(email);
+
+    // Le diagnostic public doit continuer de fonctionner, en anonyme.
+    await page.goto('/diagnostic');
+    await page.getByRole('button', { name: '18 à 24 ans' }).click();
+    await page.waitForURL(/q=1/);
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Tu fais quoi en ce moment');
+
+    // Et l'application renvoie proprement vers la connexion.
+    await page.goto('/app');
+    await page.waitForURL('**/connexion');
+
+    await page.goto('about:blank');
+  });
+});

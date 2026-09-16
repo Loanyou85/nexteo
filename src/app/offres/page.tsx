@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { FREE_FEATURES, OFFERS, formatPrice } from '@/lib/offers';
 import { GUARANTEE_DAYS, GUARANTEE_HEADLINE } from '@/lib/guarantee';
-import { auth } from '@/server/auth';
+import { sessionOuNull } from '@/server/auth';
 import { db } from '@/server/db';
 import { choisirOffre } from '@/server/actions/plan';
 import { stripeEnabled } from '@/server/stripe';
@@ -22,7 +22,7 @@ export default async function OffresPage({
   searchParams: Promise<{ paiement?: string; retour?: string }>;
 }) {
   const { paiement, retour } = await searchParams;
-  const session = await auth();
+  const session = await sessionOuNull();
   if (!session?.user?.id) redirect(`/connexion?suite=${encodeURIComponent('/offres')}`);
 
   const idee = await db.idea.findFirst({
