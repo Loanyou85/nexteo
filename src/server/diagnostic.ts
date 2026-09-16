@@ -51,13 +51,21 @@ export async function ensureProfile(): Promise<Profile> {
 
   const id = randomUUID();
   const profile = await db.profile.create({ data: { anonId: id } });
-  (await cookies()).set(COOKIE, id, {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: DUREE,
-    path: '/',
-  });
+
+  try {
+    (await cookies()).set(COOKIE, id, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: DUREE,
+      path: '/',
+    });
+  } catch (error) {
+    // Sans cookie, les réponses suivantes repartiront d'un profil neuf. C'est
+    // dégradé, mais ça reste préférable à un mur à la première question.
+    console.error('[diagnostic] cookie non posé, la progression ne sera pas retrouvée', error);
+  }
+
   return profile;
 }
 

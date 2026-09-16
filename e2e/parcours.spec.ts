@@ -305,15 +305,15 @@ test.describe('quand quelque chose casse', () => {
 
     const sante = await reponse.json();
     expect(sante.etat).toBe('ok');
-    expect(sante.lecture).toBe('ok');
-    // L'écriture est testée pour de vrai : c'est ce que fait la première
-    // question du diagnostic, et donc le premier endroit où ça casse.
-    expect(sante.ecriture).toBe('ok');
-    expect(sante.cookies).toBe('ok');
-    expect(sante.contenu).toBe('complet');
-    expect(sante.details.phases).toBe(13);
-    expect(sante.details.archetypes).toBeGreaterThan(0);
-    expect(sante.details.gabarits).toBeGreaterThan(0);
+
+    // Les quatre opérations dont dépend la première question du diagnostic.
+    const noms = sante.etapes.map((e: { nom: string }) => e.nom);
+    expect(noms).toEqual(['Lire la base', 'Écrire dans la base', 'Lire les cookies', 'Poser un cookie']);
+    for (const etape of sante.etapes) expect(etape.ok, etape.nom).toBe(true);
+
+    expect(sante.contenu.complet).toBe(true);
+    expect(sante.contenu.phases).toBe(13);
+    expect(sante.contenu.archetypes).toBeGreaterThan(0);
 
     // Rien de sensible ne doit fuir : des booléens et des comptes, pas de valeurs.
     const brut = JSON.stringify(sante);
@@ -368,5 +368,28 @@ test.describe('créer un compte sans passer par les questions', () => {
 
     await page.goto('about:blank');
     await supprimerCompteDeTest(email);
+  });
+});
+
+test.describe('l’écran de panne', () => {
+  test.use({ viewport: MOBILE });
+
+  test('explique la cause en français au lieu d’un identifiant illisible', async ({ page }) => {
+    await page.goto('/diagnostic/probleme?code=P1001&question=age');
+
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('voici pourquoi');
+    await expect(page.getByText('Le site n’arrive pas à joindre sa base de données.')).toBeVisible();
+    await expect(page.getByText('Quel âge as-tu ?', { exact: false })).toBeVisible();
+
+    // Le rapport refait le test : ici la base répond, donc tout est vert.
+    await expect(page.getByText('Lire la base')).toBeVisible();
+    await expect(page.getByText('Écrire dans la base')).toBeVisible();
+
+    await expect(page.getByRole('link', { name: 'Réessayer' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Copier le rapport' })).toBeVisible();
+
+    // Rien de sensible à l'écran.
+    const texte = await page.locator('body').innerText();
+    expect(texte).not.toMatch(/postgres(ql)?:\/\/|sk_|whsec_/);
   });
 });

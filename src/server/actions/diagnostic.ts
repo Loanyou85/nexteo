@@ -10,6 +10,7 @@ import { genererIdees } from '@/server/ideas';
 import { normaliserFrictions, frictionsParMotsCles } from '@/lib/ai/signals';
 import { QUESTIONS, indexOfQuestion } from '@/lib/diagnostic/questions';
 import { MIN_AGE } from '@/lib/guardrails';
+import { classer } from '@/lib/panne/classer';
 
 const entier = (value: FormDataEntryValue | null): number | null => {
   const n = Number(String(value ?? '').trim());
@@ -138,10 +139,11 @@ export async function repondre(formData: FormData): Promise<void> {
 
     await db.profile.update({ where: { id: profile.id }, data });
   } catch (error) {
-    // Le journal nomme la question en cause : « la page ne charge plus » ne
-    // dit rien, « enregistrement de age impossible » se corrige.
     console.error(`[diagnostic] enregistrement de la question « ${key} » impossible`, error);
-    throw new Error(`Enregistrement impossible à la question « ${key} ».`);
+    // On ne lève pas : Next masquerait le message et ne laisserait qu'un
+    // identifiant illisible sans accès aux journaux. On envoie vers un écran
+    // qui dit ce qui s'est passé, en français.
+    redirect(`/diagnostic/probleme?code=${encodeURIComponent(classer(error))}&question=${encodeURIComponent(key)}`);
   }
 
   if (tropJeune) redirect('/trop-jeune');
