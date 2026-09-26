@@ -2,9 +2,9 @@ import Link from 'next/link';
 import { Suspense } from 'react';
 import { Coque, EnTetePage, EtatVide } from '@/components/shell/coque';
 import { BaseAbsente } from '@/components/shell/base-absente';
-import { Button } from '@/components/ui/button';
-import { CarteAnnonceur } from '@/components/annonce/carte-annonceur';
 import { BarreFiltres } from '@/components/explore/barre-filtres';
+import { TableauAnnonceurs } from '@/components/explore/tableau';
+import { Button } from '@/components/ui/button';
 import { avecCurseur, filtreActif, filtresDepuisUrl, lireParam, type ParamsUrl } from '@/lib/filtres-url';
 import { MENTION_SOURCE } from '@/lib/guardrails';
 import { facettes, rechercherAnnonceurs } from '@/server/annonceurs';
@@ -14,11 +14,26 @@ import { etatBase } from '@/server/etat';
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Recherche — Nexteo',
-  description: 'Filtre les annonceurs par signal, durée de diffusion, catégorie et pays.',
+  title: 'Annonceurs — Nexteo',
+  description:
+    'Toutes les entreprises que Nexteo a vues payer pour de la publicité, en tableau comparable.',
 };
 
-export default async function ExplorePage({ searchParams }: { searchParams: Promise<ParamsUrl> }) {
+/**
+ * La même donnée que la recherche, en tableau.
+ *
+ * Les filtres et l'URL sont partagés avec /explore : on bascule d'une vue à
+ * l'autre sans reposer ses filtres. Cinquante lignes par page ici contre
+ * vingt-quatre cartes là-bas — un tableau dense supporte le défilement, une
+ * grille de cartes non.
+ */
+const PAR_PAGE = 50;
+
+export default async function AnnonceursPage({
+  searchParams,
+}: {
+  searchParams: Promise<ParamsUrl>;
+}) {
   const params = await searchParams;
   const etat = await etatBase();
 
@@ -34,27 +49,28 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
   const curseur = lireParam(params, 'curseur');
 
   const [resultat, listes, coque] = await Promise.all([
-    rechercherAnnonceurs(filtres, curseur),
+    rechercherAnnonceurs(filtres, curseur, PAR_PAGE),
     facettes(),
     proprietesCoque(),
   ]);
-  const { annonceurs: totalAnnonceurs, annonces: totalAnnonces } = coque.compteurs;
 
+  const { annonceurs: total, annonces } = coque.compteurs;
   const filtre = filtreActif(filtres);
 
   return (
     <Coque compteurs={coque.compteurs} admin={coque.admin} compte={coque.compte}>
       <EnTetePage
-        titre="Recherche"
-        actions={
-          <Button asChild taille="sm" variant="secondaire">
-            <Link href={`/annonceurs?${avecCurseur(params, null)}`}>Vue tableau</Link>
-          </Button>
-        }
+        titre="Annonceurs"
         compteur={
           filtre
-            ? `${resultat.lignes.length} résultat${resultat.lignes.length > 1 ? 's' : ''} sur ${totalAnnonceurs.toLocaleString('fr-FR')} annonceurs archivés`
-            : `${totalAnnonceurs.toLocaleString('fr-FR')} annonceurs, ${totalAnnonces.toLocaleString('fr-FR')} annonces archivées`
+            ? `${resultat.lignes.length} ligne${resultat.lignes.length > 1 ? 's' : ''} sur ${total.toLocaleString('fr-FR')} annonceurs archivés`
+            : `${total.toLocaleString('fr-FR')} annonceurs, ${annonces.toLocaleString('fr-FR')} annonces archivées`
+        }
+        sous="Chaque ligne est une entreprise qui a payé pour être vue. La colonne Diffusion est la seule mesure vérifiable ici : combien de temps elle paie sans s’arrêter."
+        actions={
+          <Button asChild taille="sm" variant="secondaire">
+            <Link href={`/explore?${avecCurseur(params, null)}`}>Vue cartes</Link>
+          </Button>
         }
       />
 
@@ -70,22 +86,20 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
               explication="Élargis les filtres, ou attends la prochaine exécution du pipeline : l’archive s’enrichit chaque jour et ne perd jamais ce qu’elle a vu."
               action={
                 <Button asChild taille="sm" variant="secondaire">
-                  <Link href="/explore">Réinitialiser les filtres</Link>
+                  <Link href="/annonceurs">Réinitialiser les filtres</Link>
                 </Button>
               }
             />
           ) : (
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-              {resultat.lignes.map((a) => (
-                <CarteAnnonceur key={a.id} a={a} />
-              ))}
-            </div>
+            <TableauAnnonceurs lignes={resultat.lignes} />
           )}
 
           {resultat.curseurSuivant ? (
             <div className="mt-6 flex justify-center">
               <Button asChild variant="secondaire" taille="md">
-                <Link href={`/explore?${avecCurseur(params, resultat.curseurSuivant)}`}>Charger la suite</Link>
+                <Link href={`/annonceurs?${avecCurseur(params, resultat.curseurSuivant)}`}>
+                  Charger la suite
+                </Link>
               </Button>
             </div>
           ) : null}

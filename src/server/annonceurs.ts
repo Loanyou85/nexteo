@@ -1,5 +1,6 @@
 import 'server-only';
 import { Prisma } from '@prisma/client';
+import { requetePrefixe } from '@/lib/plein-texte';
 import { db } from '@/server/db';
 import { bandePour, type Bande } from '@/lib/signal/score';
 
@@ -125,12 +126,7 @@ export async function rechercherAnnonceurs(
     // Plein texte par préfixe sur les annonces, plus recherche par fragment
     // sur le nom : « stri » doit trouver « Stripe », que le plein texte seul
     // ne rattrape pas.
-    const requete = q
-      .split(/\s+/)
-      .filter(Boolean)
-      .map((mot) => `${mot.replace(/[^\p{L}\p{N}]/gu, '')}:*`)
-      .filter((m) => m.length > 2)
-      .join(' & ');
+    const requete = requetePrefixe(q);
 
     conditions.push(
       requete

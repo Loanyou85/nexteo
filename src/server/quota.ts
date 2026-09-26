@@ -46,7 +46,7 @@ async function identite(): Promise<Identite> {
   return visiteur ? { visitorId: visiteur } : null;
 }
 
-async function planActif(userId: string | undefined): Promise<Plan> {
+export async function planActif(userId: string | undefined): Promise<Plan> {
   if (!userId) return 'free';
 
   const abo = await db.subscription.findUnique({

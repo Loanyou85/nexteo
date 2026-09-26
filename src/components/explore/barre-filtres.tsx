@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { ChevronDown, RotateCcw, Search, SlidersHorizontal } from 'lucide-react';
 import { BANDES } from '@/lib/signal/score';
@@ -13,6 +13,10 @@ import { cn } from '@/lib/utils';
  * copiant l'adresse et le bouton Précédent fait ce qu'on attend. Le curseur de
  * pagination est remis à zéro dès qu'un filtre change — le garder pointerait
  * au milieu d'un autre résultat.
+ *
+ * La barre réécrit le chemin courant et non une adresse fixe : la recherche en
+ * cartes et la liste en tableau lisent les mêmes paramètres, et filtrer depuis
+ * le tableau ne doit pas renvoyer sur les cartes.
  */
 const ANTI_REBOND_MS = 300;
 
@@ -24,6 +28,7 @@ type Facettes = {
 
 export function BarreFiltres({ facettes }: { facettes: Facettes }) {
   const router = useRouter();
+  const chemin = usePathname();
   const params = useSearchParams();
   const [enCours, demarrer] = useTransition();
   const [q, setQ] = useState(params.get('q') ?? '');
@@ -37,7 +42,7 @@ export function BarreFiltres({ facettes }: { facettes: Facettes }) {
       else suivant.set(cle, valeur);
     }
     suivant.delete('curseur');
-    demarrer(() => router.replace(`/explore?${suivant.toString()}`, { scroll: false }));
+    demarrer(() => router.replace(`${chemin}?${suivant.toString()}`, { scroll: false }));
   }
 
   // Anti-rebond de 300 ms : une requête par frappe rendrait la liste illisible
@@ -119,7 +124,7 @@ export function BarreFiltres({ facettes }: { facettes: Facettes }) {
           type="button"
           onClick={() => {
             setQ('');
-            demarrer(() => router.replace('/explore', { scroll: false }));
+            demarrer(() => router.replace(chemin, { scroll: false }));
           }}
           className="flex h-11 items-center gap-2 rounded-champ border border-bordure bg-surface px-3.5 text-sm text-encre-2 transition-colors hover:text-encre"
         >

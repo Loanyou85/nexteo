@@ -22,20 +22,31 @@ export function Coque({
 }: {
   children: React.ReactNode;
   compteurs?: { annonceurs?: number; annonces?: number };
-  compte?: { email: string; plan: string } | null;
+  compte?: { email: string; plan: string; abonne: boolean } | null;
   admin?: boolean;
 }) {
   return (
     <div className="flex min-h-dvh bg-nuit">
       <div className="hidden w-[272px] shrink-0 flex-col lg:flex">
         <BarreLaterale compteurs={compteurs} admin={admin} />
+        {/* Rien à vendre à quelqu'un qui paie déjà : lui remontrer « Passer à
+            Pro » à chaque écran lui dit qu'on ne sait pas qu'il est client. */}
         <div className="p-4">
-          <Link
-            href="/tarifs"
-            className="flex h-12 items-center justify-center rounded-capsule bg-neo-500 text-sm font-semibold text-white transition-colors hover:bg-neo-400"
-          >
-            Passer à Pro
-          </Link>
+          {compte?.abonne ? (
+            <Link
+              href="/tarifs"
+              className="flex h-12 items-center justify-center rounded-capsule border border-nuit-3 text-sm font-medium text-nuit-encre transition-colors hover:bg-nuit-2"
+            >
+              Gérer l’abonnement
+            </Link>
+          ) : (
+            <Link
+              href="/tarifs"
+              className="flex h-12 items-center justify-center rounded-capsule bg-neo-500 text-sm font-semibold text-white transition-colors hover:bg-neo-400"
+            >
+              Passer à Pro
+            </Link>
+          )}
         </div>
 
         {compte ? (
@@ -60,9 +71,13 @@ export function Coque({
           </Link>
           <Link
             href="/tarifs"
-            className="flex h-9 items-center rounded-capsule bg-neo-500 px-4 text-xs font-semibold text-white"
+            className={
+              compte?.abonne
+                ? 'flex h-9 items-center rounded-capsule border border-nuit-3 px-4 text-xs font-medium text-nuit-encre'
+                : 'flex h-9 items-center rounded-capsule bg-neo-500 px-4 text-xs font-semibold text-white'
+            }
           >
-            Passer à Pro
+            {compte?.abonne ? 'Gérer l’abonnement' : 'Passer à Pro'}
           </Link>
         </header>
 
