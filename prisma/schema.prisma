@@ -148,6 +148,14 @@ model UsageCounter {
   profileViews Int     @default(0)
   exports      Int     @default(0)
 
+  /// Annonceurs déjà consultés ce mois-ci.
+  ///
+  /// Revoir une fiche déjà ouverte ne doit rien coûter : recharger une page ou
+  /// revenir en arrière n'est pas une nouvelle consultation, et facturer un
+  /// aller-retour serait un piège plutôt qu'un quota. La liste reste courte —
+  /// trois entrées sur l'offre gratuite, et les offres payantes ne comptent pas.
+  viewedProfiles String[]
+
   user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, period])

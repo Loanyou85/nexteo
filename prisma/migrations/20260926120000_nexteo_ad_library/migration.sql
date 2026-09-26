@@ -108,6 +108,7 @@ CREATE TABLE "UsageCounter" (
     "searches" INTEGER NOT NULL DEFAULT 0,
     "profileViews" INTEGER NOT NULL DEFAULT 0,
     "exports" INTEGER NOT NULL DEFAULT 0,
+    "viewedProfiles" TEXT[],
 
     CONSTRAINT "UsageCounter_pkey" PRIMARY KEY ("id")
 );
