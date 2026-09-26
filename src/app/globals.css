@@ -1,92 +1,110 @@
 @import 'tailwindcss';
 
 /*
- * Nexteo — tokens de design (section 4 du prompt maître).
+ * Nexteo — tokens de design (section 5 du prompt maître).
  *
- * Fond sombre, halos violets, une seule couleur d'action par écran.
- * Règle non négociable : --revenu (vert) n'apparaît QUE sur un montant
- * d'argent. Jamais un bouton, jamais une icône décorative. Quand
- * l'utilisateur voit du vert, il voit de l'argent.
+ * Deux territoires, un seul jeu de tokens.
+ *
+ *   L'accueil public est sombre et spectaculaire : il reçoit du trafic TikTok
+ *   et doit convertir en quelques secondes. Il s'active avec `.territoire-nuit`.
+ *
+ *   L'application est claire et dense : c'est un outil de travail où on lit des
+ *   tableaux vingt minutes d'affilée. C'est le mode par défaut du document.
+ *
+ * Règle non négociable : AUCUN VERT, nulle part. Dans ce secteur le vert
+ * signifie l'argent, et Nexteo ne publie jamais de donnée d'argent. L'intensité
+ * du signal se lit au remplissage violet de la barre, jamais à sa couleur.
  */
 
 @theme {
-  /* Fonds — violet très sombre, jamais du noir pur */
+  /* Application — fond clair */
+  --color-fond: #fafafb;
+  --color-surface: #ffffff;
+  --color-bordure: #e6e6ec;
+  --color-encre: #14141c;
+  --color-encre-2: #5c5c70;
+
+  /* Marque */
+  --color-neo-600: #5b43f0;
+  --color-neo-500: #6e56f8;
+  --color-neo-100: #e9e4fe;
+
+  /* Accueil — fond sombre */
   --color-nuit-900: #08080f;
   --color-nuit-800: #10101c;
   --color-nuit-700: #1a1a2e;
-
-  /* Violet électrique — marque, CTA, halos */
-  --color-neo-500: #6e56f8;
-  --color-neo-400: #8b77fa;
-  --color-neo-100: #e4defe;
-
-  /* Vert — RÉSERVÉ aux montants et preuves de revenu */
-  --color-revenu: #16c784;
-
-  --color-blanc: #ffffff;
   --color-gris-300: #a0a0b8;
-  --color-gris-700: #2a2a3e;
+
+  /* États. `--color-actif` vaut volontairement le violet de marque : une
+     annonce en cours de diffusion est le signal positif du produit, et c'est
+     la seule teinte autorisée pour le dire. */
+  --color-actif: #6e56f8;
+  --color-arrete: #9a9aad;
+  --color-alerte: #e0603a;
 
   /* Typographie */
   --font-display: var(--font-onest), system-ui, sans-serif;
   --font-sans: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, 'SF Mono', Menlo, monospace;
 
-  /* Échelle mobile : 13 / 15 / 17 / 22 / 28 / 36 / 48 */
+  /* Échelle dense : 12 / 13 / 14 / 15 / 17 / 20 / 26 / 34 / 46.
+     Un outil de travail lit petit et serré ; l'accueil emprunte les deux
+     derniers crans pour ses titres. */
+  --text-2xs: 0.75rem;
   --text-xs: 0.8125rem;
-  --text-sm: 0.9375rem;
-  --text-base: 1.0625rem;
-  --text-lg: 1.375rem;
-  --text-xl: 1.75rem;
-  --text-2xl: 2.25rem;
-  --text-3xl: 3rem;
+  --text-sm: 0.875rem;
+  --text-base: 0.9375rem;
+  --text-md: 1.0625rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.625rem;
+  --text-2xl: 2.125rem;
+  --text-3xl: 2.875rem;
 
+  --text-2xs--line-height: 1.45;
   --text-xs--line-height: 1.5;
-  --text-sm--line-height: 1.55;
+  --text-sm--line-height: 1.5;
   --text-base--line-height: 1.55;
+  --text-md--line-height: 1.5;
   --text-lg--line-height: 1.35;
   --text-xl--line-height: 1.2;
-  --text-2xl--line-height: 1.08;
-  --text-3xl--line-height: 1.02;
+  --text-2xl--line-height: 1.1;
+  --text-3xl--line-height: 1.04;
 
-  /* Formes. Le cahier des charges prévoyait 12 px sur les boutons ; le
-     fondateur a demandé des coins nettement plus arrondis, façon gélule. Les
-     champs et les blocs gardent un rayon propre, sinon une zone de saisie sur
-     plusieurs lignes devient illisible. */
-  --radius-card: 1rem;
-  --radius-bouton: 9999px;
-  --radius-champ: 0.875rem;
+  /* Formes. Un outil de travail n'a pas de boutons en gélule : le rayon reste
+     discret. `--radius-capsule` existe pour le seul CTA de l'accueil public. */
+  --radius-card: 0.625rem;
+  --radius-champ: 0.5rem;
+  --radius-bouton: 0.5rem;
+  --radius-capsule: 9999px;
 
-  /* Easing partagé — section 5 */
+  /* Densité (section 5.4) — reprises comme utilitaires pour ne pas
+     redécouvrir ces valeurs dans chaque composant. */
+  --spacing-ligne: 44px;
+  --spacing-carte: 16px;
+
   --ease-nexteo: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 @layer base {
   * {
-    border-color: var(--color-gris-700);
+    border-color: var(--color-bordure);
   }
 
   html {
     -webkit-text-size-adjust: 100%;
-    background-color: var(--color-nuit-900);
-    /*
-     * Une barre d'action est collée en bas de l'écran. Sans cette réserve,
-     * tout ce qu'on atteint par un défilement automatique — un champ qui
-     * prend le focus, une ancre, un élément amené dans l'écran — se retrouve
-     * dessous et devient incliquable.
-     */
-    scroll-padding-bottom: 104px;
+    background-color: var(--color-fond);
   }
 
   body {
-    background-color: var(--color-nuit-900);
-    color: var(--color-blanc);
+    background-color: var(--color-fond);
+    color: var(--color-encre);
     font-family: var(--font-sans);
     font-weight: 400;
+    font-size: var(--text-base);
     -webkit-font-smoothing: antialiased;
     /* Aucune barre horizontale, à aucune largeur. */
     overflow-x: hidden;
@@ -96,19 +114,21 @@
   h2,
   h3 {
     font-family: var(--font-display);
-    font-weight: 800;
+    font-weight: 700;
     text-wrap: balance;
   }
 
-  /* Section 4.2 : -0.03em au-dessus de 32 px seulement. */
-  .display-xl,
+  /* Section 5.3 : -0.03em au-dessus de 32 px seulement. En dessous, le
+     resserrement colle les lettres au lieu de les tenir. */
+  .display,
   h1 {
+    font-weight: 800;
     letter-spacing: -0.03em;
   }
 
   h2,
   h3 {
-    letter-spacing: -0.02em;
+    letter-spacing: -0.015em;
   }
 
   code,
@@ -117,36 +137,85 @@
     font-family: var(--font-mono);
   }
 
+  /* Section 5.3 : obligatoire dans tous les tableaux et compteurs. Appliqué
+     aux cellules d'office — un chiffre qui saute d'une ligne à l'autre rend
+     une colonne illisible, et personne ne pense à la classe au bon endroit. */
+  th,
+  td,
   .tabular {
     font-variant-numeric: tabular-nums;
   }
 
   ::selection {
-    background-color: color-mix(in srgb, var(--color-neo-500) 40%, transparent);
-    color: var(--color-blanc);
+    background-color: color-mix(in srgb, var(--color-neo-500) 28%, transparent);
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-neo-400);
+    outline: 2px solid var(--color-neo-500);
     outline-offset: 2px;
-  }
-
-  /* Zone tactile minimale (section 2.2). */
-  .tactile {
-    min-height: 48px;
   }
 }
 
-/* --- Halos (section 5.1.2) : en CSS, jamais en image. --- */
+/*
+ * Territoire sombre. Redéfinit les tokens de surface plutôt que d'imposer des
+ * classes de couleur à chaque composant : un composant écrit pour
+ * l'application se réutilise tel quel sur l'accueil.
+ */
+.territoire-nuit {
+  color-scheme: dark;
+  --color-fond: #08080f;
+  --color-surface: #10101c;
+  --color-bordure: #1a1a2e;
+  --color-encre: #ffffff;
+  --color-encre-2: #a0a0b8;
+  background-color: var(--color-fond);
+  color: var(--color-encre);
+}
+
+/* Contenu publicitaire tiers (section 5.3). Le monospace n'est pas décoratif :
+   il dit au lecteur que ce texte n'a pas été écrit par Nexteo. */
+.texte-annonce {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+/* Halo violet de l'accueil — en CSS, jamais en image. */
 .halo-neo {
   background: radial-gradient(
     closest-side,
-    color-mix(in srgb, var(--color-neo-500) 14%, transparent),
+    color-mix(in srgb, var(--color-neo-500) 16%, transparent),
     transparent 100%
   );
 }
 
-/* --- Entrée orchestrée du hero (section 5.1.1). Ne se rejoue jamais. --- */
+/* Survol de ligne de tableau, 150 ms (section 5.4). */
+.ligne-tableau {
+  transition: background-color 150ms var(--ease-nexteo);
+}
+
+.ligne-tableau:hover {
+  background-color: color-mix(in srgb, var(--color-neo-500) 5%, transparent);
+}
+
+/* Squelettes de chargement plutôt que rotateurs (section 5.4). */
+@keyframes respirer {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.squelette {
+  background-color: color-mix(in srgb, var(--color-encre) 8%, transparent);
+  border-radius: var(--radius-champ);
+  animation: respirer 1.4s ease-in-out infinite;
+}
+
+/* Entrée orchestrée de l'accueil. Ne se rejoue jamais. */
 @keyframes lever {
   from {
     opacity: 0;
@@ -164,80 +233,6 @@
   animation-delay: calc(var(--rang, 0) * 60ms);
 }
 
-/* --- Lévitation du téléphone (section 5.1.4) --- */
-@keyframes leviter {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0);
-  }
-  50% {
-    transform: translate3d(0, -6px, 0);
-  }
-}
-
-.leviter {
-  animation: leviter 4s ease-in-out infinite;
-  will-change: transform;
-}
-
-@media (min-width: 768px) {
-  @keyframes leviter {
-    0%,
-    100% {
-      transform: translate3d(0, 0, 0);
-    }
-    50% {
-      transform: translate3d(0, -12px, 0);
-    }
-  }
-}
-
-/* --- Bandeau défilant (section 5.1.3) --- */
-@keyframes bandeau {
-  from {
-    transform: translate3d(0, 0, 0);
-  }
-  to {
-    transform: translate3d(-50%, 0, 0);
-  }
-}
-
-.bandeau-piste {
-  animation: bandeau 34s linear infinite;
-  will-change: transform;
-}
-
-/* --- Onde de déverrouillage d'étape (section 5.2) --- */
-@keyframes onde {
-  from {
-    opacity: 0.5;
-    transform: scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: scale(2.4);
-  }
-}
-
-.onde {
-  animation: onde 600ms var(--ease-nexteo) forwards;
-}
-
-/* --- Barre de génération indéterminée (section 5.2) --- */
-@keyframes glisser {
-  from {
-    transform: translate3d(-100%, 0, 0);
-  }
-  to {
-    transform: translate3d(300%, 0, 0);
-  }
-}
-
-.glisser {
-  animation: glisser 1.1s ease-in-out infinite;
-}
-
-/* Section 5.3 — respecté partout. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -252,8 +247,7 @@
     opacity: 1;
   }
 
-  .bandeau-piste,
-  .leviter {
+  .squelette {
     animation: none !important;
   }
 }

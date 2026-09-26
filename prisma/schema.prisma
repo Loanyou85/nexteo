@@ -1,10 +1,17 @@
 // Nexteo — schéma de données (section 7 du prompt maître).
 //
-// Deux règles structurantes :
-//   1. Aucun contenu de parcours n'est codé en dur dans le front-end.
-//      Tout — phases, étapes, actions, prompts, erreurs connues — vient d'ici.
-//   2. Les poids du moteur d'idées vivent en base (table ScoringWeight),
-//      jamais dans le code : les régler ne demande pas un déploiement.
+// Trois règles structurantes.
+//
+//   1. Aucun champ ne porte, ne dérive ni n'approche un montant attribué à une
+//      entreprise tierce. Pas de revenu, pas de MRR, pas de « taille estimée ».
+//      Si un champ ajouté ici ressemble à de l'argent, il ne doit pas exister.
+//
+//   2. Les poids du signal vivent en base (SignalWeight), jamais dans le code :
+//      les régler ne doit pas demander un déploiement.
+//
+//   3. AdObservation ne se met jamais à jour. On empile des observations
+//      horodatées, une par annonce et par exécution, même quand rien n'a
+//      changé. C'est cette table qui porte la valeur du produit.
 
 generator client {
   provider = "prisma-client-js"
@@ -14,13 +21,13 @@ datasource db {
   provider  = "postgresql"
   // Connexion applicative : passe par le pooler de l'hébergeur en production.
   url       = env("DATABASE_URL")
-  // Connexion directe, utilisée uniquement par les migrations : un pooler ne
-  // sait pas exécuter les instructions de migration. En local, identique.
+  // Connexion directe, réservée aux migrations : un pooler ne sait pas
+  // exécuter les instructions de migration. En local, identique.
   directUrl = env("DIRECT_URL")
 }
 
 // ---------------------------------------------------------------------------
-// 7.1 — Compte
+// Comptes
 // ---------------------------------------------------------------------------
 
 enum Role {
@@ -40,24 +47,19 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  // Garde-fou n° 5 (RGPD) : consentement explicite, conservation documentée.
+  // RGPD : consentement explicite, conservation documentée.
   consentAcceptedAt   DateTime?
   consentVersion      String?
   dataRetentionMonths Int       @default(36)
 
-  accounts         Account[]
-  sessions         Session[]
-  profile          Profile?
-  ideas            Idea[]
-  userJourneys     UserJourney[]
-  promptPacks      PromptPack[]
-  customRequests   CustomPromptRequest[]
-  videoScripts     VideoScript[]
-  milestones       UserMilestone[]
-  adventures       Adventure[]
-  notifications    Notification[]
-  notificationPref NotificationPref?
-  subscription     Subscription?
+  accounts     Account[]
+  sessions     Session[]
+  subscription Subscription?
+  usage        UsageCounter[]
+  collections  Collection[]
+  savedItems   SavedItem[]
+  savedSearch  SavedSearch[]
+  watches      Watch[]
 }
 
 model Account {
@@ -86,790 +88,348 @@ model Session {
 
 model VerificationToken {
   identifier String
-  token      String
+  token      String   @unique
   expires    DateTime
 
   @@id([identifier, token])
 }
 
-// ---------------------------------------------------------------------------
-// 7.2 — Profil et diagnostic
-//
-// Le diagnostic est public et sans inscription (section 8.1). Un profil peut
-// donc exister sans utilisateur : il est porté par `anonId`, un identifiant
-// tiré côté serveur et posé dans un cookie, puis rattaché au compte à
-// l'inscription.
-// ---------------------------------------------------------------------------
-
-enum ProfileStatus {
-  student
-  employed
-  unemployed
-  freelance
-  entrepreneur
-  other
-}
-
-enum RiskTolerance {
-  low
-  medium
-  high
-}
-
-/// Où il a connu le secteur de l'intérieur.
-enum DomainSource {
-  metier
-  etudes
-  passion
-  entourage
-}
-
-model Profile {
-  id     String  @id @default(cuid())
-  /// Nul tant que le diagnostic est anonyme.
-  userId String? @unique
-  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  /// Identifiant du diagnostic anonyme, posé en cookie. Effacé au rattachement.
-  anonId String? @unique
-
-  age     Int?
-  country String?
-  status  ProfileStatus?
-
-  // Contraintes déclarées (section 8.1).
-  hoursPerWeek   Int?
-  budget         Int?
-  technicalLevel Int? // 0-5, pilote le choix du chemin technique (section 9.2)
-  goalRevenue    Int?
-  timeHorizon    Int? // en mois
-  riskTolerance  RiskTolerance?
-  showsFace      Boolean?
-  prefersSolo    Boolean?
-  /// Peut-il appeler dix personnes concernées demain ?
-  reachableCount Int?
-
-  // Reprise : clé de la dernière question répondue.
-  currentQuestionKey String?
-  completedAt        DateTime?
-
-  /// Signaux structurés extraits des réponses libres par l'IA (section 8.2).
-  derivedSignals Json?
-
-  skills    UserSkill[]
-  domains   UserDomain[]
-  interests UserInterest[]
-  frictions FrictionAnswer[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Skill {
-  id       String      @id @default(cuid())
-  slug     String      @unique
-  label    String
-  category String
-  users    UserSkill[]
-}
-
-model UserSkill {
-  profileId String
-  skillId   String
-  level     Int     @default(0) // 0-5
-  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  skill     Skill   @relation(fields: [skillId], references: [id], onDelete: Cascade)
-
-  @@id([profileId, skillId])
-}
-
-/// Secteurs connus de l'intérieur — la dimension la plus discriminante du
-/// moteur (section 8.1).
-model Domain {
-  id         String          @id @default(cuid())
-  slug       String          @unique
-  label      String
-  /// Famille d'affichage : santé, restauration, bâtiment…
-  family     String
-  users      UserDomain[]
-  blueprints IdeaBlueprint[]
-}
-
-model UserDomain {
-  profileId     String
-  domainId      String
-  yearsExposure Int          @default(0)
-  source        DomainSource @default(metier)
-  profile       Profile      @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  domain        Domain       @relation(fields: [domainId], references: [id], onDelete: Cascade)
-
-  @@id([profileId, domainId])
-}
-
-model Interest {
-  id    String         @id @default(cuid())
-  slug  String         @unique
-  label String
-  users UserInterest[]
-}
-
-model UserInterest {
-  profileId  String
-  interestId String
-  profile    Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  interest   Interest @relation(fields: [interestId], references: [id], onDelete: Cascade)
-
-  @@id([profileId, interestId])
-}
-
-/// Réponses libres « ce qui l'agace » (section 8.1), analysées par l'IA.
-model FrictionAnswer {
-  id          String  @id @default(cuid())
-  profileId   String
-  questionKey String
-  answer      String  @db.Text
-  profile     Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
-
-  @@unique([profileId, questionKey])
-}
-
-// ---------------------------------------------------------------------------
-// 7.3 — Moteur d'idées
-// ---------------------------------------------------------------------------
-
-/// Poids des dimensions du scoring. En base (section 8.2), jamais dans le code.
-model ScoringWeight {
-  dimension String @id
-  label     String
-  weight    Float
-  order     Int    @default(0)
-}
-
-enum PayerType {
-  business
-  professional
-  consumer
-}
-
-/// Archétype d'idée. Le moteur ne fabrique pas une idée depuis rien : il
-/// classe des archétypes contre un profil, puis l'IA rédige la restitution.
-model IdeaBlueprint {
-  id               String    @id @default(cuid())
-  slug             String    @unique
-  title            String
-  oneLiner         String    @db.Text
-  targetAudience   String
-  problem          String    @db.Text
-  solution         String    @db.Text
-  pricingModel     String
-  monthlyPrice     Int
-  /// 1 (trivial) à 5 (limite haute du parcours).
-  buildComplexity  Int
-  weeksToFirstEuro Int
-  payerType        PayerType
-
-  // Contraintes vérifiées contre le profil.
-  hoursPerWeekMin  Int @default(5)
-  monthlyFixedCost Int @default(0)
-
-  // Contraintes dures éliminatoires (section 8.2).
-  requiresComplexCode      Boolean @default(false)
-  requiresRegulatedLicense Boolean @default(false)
-  requiresPhysicalStock    Boolean @default(false)
-  requiresTeam             Boolean @default(false)
-
-  // Contraintes de compatibilité personnelle.
-  requiresFace     Boolean @default(false)
-  requiresOutbound Boolean @default(true)
-
-  isActive Boolean @default(true)
-
-  domains Domain[]
-  tags    IdeaBlueprintTag[]
-  ideas   Idea[]
-}
-
-model IdeaBlueprintTag {
-  id          String        @id @default(cuid())
-  blueprintId String
-  /// skill | interest | friction | payer
-  dimension   String
-  key         String
-  weight      Float         @default(1)
-  blueprint   IdeaBlueprint @relation(fields: [blueprintId], references: [id], onDelete: Cascade)
-
-  @@unique([blueprintId, dimension, key])
-  @@index([dimension, key])
-}
-
-enum IdeaStatus {
-  proposed
-  selected
-  rejected
-}
-
-model Idea {
-  id          String  @id @default(cuid())
-  userId      String?
-  /// Rattachement anonyme, comme le profil.
-  anonId      String?
-  blueprintId String
-
-  title           String
-  oneLiner        String @db.Text
-  targetAudience  String
-  problem         String @db.Text
-  solution        String @db.Text
-  pricingModel    String
-  monthlyPrice    Int
-  buildComplexity Int
-  timeToFirstEuro Int // en semaines
-
-  score           Float
-  rank            Int        @default(1)
-  breakdown       Json
-  rationale       String?    @db.Text
-  status          IdeaStatus @default(proposed)
-  rejectionReason String?    @db.Text
-  createdAt       DateTime   @default(now())
-
-  user        User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  blueprint   IdeaBlueprint @relation(fields: [blueprintId], references: [id], onDelete: Cascade)
-  sources     IdeaSource[]
-  userJourney UserJourney[]
-  packs       PromptPack[]
-  scripts     VideoScript[]
-
-  @@index([userId, createdAt])
-  @@index([anonId, createdAt])
-}
-
-/// Traçabilité obligatoire (section 8.3) : chaque idée cite les éléments du
-/// profil qui l'ont produite, et l'interface les affiche.
-model IdeaSource {
-  id        String @id @default(cuid())
-  ideaId    String
-  dimension String
-  evidence  String @db.Text
-  idea      Idea   @relation(fields: [ideaId], references: [id], onDelete: Cascade)
-
-  @@index([ideaId])
-}
-
-// ---------------------------------------------------------------------------
-// 7.4 — Parcours de construction (13 phases)
-// ---------------------------------------------------------------------------
-
-enum Difficulty {
-  easy
-  medium
-  hard
-}
-
-/// Chemin technique choisi à la phase 4 (section 9.2).
-enum TechPath {
-  navigateur
-  ordinateur
-}
-
-model Journey {
-  id        String   @id @default(cuid())
-  slug      String   @unique
-  name      String
-  version   Int      @default(1)
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  phases       Phase[]
-  userJourneys UserJourney[]
-}
-
-model Phase {
-  id        String @id @default(cuid())
-  journeyId String
-  order     Int
-  key       String
-  title     String
-  goal      String @db.Text
-  /// Ce qui en ressort, une ligne.
-  outcome   String @db.Text
-
-  journey Journey @relation(fields: [journeyId], references: [id], onDelete: Cascade)
-  steps   Step[]
-
-  @@unique([journeyId, order])
-}
-
-model Step {
-  id               String     @id @default(cuid())
-  phaseId          String
-  order            Int
-  number           Int // numéro global, affiché à l'utilisateur
-  title            String
-  goal             String     @db.Text
-  why              String     @db.Text
-  estimatedMinutes Int
-  difficulty       Difficulty @default(easy)
-  /// Étape propre à un chemin technique. Nul = commune aux deux.
-  techPath         TechPath?
-
-  /// { requiresSteps: string[], requiresCheckpoints: string[] }
-  unlockConditions Json?
-
-  phase       Phase             @relation(fields: [phaseId], references: [id], onDelete: Cascade)
-  subSteps    SubStep[]
-  checkpoints Checkpoint[]
-  progress    StepProgress[]
-  prompts     GeneratedPrompt[]
-
-  @@unique([phaseId, order])
-}
-
-model SubStep {
-  id     String @id @default(cuid())
-  stepId String
-  order  Int
-  title  String
-  body   String @db.Text // markdown
-
-  step    Step     @relation(fields: [stepId], references: [id], onDelete: Cascade)
-  actions Action[]
-
-  @@unique([stepId, order])
-}
-
-model Action {
-  id                 String  @id @default(cuid())
-  subStepId          String
-  order              Int
-  instruction        String  @db.Text
-  externalUrl        String?
-  /// Slug d'un PromptTemplate. Le prompt n'est jamais écrit en dur ici
-  /// (section 9.3) : l'étape référence un gabarit, le moteur le remplit.
-  promptTemplateSlug String?
-  /// Capture annotée, servie depuis /public/guides.
-  screenshot         String?
-
-  subStep SubStep @relation(fields: [subStepId], references: [id], onDelete: Cascade)
-
-  @@unique([subStepId, order])
-}
-
-/// Certains critères demandent une preuve : une URL à coller, un paiement
-/// test à confirmer (section 9.4).
-enum ProofKind {
-  none
-  url
-  text
-}
-
-model Checkpoint {
-  id         String    @id @default(cuid())
-  stepId     String
-  order      Int
-  label      String
-  isRequired Boolean   @default(true)
-  proofKind  ProofKind @default(none)
-  /// Champ de ProjectState alimenté par la preuve : repoUrl, deployUrl…
-  proofField String?
-
-  step     Step                 @relation(fields: [stepId], references: [id], onDelete: Cascade)
-  progress CheckpointProgress[]
-
-  @@unique([stepId, order])
-}
-
-// ---------------------------------------------------------------------------
-// 7.5 — Progression
-// ---------------------------------------------------------------------------
-
-enum StepStatus {
-  locked
-  available
-  in_progress
-  done
-}
-
-model UserJourney {
-  id              String    @id @default(cuid())
-  userId          String
-  journeyId       String
-  ideaId          String?
-  startedAt       DateTime  @default(now())
-  currentStepId   String?
-  /// Ne décroît jamais (section 2.3).
-  progressPercent Int       @default(0)
-  techPath        TechPath?
-  completedAt     DateTime?
-
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  journey Journey @relation(fields: [journeyId], references: [id], onDelete: Cascade)
-  idea    Idea?   @relation(fields: [ideaId], references: [id], onDelete: SetNull)
-
-  steps        StepProgress[]
-  projectState ProjectState?
-
-  @@unique([userId, journeyId])
-  @@index([userId])
-}
-
-model StepProgress {
-  id             String     @id @default(cuid())
-  userJourneyId  String
-  stepId         String
-  status         StepStatus @default(locked)
-  startedAt      DateTime?
-  completedAt    DateTime?
-  lastActivityAt DateTime?
-
-  userJourney UserJourney          @relation(fields: [userJourneyId], references: [id], onDelete: Cascade)
-  step        Step                 @relation(fields: [stepId], references: [id], onDelete: Cascade)
-  checkpoints CheckpointProgress[]
-
-  @@unique([userJourneyId, stepId])
-}
-
-model CheckpointProgress {
-  id             String   @id @default(cuid())
-  stepProgressId String
-  checkpointId   String
-  checkedAt      DateTime @default(now())
-  /// Preuve collée par l'utilisateur, quand le critère en demande une.
-  proofValue     String?
-
-  stepProgress StepProgress @relation(fields: [stepProgressId], references: [id], onDelete: Cascade)
-  checkpoint   Checkpoint   @relation(fields: [checkpointId], references: [id], onDelete: Cascade)
-
-  @@unique([stepProgressId, checkpointId])
-}
-
-/// L'état du projet construit. C'est lui qui rend cohérents les prompts
-/// générés à la demande (section 11.6) : sans lui, chaque prompt repart de
-/// zéro et le projet devient incohérent.
-model ProjectState {
-  userJourneyId String   @id
-  projectName   String?
-  repoUrl       String?
-  deployUrl     String?
-  domainName    String?
-  /// [{ name, fields: [{ name, type }] }]
-  entities      Json?
-  /// [{ route, title, purpose }]
-  screens       Json?
-  /// { naming, language, styling… }
-  conventions   Json?
-  /// { framework, db, auth, payments… }
-  stack         Json?
-  updatedAt     DateTime @updatedAt
-
-  userJourney UserJourney @relation(fields: [userJourneyId], references: [id], onDelete: Cascade)
-}
-
-// ---------------------------------------------------------------------------
-// 7.6 — Moteur de prompts (section 11)
-// ---------------------------------------------------------------------------
-
-/// Où coller le prompt.
-enum PromptTarget {
-  claude_code
-  replit
-  claude_web
-}
-
-model PromptTemplate {
-  id              String       @id @default(cuid())
-  slug            String       @unique
-  /// Bloc du pack séquencé : fondations, donnees, comptes, coeur…
-  blockKey        String
-  order           Int
-  title           String
-  objective       String       @db.Text
-  target          PromptTarget @default(claude_code)
-  /// Markdown, variables `{{ }}`.
-  body            String       @db.Text
-  expectedOutcome String       @db.Text
-  verification    String       @db.Text
-  /// Règle 11.8 : aucun prompt ne dépasse 4 000 caractères.
-  maxChars        Int          @default(4000)
-  /// Un gabarit de réparation n'entre pas dans le pack séquencé.
-  isRepair        Boolean      @default(false)
-  isActive        Boolean      @default(true)
-  version         Int          @default(1)
-
-  generated     GeneratedPrompt[]
-  errorPatterns ErrorPattern[]
-
-  @@index([blockKey, order])
-}
-
-model PromptPack {
-  id          String   @id @default(cuid())
-  userId      String
-  ideaId      String
-  generatedAt DateTime @default(now())
-  version     Int      @default(1)
-
-  user     User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  idea     Idea                  @relation(fields: [ideaId], references: [id], onDelete: Cascade)
-  prompts  GeneratedPrompt[]
-  requests CustomPromptRequest[]
-
-  @@unique([userId, ideaId, version])
-}
-
-enum PromptStatus {
-  todo
-  copied
-  executed
-  validated
-}
-
-model GeneratedPrompt {
-  id              String       @id @default(cuid())
-  packId          String
-  templateId      String?
-  stepId          String?
-  order           Int
-  phaseKey        String
-  title           String
-  objective       String       @db.Text
-  body            String       @db.Text
-  target          PromptTarget @default(claude_code)
-  expectedOutcome String       @db.Text
-  verification    String       @db.Text
-  /// Prompt de réparation lié, proposé quand ça échoue.
-  repairSlug      String?
-  /// Généré à la demande plutôt qu'issu du pack séquencé.
-  isCustom        Boolean      @default(false)
-
-  status     PromptStatus @default(todo)
-  copiedAt   DateTime?
-  executedAt DateTime?
-  /// Pouce haut (1) ou bas (-1). Alimente l'amélioration des gabarits.
-  rating     Int?
-
-  pack     PromptPack           @relation(fields: [packId], references: [id], onDelete: Cascade)
-  template PromptTemplate?      @relation(fields: [templateId], references: [id], onDelete: SetNull)
-  step     Step?                @relation(fields: [stepId], references: [id], onDelete: SetNull)
-  request  CustomPromptRequest?
-
-  @@index([packId, order])
-}
-
-/// Bibliothèque d'erreurs connues (section 11.5).
-model ErrorPattern {
-  id               String  @id @default(cuid())
-  signature        String  @unique
-  /// Expression régulière testée contre le message collé.
-  matcher          String
-  label            String
-  category         String
-  explanation      String  @db.Text
-  repairTemplateId String?
-
-  repairTemplate PromptTemplate? @relation(fields: [repairTemplateId], references: [id], onDelete: SetNull)
-}
-
-model CustomPromptRequest {
-  id                String   @id @default(cuid())
-  userId            String
-  packId            String
-  request           String   @db.Text
-  generatedPromptId String?  @unique
-  createdAt         DateTime @default(now())
-
-  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  pack            PromptPack       @relation(fields: [packId], references: [id], onDelete: Cascade)
-  generatedPrompt GeneratedPrompt? @relation(fields: [generatedPromptId], references: [id], onDelete: SetNull)
-
-  @@index([userId, createdAt])
-}
-
-// ---------------------------------------------------------------------------
-// 7.7 — Les trente scripts (section 10)
-// ---------------------------------------------------------------------------
-
-enum VideoAngle {
-  probleme
-  demonstration
-  construire_en_public
-  pedagogie
-  coulisses
-  reponse
-}
-
-enum VideoStatus {
-  todo
-  filmed
-  published
-}
-
-model VideoScript {
-  id               String      @id @default(cuid())
-  userId           String
-  ideaId           String
-  dayNumber        Int
-  angle            VideoAngle
-  hook             String      @db.Text
-  body             String      @db.Text
-  /// [{ at, shot }]
-  shotPlan         Json
-  /// [{ at, text }]
-  onScreenText     Json
-  caption          String      @db.Text
-  pinnedComment    String      @db.Text
-  durationSeconds  Int
-  status           VideoStatus @default(todo)
-  /// Hors MVP (section 10.1) : le champ existe pour accueillir le rendu vidéo
-  /// plus tard sans migration lourde.
-  renderedVideoUrl String?
-  createdAt        DateTime    @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  idea Idea @relation(fields: [ideaId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, ideaId, dayNumber])
-  @@index([userId, dayNumber])
-}
-
-// ---------------------------------------------------------------------------
-// 7.8 — Jalons, aventures
-// ---------------------------------------------------------------------------
-
-model Milestone {
-  id    String @id @default(cuid())
-  key   String @unique
-  label String
-  order Int    @default(0)
-
-  users  UserMilestone[]
-  shares AdventureShare[]
-}
-
-/// Garde-fou n° 4 : `declared` par défaut. `verified` n'existe que si le
-/// compte Stripe de l'utilisateur est connecté en lecture.
-enum VerificationStatus {
-  declared
-  verified
-}
-
-model UserMilestone {
-  id                 String             @id @default(cuid())
-  userId             String
-  milestoneId        String
-  reachedAt          DateTime           @default(now())
-  declaredValue      Int?
-  verificationStatus VerificationStatus @default(declared)
-
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  milestone Milestone @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, milestoneId])
-}
-
-model Adventure {
-  id        String   @id @default(cuid())
-  userId    String   @unique
-  slug      String   @unique
-  isPublic  Boolean  @default(false)
-  story     String?  @db.Text
-  startedAt DateTime @default(now())
-  /// Garde-fou n° 3 : toute donnée de démonstration est marquée, et l'interface
-  /// le dit.
-  isDemo    Boolean  @default(false)
-
-  user   User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  shares AdventureShare[]
-}
-
-model AdventureShare {
-  id           String   @id @default(cuid())
-  adventureId  String
-  milestoneId  String
-  cardImageUrl String?
-  sharedAt     DateTime @default(now())
-
-  adventure Adventure @relation(fields: [adventureId], references: [id], onDelete: Cascade)
-  milestone Milestone @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
-
-  @@unique([adventureId, milestoneId])
-}
-
-// ---------------------------------------------------------------------------
-// 7.9 — Notifications, abonnement, feature flags
-// ---------------------------------------------------------------------------
-
-enum NotificationType {
-  daily_reminder
-  inactivity
-  milestone
-}
-
-enum NotificationChannel {
-  email
-  browser
-  both
-}
-
-model Notification {
-  id           String           @id @default(cuid())
-  userId       String
-  type         NotificationType
-  payload      Json
-  scheduledFor DateTime
-  sentAt       DateTime?
-  readAt       DateTime?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, scheduledFor])
-}
-
-model NotificationPref {
-  userId             String              @id
-  dailyReminder      Boolean             @default(true)
-  reminderHour       Int                 @default(9)
-  inactivityReminder Boolean             @default(true)
-  channel            NotificationChannel @default(email)
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-/// Les trois offres du site. Les prix vivent dans src/lib/offers.ts et les
-/// droits dans FeatureFlag : changer un prix ne touche pas au gating.
 enum Plan {
   free
-  depart
-  construction
-  lancement
+  pro
+  pro_plus
+  agency
+}
+
+enum BillingInterval {
+  monthly
+  annual
 }
 
 enum SubscriptionStatus {
   active
+  trialing
   past_due
   canceled
+  incomplete
 }
 
 model Subscription {
-  userId               String             @id
+  id                   String             @id @default(cuid())
+  userId               String             @unique
   plan                 Plan               @default(free)
+  interval             BillingInterval    @default(monthly)
   status               SubscriptionStatus @default(active)
-  currentPeriodEnd     DateTime?
-  /// Offre choisie sur l'écran des offres, en attente d'un paiement effectif.
-  intendedPlan         Plan?
-  intendedAt           DateTime?
   stripeCustomerId     String?            @unique
   stripeSubscriptionId String?            @unique
+  currentPeriodEnd     DateTime?
   cancelAtPeriodEnd    Boolean            @default(false)
-  /// Compteur du quota de prompts à la demande de l'offre gratuite.
-  customPromptsMonth   String?
-  customPromptsUsed    Int                @default(0)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model FeatureFlag {
-  key   String @id
-  label String
-  plans Plan[]
+/// Compteur de quota mensuel.
+///
+/// Le gratuit fonctionne **sans compte** : trois fiches complètes par mois.
+/// Il faut donc pouvoir compter un visiteur anonyme, identifié par un cookie.
+/// Exactement l'une des deux colonnes d'identité est renseignée. Postgres
+/// traite les NULL comme distincts dans un index unique, donc les deux
+/// contraintes ci-dessous ne contraignent chacune que les lignes concernées.
+model UsageCounter {
+  id           String  @id @default(cuid())
+  userId       String?
+  /// Identifiant de cookie, pour un visiteur sans compte.
+  visitorId    String?
+  /// Période au format « 2026-09 ».
+  period       String
+  searches     Int     @default(0)
+  profileViews Int     @default(0)
+  exports      Int     @default(0)
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, period])
+  @@unique([visitorId, period])
+}
+
+// ---------------------------------------------------------------------------
+// Annonceurs et annonces
+// ---------------------------------------------------------------------------
+
+model Category {
+  id       String     @id @default(cuid())
+  slug     String     @unique
+  label    String
+  parentId String?
+  parent   Category?  @relation("SousCategories", fields: [parentId], references: [id])
+  children Category[] @relation("SousCategories")
+
+  advertisers Advertiser[]
+}
+
+model Advertiser {
+  id          String  @id @default(cuid())
+  metaPageId  String  @unique
+  slug        String  @unique
+  name        String
+  websiteUrl  String?
+  categoryId  String?
+  /// Pays où l'annonceur est le plus observé. Descriptif, jamais un siège social.
+  countryCode String?
+
+  firstSeenAt DateTime
+  lastSeenAt  DateTime
+
+  /// 0 à 100. Activité publicitaire observée. Jamais une santé financière.
+  signalScore      Int       @default(0)
+  /// Détail du calcul, affiché tel quel sur la fiche. Un score opaque serait
+  /// indéfendable puisque c'est le cœur du produit.
+  signalBreakdown  Json?
+  signalComputedAt DateTime?
+
+  /// Jeu de démonstration. Obligatoire dès qu'une donnée n'est pas observée,
+  /// et signalé visuellement partout où la ligne s'affiche.
+  isDemo       Boolean @default(false)
+  /// Rattachement de catégorie fait par règles : à confirmer par un humain.
+  needsReview  Boolean @default(true)
+  /// Exclusion administrateur : la page reste en base, elle ne s'affiche plus.
+  excluded     Boolean @default(false)
+  /// Fusion de doublons : la page pointe vers celle qui la remplace.
+  mergedIntoId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// Recherche plein texte. Colonne générée, créée en SQL : Prisma ne sait pas
+  /// déclarer une colonne calculée. Voir la migration.
+  searchVector Unsupported("tsvector")?
+
+  category    Category?        @relation(fields: [categoryId], references: [id])
+  ads         Ad[]
+  similarTo   SimilarityEdge[] @relation("Source")
+  similarFrom SimilarityEdge[] @relation("Cible")
+  watches     Watch[]
+
+  @@index([signalScore(sort: Desc)])
+  @@index([categoryId, signalScore(sort: Desc)])
+  @@index([excluded, signalScore(sort: Desc)])
+}
+
+model Ad {
+  id           String @id @default(cuid())
+  metaAdId     String @unique
+  advertiserId String
+
+  bodyText        String?
+  linkTitle       String?
+  linkDescription String?
+  linkCaption     String?
+  landingUrl      String?
+  landingDomain   String?
+  /// Instantané officiel Meta. Toute annonce affichée y renvoie.
+  snapshotUrl     String
+
+  deliveryStartTime DateTime
+  deliveryStopTime  DateTime?
+
+  publisherPlatforms String[]
+  languages          String[]
+  reachedCountries   String[]
+
+  firstSeenAt DateTime
+  lastSeenAt  DateTime
+  isActive    Boolean  @default(true)
+
+  /// Meta l'a retirée de son archive, Nexteo la conserve. C'est l'argument de
+  /// vente du produit, pas un déchet : on ne supprime jamais cette ligne.
+  goneFromMeta Boolean @default(false)
+  isDemo       Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  searchVector Unsupported("tsvector")?
+
+  advertiser   Advertiser      @relation(fields: [advertiserId], references: [id], onDelete: Cascade)
+  creatives    AdCreative[]
+  observations AdObservation[]
+
+  @@index([advertiserId, deliveryStartTime])
+  @@index([advertiserId, isActive])
+  @@index([landingDomain])
+}
+
+enum CreativeType {
+  image
+  video
+}
+
+model AdCreative {
+  id         String       @id @default(cuid())
+  adId       String
+  type       CreativeType
+  /// Clé dans le stockage objet. Les URL de Meta expirent, on copie à l'ingestion.
+  storageKey String
+  sourceUrl  String?
+  width      Int?
+  height     Int?
+  /// Somme de contrôle du fichier. Deux annonces qui réutilisent le même
+  /// visuel partagent la même clé de stockage.
+  checksum   String
+  createdAt  DateTime     @default(now())
+
+  ad Ad @relation(fields: [adId], references: [id], onDelete: Cascade)
+
+  @@unique([adId, checksum])
+  @@index([checksum])
+}
+
+/// Une ligne par annonce et par exécution du pipeline, **même quand rien n'a
+/// changé**. C'est ce qui permet de calculer la continuité de diffusion, les
+/// interruptions et le rythme de production de créations.
+///
+/// Table partitionnée par mois sur `observedAt` (voir la migration). Une clé
+/// primaire d'une table partitionnée doit contenir la clé de partition, d'où
+/// la clé composite.
+model AdObservation {
+  id         String   @default(cuid())
+  adId       String
+  observedAt DateTime @default(now())
+  isActive   Boolean
+  rawPayload Json
+
+  ad Ad @relation(fields: [adId], references: [id], onDelete: Cascade)
+
+  @@id([id, observedAt])
+  @@index([adId, observedAt])
+  @@index([observedAt])
+}
+
+// ---------------------------------------------------------------------------
+// Signal et proximité
+// ---------------------------------------------------------------------------
+
+/// Poids du signal. En base pour être réglables sans déploiement ; la fonction
+/// de calcul reste pure et reçoit ces valeurs en argument.
+model SignalWeight {
+  key       String   @id
+  weight    Float
+  updatedAt DateTime @updatedAt
+}
+
+model SimilarityEdge {
+  advertiserId        String
+  relatedAdvertiserId String
+  score               Float
+  /// Ce qui rapproche les deux pages : catégorie, vocabulaire d'accroche,
+  /// domaine de destination. Affiché à l'utilisateur.
+  reasons             Json
+  computedAt          DateTime @default(now())
+
+  advertiser Advertiser @relation("Source", fields: [advertiserId], references: [id], onDelete: Cascade)
+  related    Advertiser @relation("Cible", fields: [relatedAdvertiserId], references: [id], onDelete: Cascade)
+
+  @@id([advertiserId, relatedAdvertiserId])
+  @@index([advertiserId, score(sort: Desc)])
+}
+
+// ---------------------------------------------------------------------------
+// Bibliothèque de l'utilisateur
+// ---------------------------------------------------------------------------
+
+model Collection {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  createdAt DateTime @default(now())
+
+  user  User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items SavedItem[]
+
+  @@unique([userId, name])
+}
+
+enum SavedItemType {
+  advertiser
+  ad
+}
+
+model SavedItem {
+  id           String        @id @default(cuid())
+  userId       String
+  itemType     SavedItemType
+  itemId       String
+  collectionId String?
+  note         String?
+  createdAt    DateTime      @default(now())
+
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  collection Collection? @relation(fields: [collectionId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, itemType, itemId, collectionId])
+  @@index([userId, createdAt])
+}
+
+model Watch {
+  id             String    @id @default(cuid())
+  userId         String
+  advertiserId   String
+  lastNotifiedAt DateTime?
+  createdAt      DateTime  @default(now())
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  advertiser Advertiser @relation(fields: [advertiserId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, advertiserId])
+}
+
+model SavedSearch {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  filters   Json
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, name])
+}
+
+// ---------------------------------------------------------------------------
+// Pipeline
+// ---------------------------------------------------------------------------
+
+enum IngestStatus {
+  pending
+  running
+  succeeded
+  failed
+}
+
+model IngestJob {
+  id          String       @id @default(cuid())
+  countryCode String
+  searchTerm  String?
+  /// Curseur de pagination Meta, persisté pour reprendre exactement où
+  /// l'exécution s'est arrêtée après une interruption.
+  cursor      String?
+  status      IngestStatus @default(pending)
+  startedAt   DateTime?
+  finishedAt  DateTime?
+  adsFetched  Int          @default(0)
+  adsNew      Int          @default(0)
+  error       String?
+  createdAt   DateTime     @default(now())
+
+  @@index([status, createdAt])
+  @@index([countryCode, createdAt(sort: Desc)])
+}
+
+model RateLimitState {
+  key       String    @id
+  remaining Int?
+  resetAt   DateTime?
+  updatedAt DateTime  @updatedAt
 }

@@ -1,110 +1,130 @@
 # Nexteo — architecture
 
-**Crée ton SaaS de A à Z, étape par étape.**
-L'utilisateur arrive sans idée et sans compétence technique. Il repart avec un
-produit en ligne et un plan de contenu.
+**Arrête de chercher des idées. Regarde qui paie déjà pour vendre.**
+
+Base de données de publicités SaaS construite sur l'API officielle Meta Ad Library.
+Nexteo mesure un fait observable — depuis combien de temps une entreprise paie pour
+diffuser — et n'affiche jamais de montant attribué à une entreprise tierce.
+
+## Ce qui fait la valeur
+
+Les annonces commerciales disparaissent de l'archive Meta environ douze mois après
+leur dernière impression. Une requête faite aujourd'hui ne voit que la fenêtre
+d'aujourd'hui. Chaque jour sans ingestion est de la donnée perdue définitivement.
+L'ingestion quotidienne, démarrée le premier jour, produit un historique qu'un
+concurrent mieux financé ne peut pas reconstituer. C'est le seul avantage
+défendable du produit, et il ne coûte que de la régularité.
+
+D'où l'ordre de construction : **le pipeline avant l'interface.**
 
 ## Arborescence
 
 ```
+prisma/           schéma, migrations, seed (catégories, poids du signal)
+scripts/          tâches hors requête : ingestion, planificateur, déblocage de migration
+fixtures/         jeux d'annonces de test, utilisés tant que l'accès Meta n'est pas obtenu
 src/
-  app/
-    page.tsx                  landing publique (§6)
-    diagnostic/               le diagnostic public, une question par écran (§8.1)
-      analyse/                écran de transition, lance le classement
-    mes-idees/                restitution des trois idées (§8.4)
-    inscription/ connexion/   prénom + e-mail + mot de passe
-    offres/ garantie/         paywall, juste après la restitution (§13)
-    app/                      l'espace connecté
-      page.tsx                « Aujourd'hui » : une phrase, un bouton
-      chemin/                 les 13 phases et leurs étapes
-      etape/[id]/             étape détaillée, prompts, checklist, réparation
-      prompts/                le pack séquencé, filtrable
-      ajouter/                le générateur à la demande (§11.6)
-      videos/                 les 30 scripts, vue calendrier (§10.4)
-      compte/                 offre, jalons, export, suppression
-    legal/                    mentions, CGV, confidentialité
-    trop-jeune/               garde-fou mineurs (§12.6)
-    api/stripe/webhook/       la seule source de l'accès payant
-  components/  ui, brand, shell, landing, diagnostic, ideas, app, auth
-  lib/         ideas (moteur), diagnostic, prompts, videos, guardrails, offers
-  server/      db, auth, diagnostic, ideas, journey, prompts, videos, features
-prisma/
-  schema.prisma
-  seed/        referentiel, parcours (13 phases), prompts (pack + réparation)
+  app/            routes App Router (section « Routes »)
+  components/
+    ui/           primitives : bouton, carte, champ, badge, tableau, squelette
+    signal/       barre de signal et détail du calcul
+    annonce/      cartes et fiches d'annonces
+    landing/      accueil sombre
+  lib/
+    signal/       score.ts — fonction pure, testée
+    filtres/      lecture et écriture de l'état des filtres dans l'URL
+  server/
+    db.ts         client Prisma, normalisation de l'URL poolée
+    auth.ts       Auth.js v5, sessionOuNull
+    source/       AdSource : MetaAdLibrarySource | FixtureSource
+    ingestion/    pipeline, normalisation, back-off, reprise au curseur
+    stockage/     copie des visuels en stockage objet
 ```
+
+## Routes
+
+| Route | Territoire | Accès |
+|---|---|---|
+| `/` | sombre | public |
+| `/explore` | clair | public, recherche et liste libres |
+| `/annonceur/[slug]` | clair | 3 fiches complètes par mois sans compte, puis floutage |
+| `/annonce/[id]` | clair | même quota |
+| `/opportunites` | clair | compte requis |
+| `/collections` | clair | compte requis |
+| `/dashboard` | clair | compte requis |
+| `/tarifs` | clair | public |
+| `/admin` | clair | rôle administrateur |
+| `/api/ingestion` | — | déclenchement du pipeline, protégé par jeton |
+| `/api/stripe/webhook` | — | seul octroi d'un accès payant |
+
+Mobile : navigation basse à cinq entrées (Accueil, Explorer, Collections, Tarifs,
+Profil), tableaux transformés en cartes empilées, chronologie en défilement
+horizontal.
 
 ## Entités
 
-Compte et profil : `User`, `Profile` (rattachable à un `anonId` tant que le
-diagnostic est anonyme), `Skill`/`UserSkill`, `Domain`/`UserDomain`,
-`Interest`/`UserInterest`, `FrictionAnswer`.
+`Advertiser` porte le signal et son détail. `Ad` est l'annonce dédupliquée par
+`metaAdId`. `AdCreative` référence le visuel copié en stockage objet.
+**`AdObservation` est la table qui porte la valeur du produit** : une ligne par
+annonce et par exécution, même quand rien n'a changé. On n'écrase jamais, on
+empile. Elle est partitionnée par mois et indexée sur `(adId, observedAt)`.
 
-Moteur d'idées : `ScoringWeight`, `IdeaBlueprint` + `IdeaBlueprintTag`, `Idea`,
-`IdeaSource`.
+Autour : `Category`, `SignalWeight` (les poids vivent en base, pas dans le code),
+`SimilarityEdge`, `Collection` / `SavedItem` / `SavedSearch` / `Watch`,
+`IngestJob` (curseur de reprise et journal d'exécution), `RateLimitState`,
+et `User` / `Subscription` / `UsageCounter`.
 
-Parcours : `Journey` → `Phase` → `Step` → `SubStep` → `Action`, `Checkpoint`.
-Progression : `UserJourney`, `StepProgress`, `CheckpointProgress`,
-`ProjectState`.
+Aucune annonce ingérée n'est jamais supprimée, même quand Meta la retire. On
+conserve la dernière version connue avec `lastSeenAt` — ces annonces disparues
+sont un argument de vente, pas un déchet.
 
-Prompts : `PromptTemplate`, `PromptPack`, `GeneratedPrompt`, `ErrorPattern`,
-`CustomPromptRequest`.
+## Pipeline
 
-Vidéos : `VideoScript`. Monétisation : `Subscription`, `FeatureFlag`.
-Jalons : `Milestone`, `UserMilestone`, `Adventure`.
+`AdSource` est une interface à deux implémentations, choisies par
+`AD_SOURCE=fixture|meta`. Tout le produit se développe et se teste sur
+`FixtureSource` pendant que la vérification d'identité et la revue d'application
+suivent leur cours chez Meta.
 
-Aucun contenu de parcours n'est codé en dur dans le front-end : tout vient de
-la base.
+Une exécution quotidienne par pays configuré. `ad_reached_countries` est
+obligatoire dans chaque requête : il n'existe aucune requête mondiale, l'API
+officielle ne couvre hors politique que les annonces diffusées auprès
+d'utilisateurs de l'Union européenne (Digital Services Act). Pour chaque pays,
+itération sur les termes suivis avec pagination par curseur persistée dans
+`IngestJob`, donc reprise exacte après interruption. Chaque annonce est
+normalisée, dédupliquée, une `AdObservation` est écrite, les visuels non encore
+stockés sont copiés avec somme de contrôle, les annonceurs inconnus sont créés et
+marqués pour revue, puis le signal des annonceurs touchés est recalculé.
 
-## Moteur d'idées
+Back-off exponentiel sur l'erreur 613. Deux échecs consécutifs déclenchent une
+alerte : deux jours d'ingestion perdus sont deux jours perdus à jamais.
 
-`src/lib/ideas/score.ts` — fonction pure, sans base, sans date, sans aléa.
+## Signal Nexteo
 
-1. **Contraintes dures**, éliminatoires avant tout scoring : code complexe,
-   licence réglementée, stock physique, équipe, coûts fixes au-dessus de 500 €.
-2. **Huit dimensions**, chacune ramenée entre 0 et 1 : accès au problème, accès
-   aux premiers clients, faisabilité sans coder, temps jusqu'au premier euro,
-   disposition à payer, compatibilité temps, budget, compatibilité personnelle.
-3. **Somme pondérée**, les poids venant de la table `ScoringWeight`.
+Fonction pure dans `src/lib/signal/score.ts`, poids lus en base, testée avec
+Vitest. Score de 0 à 100, jamais monétaire, jamais vert.
 
-L'IA intervient à deux endroits, et jamais pour noter : en amont pour traduire
-les réponses libres vers un vocabulaire fermé de vingt irritants, en aval pour
-rédiger l'explication à partir du `breakdown`. Chaque idée porte des
-`IdeaSource` qui citent les réponses l'ayant produite, et l'interface les
-affiche.
+| Composante | Poids | Mesure |
+|---|---|---|
+| Persistance | 35 | durée de diffusion de la plus ancienne annonce encore active |
+| Continuité | 20 | part des jours sans interruption sur la période observée |
+| Volume actif | 15 | nombre d'annonces actives simultanément |
+| Rythme de test | 15 | créations distinctes produites sur douze mois |
+| Étendue | 10 | pays et plateformes touchés |
+| Fraîcheur | 5 | récence de la dernière nouvelle création |
 
-## Moteur de prompts
+Bandes de lecture : 0-29 test, 30-59 en cours de validation, 60-84 modèle
+installé, 85-100 modèle éprouvé. Ces libellés décrivent une activité
+publicitaire, jamais une santé financière.
 
-Architecture hybride. Le corps de chaque prompt vient d'un `PromptTemplate` en
-base, avec des variables `{{ }}`. Seule la partie réellement propre à l'idée —
-fonctionnalité centrale, entités, écrans — passe par le modèle, et sa sortie est
-validée par Zod avant d'être écrite dans `ProjectState`. Le reste est
-déterministe : on ne laisse pas un modèle réécrire librement un prompt de
-configuration Stripe.
+Chaque fiche affiche le détail du calcul. Un score opaque serait indéfendable
+puisque c'est le cœur du produit : l'utilisateur doit comprendre en dix secondes
+pourquoi un annonceur est à 82 et un autre à 31.
 
-Deux mécanismes distincts : un **pack séquencé** de quarante prompts dans
-l'ordre du parcours, et un **générateur à la demande** illimité qui s'appuie sur
-`ProjectState` pour rester cohérent avec ce qui est déjà construit.
+## Interdit, partout
 
-La **bibliothèque d'erreurs** (vingt-sept motifs) reconnaît le message collé par
-correspondance d'expressions régulières et rend le prompt de réparation
-correspondant, contextualisé. Sans correspondance, un prompt de diagnostic
-générique injecte l'état du projet.
-
-## Générateur de scripts
-
-Le calendrier des angles est déterministe (`src/lib/videos/angles.ts`) :
-répartition 6/6/6/5/4/3, jamais deux fois le même angle d'affilée, et les six
-premiers tournables avant d'avoir le moindre utilisateur. Le modèle n'écrit que
-le contenu, par lots de six, et chaque script traverse le filtre des
-formulations interdites avant d'être enregistré. Si le profil dit non au visage,
-aucun script ne demande de se filmer.
-
-## Ce qui tient le produit
-
-- Le gating vit dans `FeatureFlag`, et `can()` est vérifié dans l'action, pas
-  seulement dans la vue.
-- Le webhook Stripe est le seul endroit qui ouvre un accès payant.
-- Aucune clé d'API côté client. Tous les appels IA passent par des Server
-  Actions.
-- La progression ne recule jamais.
+Aucun chiffre d'affaires, MRR, revenu estimé ni montant attribué à une entreprise
+tierce — ni calculé, ni estimé, ni déduit, ni en fourchette, ni sous une
+formulation détournée type « potentiel de revenu ». Aucune donnée inventée
+(`isDemo: true` et identification visuelle). Chaque annonce affichée renvoie vers
+son `ad_snapshot_url` officiel. Aucune donnée personnelle d'annonceur : on traite
+des pages, pas des personnes.

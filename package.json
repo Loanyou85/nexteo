@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && tsx scripts/debloquer-migration.ts && prisma migrate deploy && tsx prisma/seed.ts && next build",
+    "build": "prisma generate && prisma migrate deploy && tsx prisma/seed.ts && next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
@@ -18,7 +18,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:reset": "prisma migrate reset --force",
     "build:sans-migration": "prisma generate && next build",
-    "db:debloquer": "tsx scripts/debloquer-migration.ts"
+    "ingestion": "tsx scripts/ingestion.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
