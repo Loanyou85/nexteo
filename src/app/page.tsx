@@ -8,6 +8,8 @@ import { Faq } from '@/components/landing/faq';
 import { MENTION_SOURCE } from '@/lib/guardrails';
 import { rechercherAnnonceurs } from '@/server/annonceurs';
 import { sessionOuNull } from '@/server/auth';
+import { etatBase } from '@/server/etat';
+import { BaseAbsente } from '@/components/shell/base-absente';
 
 export const dynamic = 'force-dynamic';
 
@@ -66,10 +68,18 @@ const COMPARAISON: { quoi: string; aLaMain: string; avecNexteo: string }[] = [
 ];
 
 export default async function AccueilPage() {
-  const [{ lignes }, session] = await Promise.all([
-    rechercherAnnonceurs({ tri: 'signal', enDiffusion: true }, undefined, 6),
-    sessionOuNull(),
-  ]);
+  const [etat, session] = await Promise.all([etatBase(), sessionOuNull()]);
+
+  if (!etat.pret) {
+    return (
+      <div className="min-h-dvh">
+        <TopBar sansAction />
+        <BaseAbsente etat={etat} />
+      </div>
+    );
+  }
+
+  const { lignes } = await rechercherAnnonceurs({ tri: 'signal', enDiffusion: true }, undefined, 6);
 
   return (
     <div className="min-h-dvh">

@@ -10,6 +10,8 @@ import { MENTION_SOURCE } from '@/lib/guardrails';
 import type { Bande } from '@/lib/signal/score';
 import { facettes, rechercherAnnonceurs, type Filtres as TFiltres, type Tri } from '@/server/annonceurs';
 import { sessionOuNull } from '@/server/auth';
+import { etatBase } from '@/server/etat';
+import { BaseAbsente } from '@/components/shell/base-absente';
 
 export const dynamic = 'force-dynamic';
 
@@ -54,6 +56,16 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
   const filtres = filtresDepuisUrl(params);
   const vue = lire(params, 'vue') === 'tableau' ? 'tableau' : 'cartes';
   const curseur = lire(params, 'curseur');
+
+  const etat = await etatBase();
+  if (!etat.pret) {
+    return (
+      <>
+        <TopBar sansAction />
+        <BaseAbsente etat={etat} />
+      </>
+    );
+  }
 
   const [resultat, listes, session] = await Promise.all([
     rechercherAnnonceurs(filtres, curseur),

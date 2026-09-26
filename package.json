@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && tsx scripts/verifier-base.ts && prisma migrate deploy && tsx prisma/seed.ts && next build",
+    "build": "prisma generate && tsx scripts/preparer-base.ts && next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
@@ -19,7 +19,7 @@
     "db:reset": "prisma migrate reset --force",
     "build:sans-migration": "prisma generate && next build",
     "ingestion": "tsx scripts/ingestion.ts",
-    "db:verifier": "tsx scripts/verifier-base.ts"
+    "db:preparer": "tsx scripts/preparer-base.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
