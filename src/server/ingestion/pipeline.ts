@@ -154,6 +154,7 @@ async function enregistrerAnnonce(
     publisherPlatforms: annonce.publisherPlatforms,
     languages: annonce.languages,
     reachedCountries: annonce.reachedCountries,
+    euTotalReach: annonce.euTotalReach,
     isActive: annonce.isActive,
     creativeHash,
     lastSeenAt: contexte.maintenant,

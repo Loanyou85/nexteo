@@ -1,5 +1,6 @@
 import type { PrismaClient } from '@prisma/client';
 import { calculerSignal, type Composante } from '@/lib/signal/score';
+import { estimerMrr } from '@/lib/mrr/estimer';
 import { couverturePour } from './couverture';
 
 /**
@@ -33,6 +34,7 @@ export async function recalculerSignal(
         publisherPlatforms: true,
         creativeHash: true,
         firstSeenAt: true,
+        euTotalReach: true,
       },
     });
 
@@ -53,9 +55,25 @@ export async function recalculerSignal(
       poids,
     );
 
+    // L'estimation de revenu se recalcule au même moment que le signal : elle
+    // dépend des mêmes annonces, et deux chiffres calculés à des instants
+    // différents finiraient par se contredire sur la même fiche.
+    const actives = annonces.filter((a) => a.isActive);
+    const portee = actives.reduce((s, a) => s + (a.euTotalReach ?? 0), 0);
+    const persistance = signal.detail.find((d) => d.cle === 'persistance')?.valeur ?? 0;
+    const estimation = estimerMrr({
+      porteeTotale: portee > 0 ? portee : null,
+      joursDiffusion: persistance,
+    });
+
     await db.advertiser.update({
       where: { id: advertiserId },
       data: {
+        mrrEstimatedLowCents: estimation?.basCents ?? null,
+        mrrEstimatedHighCents: estimation?.hautCents ?? null,
+        mrrEstimatedMethod: estimation?.methode ?? null,
+        mrrEstimatedTrust: estimation?.fiabilite ?? null,
+        mrrEstimatedAt: estimation ? maintenant : null,
         signalScore: signal.score,
         // Le détail est stocké tel qu'il sera affiché : la fiche ne recalcule
         // rien, donc ce qu'on montre est exactement ce qui a produit le score.

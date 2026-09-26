@@ -55,6 +55,15 @@ export type FicheAnnonceur = {
   libelleBande: string;
   detail: DetailComposante[];
   signalComputedAt: Date | null;
+  mrr: {
+    declareCents: number | null;
+    declareSource: string | null;
+    declareLe: Date | null;
+    estimeBasCents: number | null;
+    estimeHautCents: number | null;
+    estimeMethode: string | null;
+    estimeFiabilite: string | null;
+  };
   actives: AnnonceFiche[];
   archivees: AnnonceFiche[];
   retirees: AnnonceFiche[];
@@ -207,6 +216,15 @@ export async function ficheAnnonceur(
     libelleBande: libelle,
     detail,
     signalComputedAt: a.signalComputedAt,
+    mrr: {
+      declareCents: a.mrrDeclaredCents,
+      declareSource: a.mrrDeclaredSource,
+      declareLe: a.mrrDeclaredAt,
+      estimeBasCents: a.mrrEstimatedLowCents,
+      estimeHautCents: a.mrrEstimatedHighCents,
+      estimeMethode: a.mrrEstimatedMethod,
+      estimeFiabilite: a.mrrEstimatedTrust,
+    },
     actives: enrichies.filter((x) => x.isActive),
     archivees: enrichies.filter((x) => !x.isActive && !x.goneFromMeta),
     retirees: enrichies.filter((x) => x.goneFromMeta),

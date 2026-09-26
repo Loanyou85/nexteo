@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { ExternalLink } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { BarreSignal } from '@/components/signal/barre';
+import { MrrCompact } from '@/components/annonce/mrr';
 import { ETIQUETTE_DEMO } from '@/lib/guardrails';
 import type { LigneAnnonceur } from '@/server/annonceurs';
 
@@ -85,9 +86,8 @@ export function CarteAnnonceur({ a }: { a: LigneAnnonceur }) {
           </p>
         </div>
 
-        <div className="shrink-0 text-right">
-          <p className="tabular text-sm font-semibold text-encre">{duree(a.joursDiffusion)}</p>
-          <p className="text-2xs text-encre-2">de diffusion</p>
+        <div className="shrink-0">
+          <MrrCompact m={a} />
         </div>
       </div>
 
@@ -112,13 +112,17 @@ export function CarteAnnonceur({ a }: { a: LigneAnnonceur }) {
         <BarreSignal score={a.signalScore} taille="sm" sansLibelle />
       </div>
 
-      <div className="mt-auto grid grid-cols-2 gap-4 border-t border-bordure p-4 pt-3">
+      <div className="mt-auto grid grid-cols-3 gap-3 border-t border-bordure p-4 pt-3">
+        <div>
+          <p className="text-2xs uppercase tracking-wide text-encre-2">Diffusion</p>
+          <p className="tabular mt-1 text-base font-semibold text-encre">{duree(a.joursDiffusion)}</p>
+        </div>
         <div>
           <p className="text-2xs uppercase tracking-wide text-encre-2">Archivées</p>
           <p className="tabular mt-1 text-base font-semibold text-encre">{a.annoncesTotal}</p>
         </div>
         <div className="min-w-0">
-          <p className="text-2xs uppercase tracking-wide text-encre-2">Diffusion · 12 mois</p>
+          <p className="text-2xs uppercase tracking-wide text-encre-2">12 mois</p>
           <div className="mt-1">
             <Courbe valeurs={activite} />
           </div>

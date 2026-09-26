@@ -30,6 +30,9 @@ export type AnnonceNormalisee = {
   languages: string[];
   reachedCountries: string[];
   isActive: boolean;
+  /// Comptes européens touchés. Seule donnée chiffrée de l'API, et donc seule
+  /// entrée possible d'une estimation de revenu.
+  euTotalReach: number | null;
   rawPayload: AnnonceBrute;
 };
 
@@ -140,6 +143,10 @@ export function normaliser(brute: AnnonceBrute, maintenant: Date): AnnonceNormal
     reachedCountries: liste(brute.ad_reached_countries, (v) => v.toUpperCase()),
     // Pas de date de fin, ou date de fin à venir : l'annonce tourne encore.
     isActive: !fin || fin > maintenant,
+    euTotalReach:
+      typeof brute.eu_total_reach === 'number' && Number.isFinite(brute.eu_total_reach)
+        ? Math.max(0, Math.round(brute.eu_total_reach))
+        : null,
     rawPayload: brute,
   };
 }

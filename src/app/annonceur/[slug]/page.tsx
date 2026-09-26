@@ -8,6 +8,7 @@ import { BarreSignal, DetailSignal } from '@/components/signal/barre';
 import { Chronologie } from '@/components/annonce/chronologie';
 import { CarteAnnonce } from '@/components/annonce/carte-annonce';
 import { AbonnementRequis } from '@/components/annonce/mur-payant';
+import { MrrDetaille } from '@/components/annonce/mrr';
 import { ETIQUETTE_DEMO, MENTION_SOURCE } from '@/lib/guardrails';
 import { ficheAnnonceur } from '@/server/annonceur-fiche';
 import { consulterFiche } from '@/server/quota';
@@ -165,6 +166,13 @@ export default async function AnnonceurPage({ params }: Props) {
                 Calculé le {dateFr(a.signalComputedAt)}.
               </p>
             ) : null}
+          </Section>
+
+          <Section
+            titre="Revenu mensuel récurrent"
+            aide="Un montant déclaré est un fait, publié par l’entreprise elle-même. Une estimation est une fourchette, obtenue par une chaîne d’hypothèses à partir de la portée que Meta expose. Les deux ne se lisent pas de la même façon, et ne sont jamais mélangés."
+          >
+            <MrrDetaille m={a.mrr} nom={a.name} />
           </Section>
 
           <Section

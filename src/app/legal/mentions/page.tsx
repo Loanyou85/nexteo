@@ -48,13 +48,28 @@ export default function MentionsPage() {
         instantané officiel chez Meta, qui fait foi.
       </p>
 
-      <h2>Ce que Nexteo ne publie pas</h2>
+      <h2>Les montants affichés, et ce qu’ils valent</h2>
       <p>
-        Nexteo n’affiche aucun chiffre d’affaires, aucune estimation de recettes ni aucun montant
-        attribué à une entreprise tierce, sous quelque forme que ce soit. Le signal Nexteo mesure une
-        activité publicitaire observée — durée de diffusion, continuité, volume, étendue — et rien
-        d’autre. Il ne décrit pas la santé financière d’une entreprise et ne doit pas être lu comme
-        tel.
+        Nexteo affiche deux types de montants, qui ne se lisent pas de la même façon et ne sont
+        jamais mélangés.
+      </p>
+      <p>
+        Un montant <strong>déclaré</strong> a été publié par l’entreprise elle-même. Nexteo indique
+        le lien vers cette publication et la date du relevé. Nexteo ne garantit ni l’exactitude ni
+        l’actualité de ce que l’entreprise a publié.
+      </p>
+      <p>
+        Une <strong>estimation</strong> est calculée par Nexteo à partir de la portée européenne que
+        Meta expose pour les annonces concernées, par une chaîne d’hypothèses de marché explicitée à
+        côté de chaque montant. Elle est présentée en fourchette, jamais en valeur unique. Ce n’est
+        pas une mesure : le revenu d’une société privée n’est pas une donnée publique, et aucune
+        estimation ne doit être tenue pour un fait ni servir de base à une décision
+        d’investissement.
+      </p>
+      <p>
+        Le signal Nexteo, lui, ne contient aucune donnée monétaire. Il mesure une activité
+        publicitaire observée — durée de diffusion, continuité, volume, étendue — et ne décrit pas la
+        santé financière d’une entreprise.
       </p>
 
       <h2>Propriété intellectuelle</h2>

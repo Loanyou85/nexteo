@@ -57,6 +57,13 @@ export type LigneAnnonceur = {
   activiteMensuelle: number[];
   /** Accroche de l'annonce active la plus ancienne : celle qui tient le plus longtemps. */
   accroche: string | null;
+  declareCents: number | null;
+  declareSource: string | null;
+  declareLe: Date | null;
+  estimeBasCents: number | null;
+  estimeHautCents: number | null;
+  estimeMethode: string | null;
+  estimeFiabilite: string | null;
 };
 
 const TAILLE_PAR_DEFAUT = 24;
@@ -219,6 +226,13 @@ export async function rechercherAnnonceurs(
     )
     SELECT
       a."id", a."slug", a."name", a."websiteUrl", a."signalScore", a."isDemo", a."firstSeenAt",
+      a."mrrDeclaredCents" AS "declareCents",
+      a."mrrDeclaredSource" AS "declareSource",
+      a."mrrDeclaredAt" AS "declareLe",
+      a."mrrEstimatedLowCents" AS "estimeBasCents",
+      a."mrrEstimatedHighCents" AS "estimeHautCents",
+      a."mrrEstimatedMethod" AS "estimeMethode",
+      a."mrrEstimatedTrust" AS "estimeFiabilite",
       c."label" AS "categorie", c."slug" AS "categorieSlug",
       COALESCE(g."annoncesActives", 0) AS "annoncesActives",
       COALESCE(g."annoncesTotal", 0) AS "annoncesTotal",

@@ -159,6 +159,8 @@ type AnnonceFixture = {
   publisher_platforms: string[];
   languages: string[];
   ad_reached_countries: string[];
+  /** Comptes européens touchés, comme Meta l'expose pour les annonces UE. */
+  eu_total_reach: number;
   /** Décalage en jours par rapport à aujourd'hui. Matérialisé à la lecture. */
   _joursDebut: number;
   /** `null` = annonce encore active. */
@@ -195,6 +197,9 @@ for (const p of PROFILS) {
       publisher_platforms: echantillon(plateformes, entre(1, plateformes.length)),
       languages: ['fr'],
       ad_reached_countries: echantillon(pays, entre(1, pays.length)),
+      // Ordre de grandeur plausible pour une annonce diffusée quelques
+      // semaines dans deux ou trois pays européens.
+      eu_total_reach: entre(8_000, 420_000),
       _joursDebut: debut,
       _joursFin: fin,
     });
