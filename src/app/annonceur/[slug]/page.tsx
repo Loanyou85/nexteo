@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { TopBar } from '@/components/shell/top-bar';
-import { NavMobile } from '@/components/shell/nav-mobile';
+import { Coque } from '@/components/shell/coque';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { BarreSignal, DetailSignal } from '@/components/signal/barre';
@@ -13,7 +12,7 @@ import { LogoAnnonceur } from '@/components/annonce/logo-annonceur';
 import { ETIQUETTE_DEMO, MENTION_SOURCE } from '@/lib/guardrails';
 import { ficheAnnonceur } from '@/server/annonceur-fiche';
 import { consulterFiche } from '@/server/quota';
-import { sessionOuNull } from '@/server/auth';
+import { proprietesCoque } from '@/server/coque';
 
 export const dynamic = 'force-dynamic';
 
@@ -60,7 +59,7 @@ export default async function AnnonceurPage({ params }: Props) {
   const a = await ficheAnnonceur(slug);
   if (!a) notFound();
 
-  const [acces, session] = await Promise.all([consulterFiche(a.id), sessionOuNull()]);
+  const [acces, coque] = await Promise.all([consulterFiche(a.id), proprietesCoque()]);
 
   const total = a.actives.length + a.archivees.length + a.retirees.length;
   const mois = Math.floor((a.detail.find((d) => d.cle === 'persistance')?.valeur ?? 0) / 30);
@@ -69,13 +68,11 @@ export default async function AnnonceurPage({ params }: Props) {
   const reserve = !acces.autorise;
 
   return (
-    <>
-      <TopBar connecte={Boolean(session)} />
-
-      <main className="mx-auto max-w-5xl px-4 pb-24 pt-8 md:pb-12">
+    <Coque compteurs={coque.compteurs} admin={coque.admin} compte={coque.compte}>
+      <div className="px-5 pb-10 pt-6 lg:px-8 lg:pt-8">
         <nav className="text-sm text-encre-2">
           <Link href="/explore" className="underline underline-offset-4 hover:text-encre">
-            Explorer
+            Recherche
           </Link>
           {a.categorieSlug ? (
             <>
@@ -321,10 +318,8 @@ export default async function AnnonceurPage({ params }: Props) {
           )}
         </div>
 
-        <p className="mt-12 border-t border-bordure pt-6 text-xs text-encre-2">{MENTION_SOURCE}</p>
-      </main>
-
-      <NavMobile />
-    </>
+        <p className="mt-12 border-t border-bordure pt-6 text-2xs text-encre-2">{MENTION_SOURCE}</p>
+      </div>
+    </Coque>
   );
 }

@@ -160,3 +160,17 @@ export async function requireUser() {
   if (!session?.user?.id) redirect('/connexion');
   return session.user;
 }
+
+/**
+ * Administrateur obligatoire.
+ *
+ * Renvoie vers l'accueil et non vers une page d'erreur : un visiteur qui
+ * tombe sur une adresse d'administration n'a pas besoin d'apprendre qu'elle
+ * existe. Utilisée aussi par les actions serveur — un écran caché n'est pas
+ * une protection, seule la vérification côté serveur en est une.
+ */
+export async function requireAdmin() {
+  const user = await requireUser();
+  if (user.role !== 'admin') redirect('/');
+  return user;
+}

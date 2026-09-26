@@ -1,9 +1,8 @@
 import Link from 'next/link';
-import { TopBar } from '@/components/shell/top-bar';
-import { NavMobile } from '@/components/shell/nav-mobile';
+import { Coque, EnTetePage } from '@/components/shell/coque';
 import { CartesTarifs } from '@/components/tarifs/cartes';
 import { offresSansTarif } from '@/server/stripe';
-import { sessionOuNull } from '@/server/auth';
+import { proprietesCoque } from '@/server/coque';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,25 +12,21 @@ export const metadata = {
 };
 
 export default async function TarifsPage() {
-  const [session, manquants] = await Promise.all([sessionOuNull(), Promise.resolve(offresSansTarif())]);
+  const [coque, manquants] = await Promise.all([
+    proprietesCoque(),
+    Promise.resolve(offresSansTarif()),
+  ]);
   const tarifsManquants = manquants.flatMap((m) => m.manquantes);
 
   return (
-    <>
-      <TopBar connecte={Boolean(session)} />
+    <Coque compteurs={coque.compteurs} admin={coque.admin} compte={coque.compte}>
+      <EnTetePage
+        titre="Tarifs"
+        sous="Pas d’offre gratuite. La recherche et la liste des annonceurs sont ouvertes pour que tu puisses juger, les fiches complètes demandent un abonnement."
+      />
 
-      <main className="mx-auto max-w-5xl px-4 pb-24 pt-10 md:pb-16">
-        <div className="text-center">
-          <h1 className="text-xl">Tarifs</h1>
-          <p className="mx-auto mt-2 max-w-xl text-sm text-encre-2">
-            Pas d’offre gratuite. La recherche et la liste des annonceurs sont ouvertes pour que tu
-            puisses juger, les fiches complètes demandent un abonnement.
-          </p>
-        </div>
-
-        <div className="mt-10">
-          <CartesTarifs tarifsManquants={tarifsManquants} />
-        </div>
+      <div className="px-5 pb-10 pt-6 lg:px-8">
+        <CartesTarifs tarifsManquants={tarifsManquants} />
 
         {tarifsManquants.length > 0 ? (
           <p className="mt-6 rounded-card border border-alerte/30 bg-alerte/5 p-carte text-sm text-encre">
@@ -51,8 +46,10 @@ export default async function TarifsPage() {
               rareté artificielle.
             </li>
             <li>
-              Aucune donnée de recettes n’est publiée, sur aucune offre. Ce n’est pas une
-              fonctionnalité réservée : cette donnée n’existe pas publiquement.
+              Un revenu mensuel déclaré est repris tel que l’entreprise l’a publié, avec le lien
+              vers sa source et sa date. Une estimation reste une fourchette, et le chemin de
+              calcul est affiché à côté. Aucune offre ne donne accès à des recettes vérifiées :
+              cette donnée n’existe pas pour une entreprise privée.
             </li>
             <li>
               Les annonces conservées après leur retrait par Meta restent consultables tant que ton
@@ -67,9 +64,7 @@ export default async function TarifsPage() {
             </li>
           </ul>
         </section>
-      </main>
-
-      <NavMobile />
-    </>
+      </div>
+    </Coque>
   );
 }

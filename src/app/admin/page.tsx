@@ -1,8 +1,10 @@
-import { redirect } from 'next/navigation';
-import { TopBar } from '@/components/shell/top-bar';
+import Link from 'next/link';
+import { Coque, EnTetePage } from '@/components/shell/coque';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { requireUser } from '@/server/auth';
+import { requireAdmin } from '@/server/auth';
+import { proprietesCoque } from '@/server/coque';
 import { supervision } from '@/server/supervision';
 
 export const dynamic = 'force-dynamic';
@@ -31,23 +33,24 @@ function Alerte({ titre, children }: { titre: string; children: React.ReactNode 
 }
 
 export default async function AdminPage() {
-  const user = await requireUser();
-  if (user.role !== 'admin') redirect('/');
+  await requireAdmin();
 
-  const s = await supervision();
+  const [s, coque] = await Promise.all([supervision(), proprietesCoque()]);
 
   return (
-    <>
-      <TopBar connecte />
+    <Coque compteurs={coque.compteurs} admin compte={coque.compte}>
+      <EnTetePage
+        titre="Supervision"
+        sous="Cet écran existe pour qu’on n’ait jamais à lire les journaux de l’hébergeur. La seule panne irrécupérable, c’est l’ingestion qui s’arrête."
+        actions={
+          <Button asChild taille="sm" variant="secondaire">
+            <Link href="/admin/mrr">Saisir les MRR</Link>
+          </Button>
+        }
+      />
 
-      <main className="mx-auto max-w-5xl px-4 pb-16 pt-8">
-        <h1 className="text-xl">Supervision</h1>
-        <p className="mt-1.5 text-sm text-encre-2">
-          Cet écran existe pour qu’on n’ait jamais à lire les journaux de l’hébergeur. La seule
-          panne irrécupérable, c’est l’ingestion qui s’arrête.
-        </p>
-
-        <div className="mt-8 space-y-3">
+      <div className="px-5 pb-10 pt-5 lg:px-8">
+        <div className="space-y-3">
           {s.ingestion.enRetard ? (
             <Alerte titre="L’ingestion est en retard">
               {s.ingestion.heuresDepuis === null
@@ -167,7 +170,7 @@ export default async function AdminPage() {
             </div>
           )}
         </section>
-      </main>
-    </>
+      </div>
+    </Coque>
   );
 }

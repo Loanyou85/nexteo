@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   Bookmark,
+  Coins,
   Globe,
   Megaphone,
   Search,
@@ -92,18 +93,27 @@ export function BarreLaterale({
       {admin ? (
         <>
           <hr className="my-3 border-nuit-3/70" />
-          <Link
-            href="/admin"
-            className={cn(
-              'flex h-11 items-center gap-3 rounded-champ px-3 text-sm transition-colors',
-              estActif('/admin')
-                ? 'bg-nuit-2 font-medium text-nuit-encre'
-                : 'text-nuit-encre-2 hover:bg-nuit-2/60 hover:text-nuit-encre',
-            )}
-          >
-            <Settings2 size={18} strokeWidth={1.75} className="shrink-0" aria-hidden />
-            Supervision
-          </Link>
+          {[
+            { href: '/admin', libelle: 'Supervision', Icone: Settings2 },
+            { href: '/admin/mrr', libelle: 'Saisir les MRR', Icone: Coins },
+          ].map(({ href, libelle, Icone }) => (
+            <Link
+              key={href}
+              href={href}
+              // Comparaison exacte : /admin est le préfixe de /admin/mrr, et
+              // `startsWith` allumerait les deux entrées à la fois.
+              aria-current={chemin === href ? 'page' : undefined}
+              className={cn(
+                'flex h-11 items-center gap-3 rounded-champ px-3 text-sm transition-colors',
+                chemin === href
+                  ? 'bg-nuit-2 font-medium text-nuit-encre'
+                  : 'text-nuit-encre-2 hover:bg-nuit-2/60 hover:text-nuit-encre',
+              )}
+            >
+              <Icone size={18} strokeWidth={1.75} className="shrink-0" aria-hidden />
+              {libelle}
+            </Link>
+          ))}
         </>
       ) : null}
     </nav>

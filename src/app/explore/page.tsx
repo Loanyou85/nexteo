@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { CarteAnnonceur } from '@/components/annonce/carte-annonceur';
 import { BarreFiltres } from '@/components/explore/barre-filtres';
 import { MENTION_SOURCE } from '@/lib/guardrails';
-import { offrePour } from '@/lib/plans';
 import type { Bande } from '@/lib/signal/score';
 import {
   facettes,
@@ -14,8 +13,7 @@ import {
   type Filtres as TFiltres,
   type Tri,
 } from '@/server/annonceurs';
-import { sessionOuNull } from '@/server/auth';
-import { db } from '@/server/db';
+import { proprietesCoque } from '@/server/coque';
 import { etatBase } from '@/server/etat';
 
 export const dynamic = 'force-dynamic';
@@ -70,20 +68,12 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
   const filtres = filtresDepuisUrl(params);
   const curseur = lire(params, 'curseur');
 
-  const [resultat, listes, session, totalAnnonceurs, totalAnnonces] = await Promise.all([
+  const [resultat, listes, coque] = await Promise.all([
     rechercherAnnonceurs(filtres, curseur),
     facettes(),
-    sessionOuNull(),
-    db.advertiser.count({ where: { excluded: false } }),
-    db.ad.count(),
+    proprietesCoque(),
   ]);
-
-  const abonnement = session?.user?.id
-    ? await db.subscription.findUnique({
-        where: { userId: session.user.id },
-        select: { plan: true },
-      })
-    : null;
+  const { annonceurs: totalAnnonceurs, annonces: totalAnnonces } = coque.compteurs;
 
   const suivante = new URLSearchParams(
     Object.entries(params).flatMap(([k, v]) =>
@@ -97,18 +87,7 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
   );
 
   return (
-    <Coque
-      compteurs={{ annonceurs: totalAnnonceurs, annonces: totalAnnonces }}
-      admin={session?.user?.role === 'admin'}
-      compte={
-        session?.user?.email
-          ? {
-              email: session.user.email,
-              plan: abonnement ? (offrePour(abonnement.plan)?.nom ?? 'Sans abonnement') : 'Sans abonnement',
-            }
-          : null
-      }
-    >
+    <Coque compteurs={coque.compteurs} admin={coque.admin} compte={coque.compte}>
       <EnTetePage
         titre="Recherche"
         compteur={
