@@ -3,6 +3,7 @@ import { ExternalLink } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { BarreSignal } from '@/components/signal/barre';
 import { MrrCompact } from '@/components/annonce/mrr';
+import { LogoAnnonceur } from '@/components/annonce/logo-annonceur';
 import { ETIQUETTE_DEMO } from '@/lib/guardrails';
 import type { LigneAnnonceur } from '@/server/annonceurs';
 
@@ -21,14 +22,14 @@ function duree(jours: number): string {
   return `${Math.floor(jours / 30)} mois`;
 }
 
-/** Initiales, à défaut de logo : on n'ira pas chercher celui de l'annonceur. */
-function initiales(nom: string): string {
-  return nom
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((m) => m[0] ?? '')
-    .join('')
-    .toUpperCase();
+/** Domaine nu extrait de l'URL enregistrée. */
+function domaineDe(url: string | null): string | null {
+  if (!url) return null;
+  try {
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return null;
+  }
 }
 
 function Courbe({ valeurs }: { valeurs: number[] }) {
@@ -52,12 +53,7 @@ export function CarteAnnonceur({ a }: { a: LigneAnnonceur }) {
   return (
     <article className="flex flex-col rounded-card border border-bordure bg-surface transition-colors hover:border-neo-500/40">
       <div className="flex items-start gap-3 p-4">
-        <span
-          aria-hidden
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-champ bg-neo-100 text-xs font-semibold text-neo-600"
-        >
-          {initiales(a.name)}
-        </span>
+        <LogoAnnonceur nom={a.name} domaine={domaineDe(a.websiteUrl)} taille={36} />
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">

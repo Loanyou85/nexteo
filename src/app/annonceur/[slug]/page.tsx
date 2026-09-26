@@ -9,6 +9,7 @@ import { Chronologie } from '@/components/annonce/chronologie';
 import { CarteAnnonce } from '@/components/annonce/carte-annonce';
 import { AbonnementRequis } from '@/components/annonce/mur-payant';
 import { MrrDetaille } from '@/components/annonce/mrr';
+import { LogoAnnonceur } from '@/components/annonce/logo-annonceur';
 import { ETIQUETTE_DEMO, MENTION_SOURCE } from '@/lib/guardrails';
 import { ficheAnnonceur } from '@/server/annonceur-fiche';
 import { consulterFiche } from '@/server/quota';
@@ -91,7 +92,12 @@ export default async function AnnonceurPage({ params }: Props) {
 
         <header className="mt-4 flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
           <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-3">
+              <LogoAnnonceur
+                nom={a.name}
+                domaine={a.websiteUrl ? a.websiteUrl.replace(/^https?:\/\/(www\.)?/, '') : null}
+                taille={44}
+              />
               <h1 className="text-xl">{a.name}</h1>
               {a.isDemo ? <Badge ton="demo">{ETIQUETTE_DEMO}</Badge> : null}
             </div>
