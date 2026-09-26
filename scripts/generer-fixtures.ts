@@ -30,7 +30,7 @@ function tirage(graine: number) {
 
 const alea = tirage(20260926);
 const entre = (min: number, max: number) => min + Math.floor(alea() * (max - min + 1));
-const parmi = <T>(xs: readonly T[]): T => xs[Math.floor(alea() * xs.length)];
+const parmi = <T>(xs: readonly T[]): T => xs[Math.floor(alea() * xs.length)] as T;
 const echantillon = <T>(xs: readonly T[], n: number): T[] =>
   [...xs].sort(() => alea() - 0.5).slice(0, Math.max(1, n));
 

@@ -60,12 +60,12 @@ async function main(): Promise<void> {
   let bloquee = false;
   if (tables.includes('_prisma_migrations')) {
     try {
-      const [{ n }] = await db.$queryRawUnsafe<{ n: number }[]>(
+      const compte = await db.$queryRawUnsafe<{ n: number }[]>(
         `SELECT count(*)::int AS n FROM "_prisma_migrations"
           WHERE "migration_name" = $1 AND "finished_at" IS NULL AND "rolled_back_at" IS NULL`,
         MIGRATION_V2,
       );
-      bloquee = n > 0;
+      bloquee = (compte[0]?.n ?? 0) > 0;
     } catch {
       // Journal illisible : on n'en tire aucune conclusion.
     }

@@ -166,6 +166,7 @@ CREATE TABLE "Ad" (
     "firstSeenAt" TIMESTAMP(3) NOT NULL,
     "lastSeenAt" TIMESTAMP(3) NOT NULL,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "creativeHash" TEXT NOT NULL,
     "goneFromMeta" BOOLEAN NOT NULL DEFAULT false,
     "isDemo" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -179,7 +180,8 @@ CREATE TABLE "AdCreative" (
     "id" TEXT NOT NULL,
     "adId" TEXT NOT NULL,
     "type" "CreativeType" NOT NULL,
-    "storageKey" TEXT NOT NULL,
+    "storageKey" TEXT,
+    "copiedAt" TIMESTAMP(3),
     "sourceUrl" TEXT,
     "width" INTEGER,
     "height" INTEGER,
@@ -339,6 +341,9 @@ CREATE INDEX "Ad_advertiserId_deliveryStartTime_idx" ON "Ad"("advertiserId", "de
 
 -- CreateIndex
 CREATE INDEX "Ad_advertiserId_isActive_idx" ON "Ad"("advertiserId", "isActive");
+
+-- CreateIndex
+CREATE INDEX "Ad_advertiserId_creativeHash_idx" ON "Ad"("advertiserId", "creativeHash");
 
 -- CreateIndex
 CREATE INDEX "Ad_landingDomain_idx" ON "Ad"("landingDomain");

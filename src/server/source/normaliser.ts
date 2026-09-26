@@ -94,7 +94,7 @@ export function domaineDepuisCaption(caption: string | null): {
   }
 
   // Domaine nu : « exemple.fr », « app.exemple.fr/tarifs ».
-  const candidat = brut.split('/')[0];
+  const candidat = brut.split('/')[0] ?? '';
   if (/^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9-]+)+$/i.test(candidat)) {
     return { landingUrl: null, landingDomain: nettoyer(candidat) };
   }

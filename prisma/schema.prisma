@@ -242,6 +242,16 @@ model Ad {
   lastSeenAt  DateTime
   isActive    Boolean  @default(true)
 
+  /// Empreinte de la création : texte d'accroche, titre, description, légende,
+  /// et sommes de contrôle des visuels quand ils ont pu être copiés.
+  ///
+  /// C'est l'unité du « rythme de test » du signal. Elle ne repose pas sur la
+  /// seule image : l'API ne rend que des vignettes basse résolution dont les
+  /// URL expirent, et parfois rien du tout. Rediffuser la même création sur
+  /// dix annonces n'est pas dix tests, c'est un seul — l'empreinte le dit,
+  /// avec ou sans visuel.
+  creativeHash String
+
   /// Meta l'a retirée de son archive, Nexteo la conserve. C'est l'argument de
   /// vente du produit, pas un déchet : on ne supprime jamais cette ligne.
   goneFromMeta Boolean @default(false)
@@ -258,6 +268,7 @@ model Ad {
 
   @@index([advertiserId, deliveryStartTime])
   @@index([advertiserId, isActive])
+  @@index([advertiserId, creativeHash])
   @@index([landingDomain])
 }
 
@@ -270,8 +281,12 @@ model AdCreative {
   id         String       @id @default(cuid())
   adId       String
   type       CreativeType
-  /// Clé dans le stockage objet. Les URL de Meta expirent, on copie à l'ingestion.
-  storageKey String
+  /// Clé dans le stockage objet. `null` tant que le fichier n'a pas été copié :
+  /// stockage non configuré, téléchargement en échec, URL déjà expirée. On
+  /// garde la ligne pour savoir ce qui reste à rattraper, plutôt que de faire
+  /// disparaître le visuel des comptes.
+  storageKey String?
+  copiedAt   DateTime?
   sourceUrl  String?
   width      Int?
   height     Int?

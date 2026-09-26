@@ -123,9 +123,12 @@ export const BANDES: { min: number; bande: Bande; libelle: string }[] = [
   { min: 0, bande: 'test', libelle: 'Test' },
 ];
 
+/** Filet : un score négatif ou absurde retombe dans la bande la plus basse. */
+const BANDE_PLANCHER = { bande: 'test' as Bande, libelle: 'Test' };
+
 export function bandePour(score: number): { bande: Bande; libelle: string } {
-  const trouvee = BANDES.find((b) => score >= b.min) ?? BANDES[BANDES.length - 1];
-  return { bande: trouvee.bande, libelle: trouvee.libelle };
+  const trouvee = BANDES.find((b) => score >= b.min);
+  return trouvee ? { bande: trouvee.bande, libelle: trouvee.libelle } : BANDE_PLANCHER;
 }
 
 const borne = (x: number) => Math.min(1, Math.max(0, x));
@@ -156,9 +159,9 @@ function persistance(e: EntreeSignal) {
   if (actives.length === 0) {
     return { valeur: 0, normalisee: 0, explication: 'Aucune annonce en cours de diffusion.' };
   }
-  const debutLePlusAncien = actives.reduce(
+  const debutLePlusAncien = actives.reduce<Date>(
     (min, a) => (a.deliveryStartTime < min ? a.deliveryStartTime : min),
-    actives[0].deliveryStartTime,
+    actives[0]!.deliveryStartTime,
   );
   const j = Math.floor(jours(debutLePlusAncien, e.maintenant));
   const mois = Math.floor(j / 30);
@@ -259,9 +262,9 @@ function fraicheur(e: EntreeSignal) {
   if (e.annonces.length === 0) {
     return { valeur: 0, normalisee: 0, explication: 'Aucune annonce relevée.' };
   }
-  const derniere = e.annonces.reduce(
+  const derniere = e.annonces.reduce<Date>(
     (max, a) => (a.firstSeenAt > max ? a.firstSeenAt : max),
-    e.annonces[0].firstSeenAt,
+    e.annonces[0]!.firstSeenAt,
   );
   const j = Math.floor(jours(derniere, e.maintenant));
   return {

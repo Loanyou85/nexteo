@@ -86,11 +86,11 @@ const CATEGORIES: { slug: string; label: string; parent: string | null }[] = [
 ];
 
 async function main(): Promise<void> {
-  const [{ pg_try_advisory_lock: obtenu }] = await db.$queryRawUnsafe<
-    { pg_try_advisory_lock: boolean }[]
-  >(`SELECT pg_try_advisory_lock(${VERROU})`);
+  const lignes = await db.$queryRawUnsafe<{ pg_try_advisory_lock: boolean }[]>(
+    `SELECT pg_try_advisory_lock(${VERROU})`,
+  );
 
-  if (!obtenu) {
+  if (!lignes[0]?.pg_try_advisory_lock) {
     console.log('Semis déjà en cours ailleurs, on laisse faire.');
     return;
   }
