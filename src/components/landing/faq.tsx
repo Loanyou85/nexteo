@@ -1,53 +1,47 @@
-const QUESTIONS = [
+const QUESTIONS: { q: string; r: string }[] = [
   {
-    q: 'Je ne sais pas coder du tout. C’est vraiment pour moi ?',
-    r: 'Oui. Le parcours ne te demande jamais d’écrire du code. Il te dit quoi cliquer, et il te donne les phrases exactes à coller dans Claude, dans l’ordre. Une seule étape demande d’ouvrir un terminal, et elle est facultative : l’autre chemin se fait entièrement dans un onglet.',
+    q: 'D’où viennent les données ?',
+    r: 'De l’API officielle de la bibliothèque publicitaire de Meta, endpoint ads_archive. Aucun moissonnage de l’interface web, aucun service tiers de contournement. Chaque annonce affichée renvoie vers son instantané officiel chez Meta.',
   },
   {
-    q: 'Combien ça va me coûter, en plus de l’abonnement ?',
-    r: 'GitHub, Vercel et Claude ont des offres gratuites qui suffisent pour construire et mettre en ligne. Stripe ne prend une commission que si tu encaisses. Un nom de domaine coûte une douzaine d’euros par an, et c’est facultatif au départ.',
+    q: 'Pourquoi n’affichez-vous pas le chiffre d’affaires des entreprises ?',
+    r: 'Parce que personne ne le connaît. Cette donnée n’existe publiquement nulle part pour une société privée, et les outils qui en affichent une l’ont déduite du nombre d’avis et du classement dans les magasins d’applications. C’est une supposition présentée comme un fait. Nexteo mesure autre chose : depuis combien de temps une entreprise paie pour diffuser. C’est vérifiable, et ça se vérifie sur l’instantané officiel.',
   },
   {
-    q: 'Vous me garantissez que je vais gagner de l’argent ?',
-    r: 'Non, et personne ne peut le garantir. Nexteo te donne un chemin, des prompts et un plan de contenu. Ce que ça donne dépend de ton idée, de ton marché et du travail que tu y mets. La capture Stripe de cette page est un résultat du fondateur, pas une moyenne.',
+    q: 'En quoi la durée de diffusion est-elle un signal ?',
+    r: 'Une campagne publicitaire se paie tous les jours. Une entreprise qui diffuse la même annonce sans interruption depuis huit mois a donc, huit mois durant, décidé chaque jour de continuer à payer. C’est le meilleur signal public disponible sur ce qui fonctionne — et contrairement à une estimation de recettes, c’est un fait observable.',
   },
   {
-    q: 'Combien de temps ça prend ?',
-    r: 'Le diagnostic prend une dizaine de minutes. Mettre un site en ligne prend quelques jours en y passant quelques heures par semaine. Encaisser un premier paiement dépend surtout du temps que tu mets à parler à de vraies personnes du métier visé.',
+    q: 'Pourquoi uniquement l’Europe ?',
+    r: 'Hors publicités politiques, l’API officielle ne couvre que les annonces diffusées auprès d’utilisateurs de l’Union européenne, en application du Digital Services Act. C’est une contrainte pour un produit américain. Pour qui cible des annonceurs européens, c’est exactement le bon périmètre.',
   },
   {
-    q: 'L’idée qu’on me propose m’appartient ?',
-    r: 'Une idée ne s’approprie pas, et de toute façon ce n’est pas elle qui a de la valeur. Ce que tu construis — le code, le produit, les clients, le nom de domaine — est à toi, sur tes comptes, et reste à toi si tu arrêtes ton abonnement.',
+    q: 'Qu’est-ce que vous avez que je ne peux pas aller chercher moi-même ?',
+    r: 'L’historique. Meta retire une annonce commerciale de son archive environ douze mois après sa dernière impression. Une recherche faite aujourd’hui ne voit que la fenêtre d’aujourd’hui. Nexteo ingère tous les jours et ne supprime jamais : les annonces que Meta a déjà effacées sont conservées ici, et elles ne sont plus récupérables ailleurs.',
   },
   {
-    q: 'Et si ça casse et que je ne comprends rien ?',
-    r: 'C’est prévu. À chaque étape, un bouton « Ça ne marche pas » : tu colles le message d’erreur, le système le reconnaît et te rend un prompt de réparation contextualisé avec ton projet. C’est la partie que la plupart des formations oublient.',
-  },
-  {
-    q: 'Je peux arrêter quand je veux ?',
-    r: 'Oui, depuis ton compte, en deux clics, sans motif et sans frais. Ton accès reste ouvert jusqu’à la fin de la période déjà payée.',
+    q: 'Le signal dit-il qu’une entreprise va bien ?',
+    r: 'Non, et il ne faut pas le lire ainsi. Il décrit une activité publicitaire observée : durée, continuité, volume, rythme de production de créations, étendue géographique. Les libellés des bandes — test, en cours de validation, modèle installé, modèle éprouvé — décrivent cette activité, jamais une santé financière.',
   },
 ];
 
-/** Accordéon (section 5.1.9) : transition de hauteur native, zéro JavaScript. */
 export function Faq() {
   return (
-    <div className="space-y-2">
+    <div className="divide-y divide-bordure border-y border-bordure">
       {QUESTIONS.map((item) => (
-        <details
-          key={item.q}
-          className="group rounded-card border border-gris-700 bg-nuit-800 px-4"
-        >
-          <summary className="tactile flex cursor-pointer list-none items-center justify-between gap-4 py-4 text-sm font-medium text-white">
-            {item.q}
-            <span
-              aria-hidden
-              className="shrink-0 text-gris-300 transition-transform duration-200 group-open:rotate-45"
-            >
-              +
+        <details key={item.q} className="group py-4">
+          <summary className="cursor-pointer list-none text-base font-medium text-encre marker:hidden">
+            <span className="flex items-start justify-between gap-4">
+              {item.q}
+              <span
+                aria-hidden
+                className="mt-1 shrink-0 text-encre-2 transition-transform group-open:rotate-45"
+              >
+                +
+              </span>
             </span>
           </summary>
-          <p className="pb-4 text-sm text-gris-300">{item.r}</p>
+          <p className="mt-2 max-w-2xl text-sm text-encre-2">{item.r}</p>
         </details>
       ))}
     </div>

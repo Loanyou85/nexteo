@@ -1,20 +1,26 @@
 import { cn } from '@/lib/utils';
 
-/**
- * 16 px de taille de texte minimum : en dessous, les navigateurs mobiles
- * zooment tout seuls quand on tape dans le champ.
- */
-const base =
-  'w-full rounded-champ border border-gris-700 bg-nuit-800 px-4 text-base text-white placeholder:text-gris-300/60 focus:border-neo-500/50 focus:outline-none';
-
-export function Input({ className, ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
-  return <input className={cn(base, 'min-h-[52px]', className)} {...props} />;
+export function Input({
+  className,
+  ...props
+}: React.InputHTMLAttributes<HTMLInputElement> & { ref?: React.Ref<HTMLInputElement> }) {
+  return (
+    <input
+      className={cn(
+        'h-11 w-full rounded-champ border border-bordure bg-surface px-3.5 text-base text-encre',
+        'placeholder:text-encre-2/70 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-neo-500',
+        className,
+      )}
+      {...props}
+    />
+  );
 }
 
-export function Textarea({ className, ...props }: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return <textarea className={cn(base, 'min-h-[120px] py-3 leading-relaxed', className)} {...props} />;
+export function Label({ className, ...props }: React.LabelHTMLAttributes<HTMLLabelElement>) {
+  return <label className={cn('text-sm font-medium text-encre', className)} {...props} />;
 }
 
+/** Champ complet : intitulé, aide, message d'erreur relié pour les lecteurs d'écran. */
 export function Field({
   label,
   hint,
@@ -27,15 +33,15 @@ export function Field({
   children: React.ReactNode;
 }) {
   return (
-    <label className="block">
-      <span className="mb-2 block text-sm font-medium text-white">{label}</span>
+    <div className="space-y-1.5">
+      <Label>{label}</Label>
+      {hint ? <p className="text-xs text-encre-2">{hint}</p> : null}
       {children}
-      {hint && !error ? <span className="mt-1.5 block text-xs text-gris-300">{hint}</span> : null}
       {error ? (
-        <span role="alert" className="mt-1.5 block text-xs text-red-400">
+        <p role="alert" className="text-xs text-alerte">
           {error}
-        </span>
+        </p>
       ) : null}
-    </label>
+    </div>
   );
 }

@@ -1,6 +1,7 @@
 import 'server-only';
 import Stripe from 'stripe';
 import type { Plan } from '@prisma/client';
+import { OFFRES, type Periodicite } from '@/lib/plans';
 
 /**
  * Stripe, côté serveur uniquement. Tout est optionnel : sans clé, le produit
@@ -35,27 +36,46 @@ export function stripeMode(): StripeMode {
   return 'production';
 }
 
-/** Variable d'environnement portant l'identifiant de tarif de chaque offre. */
-const PRICE_ENV: Partial<Record<Plan, string>> = {
-  depart: 'STRIPE_PRICE_DEPART',
-  construction: 'STRIPE_PRICE_CONSTRUCTION',
-  lancement: 'STRIPE_PRICE_LANCEMENT',
-};
+/**
+ * Tarifs Stripe, par offre et par périodicité (section 9.3).
+ *
+ * Les noms de variables viennent du catalogue d'offres : ajouter une offre ne
+ * demande pas de toucher à ce fichier.
+ */
+function envPour(plan: Plan, periodicite: Periodicite): string | null {
+  const offre = OFFRES.find((o) => o.plan === plan);
+  if (!offre) return null;
+  return periodicite === 'annuel' ? offre.envAnnuel : offre.envMensuel;
+}
 
 /** Identifiant de tarif Stripe correspondant à une offre. */
-export function priceIdFor(plan: Plan): string | null {
-  const name = PRICE_ENV[plan];
-  if (!name) return null;
-  const id = process.env[name]?.trim();
+export function priceIdFor(plan: Plan, periodicite: Periodicite = 'mensuel'): string | null {
+  const nom = envPour(plan, periodicite);
+  if (!nom) return null;
+  const id = process.env[nom]?.trim();
   return id && id.length > 0 ? id : null;
 }
 
-/** Retrouve l'offre à partir d'un identifiant de tarif, au retour du webhook. */
-export function planForPriceId(priceId: string | null | undefined): Plan | null {
+/** Retrouve l'offre et la périodicité depuis un tarif, au retour du webhook. */
+export function planForPriceId(
+  priceId: string | null | undefined,
+): { plan: Plan; periodicite: Periodicite } | null {
   if (!priceId) return null;
-  for (const [plan, name] of Object.entries(PRICE_ENV)) {
-    const configured = process.env[name]?.trim();
-    if (configured && configured === priceId) return plan as Plan;
+  for (const offre of OFFRES) {
+    if (process.env[offre.envMensuel]?.trim() === priceId) {
+      return { plan: offre.plan, periodicite: 'mensuel' };
+    }
+    if (process.env[offre.envAnnuel]?.trim() === priceId) {
+      return { plan: offre.plan, periodicite: 'annuel' };
+    }
   }
   return null;
+}
+
+/** Offres dont le tarif n'est pas configuré : /admin et /tarifs le disent. */
+export function offresSansTarif(): { nom: string; manquantes: string[] }[] {
+  return OFFRES.map((o) => ({
+    nom: o.nom,
+    manquantes: [o.envMensuel, o.envAnnuel].filter((v) => !process.env[v]?.trim()),
+  })).filter((o) => o.manquantes.length > 0);
 }

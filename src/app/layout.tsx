@@ -5,7 +5,7 @@ import { GeistMono } from 'geist/font/mono';
 import { siteUrl } from '@/lib/site';
 import './globals.css';
 
-// Display (section 4.2). `swap` + préchargement : le premier écran ne doit
+// Titres (section 5.3). `swap` et préchargement : le premier écran ne doit
 // jamais attendre une police pour s'afficher.
 const onest = Onest({
   subsets: ['latin'],
@@ -16,13 +16,15 @@ const onest = Onest({
 });
 
 export const metadata: Metadata = {
-  title: 'Nexteo — Crée ton SaaS de A à Z, étape par étape.',
+  title: 'Nexteo — Arrête de chercher des idées. Regarde qui paie déjà pour vendre.',
   description:
-    'Trouve ton idée, mets ton site en ligne, encaisse tes premiers paiements. Sans coder.',
+    'Découvre les SaaS et applications qui dépensent en publicité depuis des mois, lis leurs ' +
+    'annonces, leurs accroches et leurs pages de vente, et comprends ce qui fonctionne avant de construire.',
   metadataBase: new URL(siteUrl()),
 };
 
 export const viewport: Viewport = {
+  // Le premier écran est l'accueil, en territoire sombre.
   themeColor: '#08080F',
   width: 'device-width',
   initialScale: 1,
@@ -31,10 +33,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="fr"
-      className={`${onest.variable} ${GeistSans.variable} ${GeistMono.variable}`}
-    >
+    <html lang="fr" className={`${onest.variable} ${GeistSans.variable} ${GeistMono.variable}`}>
       <body>{children}</body>
     </html>
   );

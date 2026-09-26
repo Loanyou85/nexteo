@@ -3,35 +3,53 @@ import { Logo } from '@/components/brand/logo';
 import { Button } from '@/components/ui/button';
 
 /**
- * Section 2.2 : aucun menu de navigation sur mobile. Un logo, un bouton.
+ * En-tête, commune aux deux territoires.
  *
- * Ce bouton est « Se connecter » : quelqu'un qui revient doit pouvoir
- * rejoindre son compte depuis n'importe quel écran, sans refaire le
- * diagnostic. Les écrans de connexion et d'inscription le masquent, sinon il
- * pointerait sur lui-même.
+ * Les couleurs viennent des tokens de surface : posée dans `.territoire-nuit`
+ * elle devient sombre d'elle-même, sans variante à maintenir.
+ *
+ * La navigation est masquée sous 768 px : sur téléphone, c'est la barre basse
+ * à cinq entrées qui sert (section 6.9).
  */
+const LIENS = [
+  { href: '/explore', libelle: 'Explorer' },
+  { href: '/tarifs', libelle: 'Tarifs' },
+] as const;
+
 export function TopBar({
-  action = 'Se connecter',
-  href = '/connexion',
   sansAction,
+  connecte,
 }: {
-  action?: string;
-  href?: string;
   sansAction?: boolean;
+  connecte?: boolean;
 }) {
   return (
-    <header
-      className="sticky top-0 z-40 border-b border-gris-700/60 bg-nuit-900/85 backdrop-blur"
-      style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
-    >
-      <div className="mx-auto flex h-[72px] max-w-5xl items-center justify-between gap-3 px-4">
+    <header className="sticky top-0 z-40 border-b border-bordure bg-fond/90 backdrop-blur">
+      <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-4">
         <Link href="/" aria-label="Nexteo, accueil">
           <Logo />
         </Link>
+
+        <nav className="hidden items-center gap-5 md:flex">
+          {LIENS.map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              className="text-sm text-encre-2 transition-colors hover:text-encre"
+            >
+              {l.libelle}
+            </Link>
+          ))}
+        </nav>
+
         {sansAction ? null : (
-          <Button asChild taille="md">
-            <Link href={href}>{action}</Link>
-          </Button>
+          <div className="ml-auto">
+            <Button asChild taille="sm" variant={connecte ? 'secondaire' : 'principal'}>
+              <Link href={connecte ? '/dashboard' : '/connexion'}>
+                {connecte ? 'Mon tableau de bord' : 'Se connecter'}
+              </Link>
+            </Button>
+          </div>
         )}
       </div>
     </header>

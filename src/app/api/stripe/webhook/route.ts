@@ -80,7 +80,9 @@ async function userIdForCustomer(customer: string | { id: string } | null): Prom
 /** Traduit l'état Stripe en droits dans l'application. */
 async function applySubscription(userId: string, subscription: Stripe.Subscription): Promise<void> {
   const item = subscription.items.data[0];
-  const plan = planForPriceId(item?.price.id) ?? Plan.free;
+  // `null` quand le tarif n'est pas un des nôtres : on retombe sur le plan
+  // gratuit plutôt que d'ouvrir un accès au hasard.
+  const tarif = planForPriceId(item?.price.id);
 
   const active = subscription.status === 'active' || subscription.status === 'trialing';
   const status: SubscriptionStatus =
@@ -97,19 +99,19 @@ async function applySubscription(userId: string, subscription: Stripe.Subscripti
     update: {
       // Un abonnement résilié ou impayé ramène au plan gratuit : l'accès suit
       // l'état réel du paiement, jamais l'intention.
-      plan: active ? plan : Plan.free,
+      plan: active && tarif ? tarif.plan : Plan.free,
+      interval: tarif?.periodicite === 'annuel' ? 'annual' : 'monthly',
       status,
       stripeSubscriptionId: subscription.id,
       stripeCustomerId:
         typeof subscription.customer === 'string' ? subscription.customer : subscription.customer.id,
       currentPeriodEnd: periodEnd ? new Date(periodEnd * 1000) : null,
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
-      intendedPlan: null,
-      intendedAt: null,
     },
     create: {
       userId,
-      plan: active ? plan : Plan.free,
+      plan: active && tarif ? tarif.plan : Plan.free,
+      interval: tarif?.periodicite === 'annuel' ? 'annual' : 'monthly',
       status,
       stripeSubscriptionId: subscription.id,
       stripeCustomerId:

@@ -2,107 +2,94 @@
 
 import { AuthError } from 'next-auth';
 import { redirect } from 'next/navigation';
-import { Role } from '@prisma/client';
 import { db } from '@/server/db';
-import { signIn, signOut, isAdminEmail } from '@/server/auth';
+import { isAdminEmail, signIn } from '@/server/auth';
 import { hashPassword } from '@/lib/auth/password';
-import { registerSchema } from '@/lib/validation/auth';
-import { rattacherProfil } from '@/server/diagnostic';
-import { demarrerParcours } from '@/server/journey';
+import { loginSchema, registerSchema } from '@/lib/validation/auth';
 
-export interface AuthState {
-  error?: string;
-  champ?: 'firstName' | 'email' | 'password';
+export type AuthState = { error?: string; champ?: 'firstName' | 'email' | 'password' };
+
+/** Version du consentement acceptée à l'inscription (RGPD, garde-fou n° 5). */
+const VERSION_CONSENTEMENT = '2026-09';
+
+function destination(formData: FormData): string {
+  const suite = String(formData.get('suite') ?? '').trim();
+  // Une redirection ne suit qu'un chemin interne : accepter une URL complète
+  // ouvrirait une redirection ouverte vers n'importe quel site.
+  return suite.startsWith('/') && !suite.startsWith('//') ? suite : '/dashboard';
 }
 
-const CONSENT_VERSION = '2026-09';
-
-/**
- * Inscription : prénom, e-mail, mot de passe. Pas de lien magique, pas de
- * vérification par boîte mail avant de pouvoir entrer.
- *
- * C'est aussi ici que le diagnostic anonyme est rattaché au compte
- * (section 14.7) : la personne ne doit pas avoir l'impression d'avoir répondu
- * pour rien.
- */
-export async function inscrire(_prev: AuthState, formData: FormData): Promise<AuthState> {
-  const parsed = registerSchema.safeParse({
+export async function inscrire(_etat: AuthState, formData: FormData): Promise<AuthState> {
+  const analyse = registerSchema.safeParse({
     firstName: formData.get('firstName'),
     email: formData.get('email'),
     password: formData.get('password'),
   });
 
-  if (!parsed.success) {
-    const premier = parsed.error.issues[0];
-    return { error: premier?.message ?? 'Vérifie ce que tu as saisi.', champ: premier?.path[0] as AuthState['champ'] };
+  if (!analyse.success) {
+    const premier = analyse.error.issues[0];
+    return {
+      error: premier?.message ?? 'Ces informations ne sont pas valides.',
+      champ: premier?.path[0] as AuthState['champ'],
+    };
   }
-  if (formData.get('consent') !== 'on') {
+
+  if (!formData.get('consent')) {
     return { error: 'Il faut accepter les conditions pour créer un compte.' };
   }
 
-  const { firstName, email, password } = parsed.data;
+  const { firstName, email, password } = analyse.data;
 
-  const existe = await db.user.findUnique({ where: { email }, select: { id: true } });
-  if (existe) {
-    return { error: 'Un compte existe déjà avec cette adresse. Connecte-toi.', champ: 'email' };
+  const dejaPris = await db.user.findUnique({ where: { email }, select: { id: true } });
+  if (dejaPris) {
+    return { error: 'Un compte existe déjà avec cette adresse.', champ: 'email' };
   }
 
-  const user = await db.user.create({
+  await db.user.create({
     data: {
       email,
       name: firstName,
       passwordHash: await hashPassword(password),
-      role: isAdminEmail(email) ? Role.admin : Role.user,
+      role: isAdminEmail(email) ? 'admin' : 'user',
       consentAcceptedAt: new Date(),
-      consentVersion: CONSENT_VERSION,
+      consentVersion: VERSION_CONSENTEMENT,
       subscription: { create: {} },
-      notificationPref: { create: {} },
     },
   });
 
-  await rattacherProfil(user.id);
-
-  const ideaId = String(formData.get('idee') ?? '').trim();
-  if (ideaId) {
-    const idea = await db.idea.findFirst({ where: { id: ideaId, userId: user.id } });
-    if (idea) {
-      await db.idea.update({ where: { id: idea.id }, data: { status: 'selected' } });
-      await demarrerParcours(user.id, idea.id);
+  try {
+    await signIn('credentials', { email, password, redirect: false });
+  } catch (e) {
+    if (e instanceof AuthError) {
+      // Le compte est créé ; seule la connexion automatique a échoué. On le
+      // dit plutôt que de laisser croire que l'inscription n'a pas marché.
+      return { error: 'Compte créé, mais la connexion a échoué. Connecte-toi.' };
     }
+    throw e;
   }
 
-  try {
-    await signIn('credentials', { email, password, redirect: false });
-  } catch (error) {
-    if (error instanceof AuthError) return { error: 'Compte créé, mais la connexion a échoué. Connecte-toi.' };
-    throw error;
-  }
-
-  redirect(ideaId ? '/offres' : '/app');
+  redirect(destination(formData));
 }
 
-export async function connecter(_prev: AuthState, formData: FormData): Promise<AuthState> {
-  const email = String(formData.get('email') ?? '').trim().toLowerCase();
-  const password = String(formData.get('password') ?? '');
-  const suite = String(formData.get('suite') ?? '/app');
+export async function connecter(_etat: AuthState, formData: FormData): Promise<AuthState> {
+  const analyse = loginSchema.safeParse({
+    email: formData.get('email'),
+    password: formData.get('password'),
+  });
 
-  if (!email || !password) return { error: 'Renseigne ton adresse et ton mot de passe.' };
+  if (!analyse.success) return { error: 'Adresse ou mot de passe incorrect.' };
 
   try {
-    await signIn('credentials', { email, password, redirect: false });
-  } catch (error) {
-    // Un message unique : ne jamais révéler laquelle des deux informations
-    // est fausse.
-    if (error instanceof AuthError) return { error: 'Identifiants incorrects.' };
-    throw error;
+    await signIn('credentials', { ...analyse.data, redirect: false });
+  } catch (e) {
+    if (e instanceof AuthError) {
+      // Aucune distinction entre « adresse inconnue » et « mot de passe
+      // faux » : la différence dirait à un inconnu quelles adresses ont un
+      // compte chez nous.
+      return { error: 'Adresse ou mot de passe incorrect.' };
+    }
+    throw e;
   }
 
-  const user = await db.user.findUnique({ where: { email }, select: { id: true } });
-  if (user) await rattacherProfil(user.id);
-
-  redirect(suite.startsWith('/') ? suite : '/app');
-}
-
-export async function deconnecter(): Promise<void> {
-  await signOut({ redirectTo: '/' });
+  redirect(destination(formData));
 }

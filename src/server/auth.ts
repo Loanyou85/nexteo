@@ -106,11 +106,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           data: {
             role: isAdminEmail(user.email) ? Role.admin : Role.user,
             consentAcceptedAt: new Date(),
-            consentVersion: '2026-01',
+            consentVersion: '2026-09',
           },
         }),
         db.subscription.create({ data: { userId: user.id } }),
-        db.notificationPref.create({ data: { userId: user.id } }),
       ]);
     },
   },

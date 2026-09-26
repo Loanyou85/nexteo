@@ -1,29 +1,56 @@
-import { autotest, testerEcritureCookie } from '@/server/autotest';
+import { NextResponse } from 'next/server';
+import { db } from '@/server/db';
+import { lotsEnSouffrance } from '@/server/ingestion/pipeline';
 
 export const dynamic = 'force-dynamic';
 
 /**
- * État du site, en une adresse.
+ * État de santé, lisible par une sonde externe.
  *
- * Quand quelque chose casse en production, les questions sont toujours les
- * mêmes : est-ce que la base répond, est-ce qu'elle accepte une écriture,
- * est-ce que les cookies passent, est-ce que le contenu est là. Sans cette
- * page il faut lire les journaux de l'hébergeur.
- *
- * Aucune valeur de configuration n'est renvoyée — des booléens, des comptes,
- * et des messages nettoyés de tout ce qui ressemble à une adresse ou à une clé.
+ * Il ne se contente pas de répondre « en vie » : il dit si l'ingestion tourne.
+ * Un site parfaitement debout qui n'ingère plus depuis trois jours est le seul
+ * incident qui coûte quelque chose d'irrécupérable.
  */
 export async function GET() {
-  const rapport = await autotest();
-  // Un gestionnaire de route a le droit d'écrire un cookie : c'est le seul
-  // endroit où cette étape-là peut être vérifiée.
-  const cookieEcriture = await testerEcritureCookie();
+  const debut = Date.now();
 
-  const etapes = [...rapport.etapes, cookieEcriture];
-  const ok = rapport.ok && cookieEcriture.ok;
+  try {
+    const [annonceurs, annonces, observations, derniere] = await Promise.all([
+      db.advertiser.count(),
+      db.ad.count(),
+      db.adObservation.count(),
+      db.ingestJob.findFirst({
+        where: { status: 'succeeded' },
+        orderBy: { finishedAt: 'desc' },
+        select: { finishedAt: true },
+      }),
+    ]);
 
-  return Response.json(
-    { etat: ok ? 'ok' : 'problème', etapes, contenu: rapport.contenu, configuration: rapport.configuration },
-    { status: ok ? 200 : 503 },
-  );
+    const souffrance = await lotsEnSouffrance(db);
+    const heuresDepuisIngestion = derniere?.finishedAt
+      ? Math.round((Date.now() - derniere.finishedAt.getTime()) / 3_600_000)
+      : null;
+
+    // Plus de 48 h sans ingestion réussie : deux jours de données perdues.
+    const enRetard = heuresDepuisIngestion === null || heuresDepuisIngestion > 48;
+    const ok = !enRetard && souffrance.length === 0;
+
+    return NextResponse.json(
+      {
+        etat: ok ? 'ok' : 'degrade',
+        base: { annonceurs, annonces, observations, msLecture: Date.now() - debut },
+        ingestion: {
+          derniereReussite: derniere?.finishedAt?.toISOString() ?? null,
+          heuresDepuis: heuresDepuisIngestion,
+          lotsEnSouffrance: souffrance.length,
+        },
+      },
+      { status: ok ? 200 : 503 },
+    );
+  } catch (e) {
+    return NextResponse.json(
+      { etat: 'hors-service', erreur: (e as Error).message.slice(0, 200) },
+      { status: 503 },
+    );
+  }
 }

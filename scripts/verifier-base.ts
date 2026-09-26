@@ -45,9 +45,19 @@ async function main(): Promise<void> {
     tables = lignes.map((l) => l.tablename);
   } catch (e) {
     // Base injoignable au moment du build : ce n'est pas à ce script de
-    // trancher. `migrate deploy` produira l'erreur de connexion, qui est
-    // déjà explicite.
-    console.log(`[base] Vérification impossible (${(e as Error).message.split('\n')[0]}).`);
+    // trancher, `migrate deploy` produira l'erreur de connexion juste après.
+    // On dit quand même quelque chose d'exploitable — les erreurs Prisma
+    // commencent souvent par une ligne vide, et un message entre parenthèses
+    // vides ne vaut pas mieux que pas de message du tout.
+    // Prisma enveloppe la cause : la première ligne est toujours
+    // « Invalid `...` invocation », qui n'apprend rien. On la saute pour
+    // remonter la vraie raison — hôte injoignable, accès refusé, base absente.
+    const utile = String((e as Error).message)
+      .split('\n')
+      .map((l) => l.trim())
+      .filter(Boolean)
+      .filter((l) => !/^Invalid `.*` invocation/.test(l));
+    console.log(`[base] Vérification impossible : ${utile[0] ?? 'base injoignable'}`);
     await db.$disconnect();
     return;
   }

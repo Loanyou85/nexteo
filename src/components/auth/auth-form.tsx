@@ -17,16 +17,12 @@ function Envoyer({ label }: { label: string }) {
 
 export function InscriptionForm({
   action,
-  ideaId,
 }: {
   action: (state: AuthState, formData: FormData) => Promise<AuthState>;
-  ideaId?: string;
 }) {
   const [state, formAction] = useActionState(action, {});
   return (
     <form action={formAction} className="space-y-4">
-      {ideaId ? <input type="hidden" name="idee" value={ideaId} /> : null}
-
       <Field label="Ton prénom" error={state.champ === 'firstName' ? state.error : undefined}>
         <Input name="firstName" autoComplete="given-name" required minLength={2} />
       </Field>
@@ -43,7 +39,7 @@ export function InscriptionForm({
         <Input name="password" type="password" autoComplete="new-password" required minLength={8} />
       </Field>
 
-      <label className="flex items-start gap-3 text-xs text-gris-300">
+      <label className="flex items-start gap-3 text-xs text-encre-2">
         <input type="checkbox" name="consent" required className="mt-0.5 h-5 w-5 accent-neo-500" />
         <span>
           J’accepte les conditions générales et la politique de confidentialité. Je peux exporter ou
@@ -52,7 +48,7 @@ export function InscriptionForm({
       </label>
 
       {state.error && !state.champ ? (
-        <p role="alert" className="text-sm text-red-400">
+        <p role="alert" className="text-sm text-alerte">
           {state.error}
         </p>
       ) : null}
@@ -83,7 +79,7 @@ export function ConnexionForm({
       </Field>
 
       {state.error ? (
-        <p role="alert" className="text-sm text-red-400">
+        <p role="alert" className="text-sm text-alerte">
           {state.error}
         </p>
       ) : null}

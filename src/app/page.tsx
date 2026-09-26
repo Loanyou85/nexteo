@@ -1,266 +1,224 @@
 import Link from 'next/link';
-import { Logo } from '@/components/brand/logo';
+import { TopBar } from '@/components/shell/top-bar';
+import { NavMobile } from '@/components/shell/nav-mobile';
 import { Button } from '@/components/ui/button';
-import { EmptyState } from '@/components/ui/empty-state';
-import { Phone } from '@/components/landing/phone';
-import { Marquee } from '@/components/landing/marquee';
-import { Reveal } from '@/components/landing/reveal';
-import { Counters } from '@/components/landing/counters';
-import { Scrollytelling } from '@/components/landing/scrollytelling';
-import { Comparison } from '@/components/landing/comparison';
+import { CarteAnnonceur } from '@/components/annonce/carte-annonceur';
+import { RechercheAccueil } from '@/components/landing/recherche';
 import { Faq } from '@/components/landing/faq';
-import { db } from '@/server/db';
-import { GUARANTEE_DAYS } from '@/lib/guarantee';
+import { MENTION_SOURCE } from '@/lib/guardrails';
+import { rechercherAnnonceurs } from '@/server/annonceurs';
+import { sessionOuNull } from '@/server/auth';
 
 export const dynamic = 'force-dynamic';
 
-const PROMESSES = [
+export const metadata = {
+  title: 'Nexteo — Arrête de chercher des idées. Regarde qui paie déjà pour vendre.',
+  description:
+    'Découvre les SaaS et applications qui dépensent en publicité depuis des mois, lis leurs ' +
+    'annonces, leurs accroches et leurs pages de vente, et comprends ce qui fonctionne avant de construire.',
+};
+
+/** Trois arguments, dans l'ordre où la question se pose au visiteur. */
+const EXPLICATIONS = [
   {
-    titre: 'Trouve ton idée',
+    titre: 'Une campagne se paie tous les jours.',
     texte:
-      'Un diagnostic qui part de ce que tu connais de l’intérieur. Trois idées, et pour chacune, les réponses qui l’ont produite.',
-    large: true,
+      'Personne ne finance une publicité perdante pendant huit mois. Quand une entreprise diffuse ' +
+      'la même annonce sans interruption depuis des mois, elle a décidé chaque jour de continuer à payer.',
   },
   {
-    titre: 'Construis-le sans coder',
-    texte: 'Treize phases, de la page blanche au paiement encaissé. Les prompts sont écrits pour toi.',
+    titre: 'Ce que Nexteo mesure est vérifiable.',
+    texte:
+      'Pas une estimation, pas une déduction : la durée de diffusion, les interruptions, le nombre ' +
+      'd’annonces simultanées, le rythme de production de créations. Chaque annonce renvoie vers son ' +
+      'instantané officiel chez Meta.',
   },
   {
-    titre: 'Vends-le',
-    texte: 'Trente scripts de vidéos, un par jour, générés pour ton produit et ton public.',
+    titre: 'L’archive Meta oublie. Pas Nexteo.',
+    texte:
+      'Meta retire une annonce commerciale environ douze mois après sa dernière impression. Nexteo ' +
+      'ingère tous les jours et ne supprime jamais — les annonces déjà effacées de chez Meta ne sont ' +
+      'plus trouvables ailleurs.',
+  },
+];
+
+const COMPARAISON: { quoi: string; aLaMain: string; avecNexteo: string }[] = [
+  {
+    quoi: 'Trouver les annonceurs d’un secteur',
+    aLaMain: 'Une recherche par mot-clé à la fois, pays par pays',
+    avecNexteo: 'Une recherche, tous les pays ingérés, triés par signal',
+  },
+  {
+    quoi: 'Savoir depuis quand ça tourne',
+    aLaMain: 'Ouvrir chaque annonce et lire sa date de début',
+    avecNexteo: 'Affiché sur la fiche, avec les interruptions',
+  },
+  {
+    quoi: 'Voir les annonces arrêtées',
+    aLaMain: 'Impossible : Meta les a effacées',
+    avecNexteo: 'Conservées et signalées comme supprimées',
+  },
+  {
+    quoi: 'Suivre un annonceur dans le temps',
+    aLaMain: 'Refaire la recherche et comparer de tête',
+    avecNexteo: 'Alerte à chaque nouvelle création',
   },
 ];
 
 export default async function AccueilPage() {
-  // Garde-fou n° 3 : aucun chiffre inventé. Ceux-ci sont lus en base.
-  const [phases, etapes, prompts, aventures] = await Promise.all([
-    db.phase.count(),
-    db.step.count(),
-    db.promptTemplate.count({ where: { isRepair: false } }),
-    db.adventure.findMany({
-      where: { isPublic: true },
-      take: 6,
-      orderBy: { startedAt: 'desc' },
-      select: { slug: true, story: true, isDemo: true },
-    }),
+  const [{ lignes }, session] = await Promise.all([
+    rechercherAnnonceurs({ tri: 'signal', enDiffusion: true }, undefined, 6),
+    sessionOuNull(),
   ]);
 
   return (
-    <>
-      <header
-        className="sticky top-0 z-40 border-b border-gris-700/60 bg-nuit-900/85 backdrop-blur"
-        style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
-      >
-        <div className="mx-auto flex h-[72px] max-w-5xl items-center justify-between gap-3 px-4">
-          <Logo />
-          {/* Section 2.2 : aucun menu sur mobile. Un logo, un bouton — et ce
-              bouton sert à revenir, pas à commencer : commencer, c'est le
-              grand bouton du hero et celui de la barre du bas. */}
-          <Button asChild taille="md">
-            <Link href="/connexion">Se connecter</Link>
-          </Button>
-        </div>
-      </header>
+    <div className="territoire-nuit min-h-dvh">
+      <TopBar connecte={Boolean(session)} />
 
-      <main className="pb-28">
-        <section className="relative mx-auto max-w-5xl px-4 pt-8 md:pt-16">
-          <div aria-hidden className="halo-neo pointer-events-none absolute left-1/2 top-0 -z-10 h-[min(520px,100vw)] w-[min(520px,100vw)] -translate-x-1/2" />
+      <main className="pb-20 md:pb-0">
+        {/* Hero */}
+        <section className="relative overflow-hidden">
+          <div
+            aria-hidden
+            className="halo-neo pointer-events-none absolute -top-40 left-1/2 h-[min(560px,100vw)] w-[min(560px,100vw)] -translate-x-1/2"
+          />
+          <div className="relative mx-auto max-w-4xl px-4 pt-14 pb-12 sm:pt-20">
+            <h1 className="display text-2xl sm:text-3xl">
+              Arrête de chercher des idées.
+              <br />
+              Regarde qui paie déjà pour vendre.
+            </h1>
 
-          <div className="md:grid md:grid-cols-2 md:items-center md:gap-12">
-            <div>
-              <p className="lever inline-flex rounded-full border border-neo-500/30 bg-neo-500/10 px-4 py-1.5 text-xs text-neo-100" style={{ ['--rang' as string]: 0 }}>
-                Sans coder · 7 jours
-              </p>
+            <p className="mt-5 max-w-2xl text-md text-encre-2">
+              Découvre les SaaS et applications qui dépensent en publicité depuis des mois, lis leurs
+              annonces, leurs accroches et leurs pages de vente, et comprends ce qui fonctionne avant
+              de construire.
+            </p>
 
-              <h1
-                className="lever mt-6 font-display text-[44px] font-extrabold leading-[1.02] tracking-[-0.03em] text-white md:text-[64px]"
-                style={{ ['--rang' as string]: 1 }}
+            <div className="mt-8 max-w-2xl">
+              <RechercheAccueil />
+              {/* Mention permanente (section 6.1). Elle ne se replie pas. */}
+              <p className="mt-4 text-xs text-encre-2">{MENTION_SOURCE}</p>
+            </div>
+
+            <p className="mt-6">
+              <Link
+                href="#comment"
+                className="text-sm text-encre-2 underline underline-offset-4 hover:text-encre"
               >
-                Crée ton SaaS de A à Z, étape par étape.
-              </h1>
-
-              <p className="lever mt-5 text-sm text-gris-300 md:text-base" style={{ ['--rang' as string]: 2 }}>
-                Trouve ton idée, mets ton site en ligne, encaisse tes premiers paiements.
-              </p>
-
-              <div className="lever mt-7" style={{ ['--rang' as string]: 3 }}>
-                <Button asChild taille="lg" className="w-full md:w-auto">
-                  <Link href="/diagnostic">
-                    Trouver mon idée
-                    <span aria-hidden>→</span>
-                  </Link>
-                </Button>
-              </div>
-            </div>
-
-            <div className="lever mt-12 md:mt-0" style={{ ['--rang' as string]: 4 }}>
-              <Phone />
-            </div>
+                Comment ça marche
+              </Link>
+            </p>
           </div>
-
-          <p className="mt-10 text-center text-xs text-gris-300">
-            Sans code · Sans équipe · Sans budget de départ
-          </p>
         </section>
 
-        <div className="mt-12">
-          <Marquee />
-        </div>
+        {/* Signal fort */}
+        <section className="mx-auto max-w-6xl px-4 py-12">
+          <div className="flex items-baseline justify-between gap-4">
+            <h2 className="text-lg">Ils diffusent depuis le plus longtemps</h2>
+            <Link
+              href="/explore"
+              className="shrink-0 text-sm text-encre-2 underline underline-offset-4 hover:text-encre"
+            >
+              Tout explorer
+            </Link>
+          </div>
 
-        <section className="mx-auto mt-16 max-w-5xl px-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            {PROMESSES.map((promesse, index) => (
-              <Reveal key={promesse.titre} delay={index * 60} className={promesse.large ? 'md:col-span-2' : ''}>
-                <article
-                  className={`h-full rounded-card border border-gris-700 bg-nuit-800 p-6 ${
-                    promesse.large ? 'md:p-8' : ''
-                  }`}
-                >
-                  <h2 className={`font-extrabold text-white ${promesse.large ? 'text-xl' : 'text-lg'}`}>
-                    {promesse.titre}
-                  </h2>
-                  <p className="mt-2 text-sm text-gris-300">{promesse.texte}</p>
-                </article>
-              </Reveal>
+          {lignes.length === 0 ? (
+            <p className="mt-6 text-sm text-encre-2">
+              L’ingestion n’a pas encore tourné sur cette base. Les annonceurs apparaîtront ici dès
+              la première exécution du pipeline.
+            </p>
+          ) : (
+            <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {lignes.map((a) => (
+                <CarteAnnonceur key={a.id} a={a} />
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* Explication */}
+        <section id="comment" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-12">
+          <h2 className="text-lg">Pourquoi la durée de diffusion, et pas le chiffre d’affaires</h2>
+          <div className="mt-6 grid gap-6 md:grid-cols-3">
+            {EXPLICATIONS.map((e) => (
+              <div key={e.titre}>
+                <h3 className="text-base font-semibold text-encre">{e.titre}</h3>
+                <p className="mt-2 text-sm text-encre-2">{e.texte}</p>
+              </div>
             ))}
           </div>
         </section>
 
-        <section className="mx-auto mt-24 max-w-5xl px-4">
-          <h2 className="text-xl font-extrabold text-white md:text-2xl">Ce que tu obtiens, dans l’ordre.</h2>
-          <div className="mt-10">
-            <Scrollytelling />
+        {/* Comparaison */}
+        <section className="mx-auto max-w-6xl px-4 py-12">
+          <h2 className="text-lg">À la main, ou avec Nexteo</h2>
+          <div className="mt-6 overflow-x-auto">
+            <table className="w-full min-w-[640px] border-collapse text-left text-sm">
+              <thead>
+                <tr className="border-b border-bordure text-2xs uppercase tracking-wide text-encre-2">
+                  <th className="py-2 pr-4 font-medium">Ce que tu veux savoir</th>
+                  <th className="py-2 pr-4 font-medium">Dans la bibliothèque Meta</th>
+                  <th className="py-2 font-medium">Avec Nexteo</th>
+                </tr>
+              </thead>
+              <tbody>
+                {COMPARAISON.map((l) => (
+                  <tr key={l.quoi} className="border-b border-bordure">
+                    <td className="py-3 pr-4 align-top text-encre">{l.quoi}</td>
+                    <td className="py-3 pr-4 align-top text-encre-2">{l.aLaMain}</td>
+                    <td className="py-3 align-top text-encre">{l.avecNexteo}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </section>
 
-        <section className="mx-auto mt-24 max-w-5xl px-4">
-          <h2 className="text-xl font-extrabold text-white md:text-2xl">Ce qu’il y a dedans.</h2>
-          <p className="mt-2 text-sm text-gris-300">
-            Des chiffres sur le produit, pas sur ses utilisateurs.
-          </p>
-          <div className="mt-6">
-            <Counters
-              items={[
-                { value: phases, label: 'phases' },
-                { value: etapes, label: 'étapes détaillées' },
-                { value: prompts, label: 'prompts dans le pack' },
-                { value: 30, label: 'scripts vidéo' },
-              ]}
-            />
-          </div>
-        </section>
-
-        <section className="mx-auto mt-24 max-w-5xl px-4">
-          <h2 className="text-xl font-extrabold text-white md:text-2xl">Avec, ou sans.</h2>
-          <div className="mt-6">
-            <Comparison />
-          </div>
-        </section>
-
-        <section className="mx-auto mt-24 max-w-5xl px-4">
-          <h2 className="text-xl font-extrabold text-white md:text-2xl">Les aventures</h2>
-          {aventures.length === 0 ? (
-            <EmptyState
-              className="mt-6"
-              title="Personne n’a encore partagé la sienne."
-              description="On n’invente pas de témoignages pour remplir. Cette section restera vide jusqu’à ce que quelqu’un partage son parcours — ce sera peut-être toi."
-              action={
-                <Button asChild variant="secondaire">
-                  <Link href="/diagnostic">Commencer la mienne</Link>
-                </Button>
-              }
-            />
-          ) : (
-            <ul className="mt-6 grid gap-4 md:grid-cols-2">
-              {aventures.map((aventure) => (
-                <li key={aventure.slug} className="rounded-card border border-gris-700 bg-nuit-800 p-5">
-                  {aventure.isDemo ? (
-                    <span className="mb-2 inline-block rounded-full border border-gris-700 px-3 py-1 text-xs text-gris-300">
-                      Exemple
-                    </span>
-                  ) : null}
-                  <p className="text-sm text-gris-300">{aventure.story}</p>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-        <section className="mx-auto mt-24 max-w-3xl px-4">
-          <h2 className="text-xl font-extrabold text-white md:text-2xl">Les questions qu’on nous pose.</h2>
+        {/* FAQ */}
+        <section className="mx-auto max-w-4xl px-4 py-12">
+          <h2 className="text-lg">Questions</h2>
           <div className="mt-6">
             <Faq />
           </div>
         </section>
 
-        <section className="relative mx-auto mt-24 max-w-3xl px-4 text-center">
-          <div aria-hidden className="halo-neo pointer-events-none absolute left-1/2 top-0 -z-10 h-[min(420px,100vw)] w-[min(420px,100vw)] -translate-x-1/2" />
-          <h2 className="font-display text-2xl font-extrabold leading-tight text-white">
-            Dans dix minutes, tu auras une idée qui te ressemble.
-          </h2>
-          <p className="mt-3 text-sm text-gris-300">
-            Le diagnostic est gratuit et ne demande aucune inscription.
+        {/* Appel final */}
+        <section className="mx-auto max-w-4xl px-4 py-16 text-center">
+          <h2 className="display text-xl">Regarde qui paie déjà, dans ton secteur.</h2>
+          <p className="mx-auto mt-3 max-w-xl text-sm text-encre-2">
+            La recherche et la liste des annonceurs sont ouvertes, sans compte.
           </p>
-          <Button asChild taille="lg" className="mt-7 w-full md:w-auto">
-            <Link href="/diagnostic">
-              Trouver mon idée
-              <span aria-hidden>→</span>
-            </Link>
-          </Button>
-          {/* Un lien dans une phrase ne peut pas faire 48 px de haut sans casser
-              le paragraphe : sur la landing, une action est un bouton. */}
-          <Button asChild taille="lg" variant="secondaire" className="mt-3 w-full md:w-auto">
-            <Link href="/inscription">Créer mon compte</Link>
-          </Button>
-          <ul className="mt-6 flex flex-wrap justify-center gap-2 text-xs text-gris-300">
-            <li className="rounded-full border border-gris-700 px-3 py-1.5">Sans inscription</li>
-            <li className="rounded-full border border-gris-700 px-3 py-1.5">Sans carte bancaire</li>
-            <li className="rounded-full border border-gris-700 px-3 py-1.5">
-              Garantie {GUARANTEE_DAYS} jours
-            </li>
-          </ul>
+          <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Button asChild taille="capsule">
+              <Link href="/explore">Explorer les annonceurs</Link>
+            </Button>
+            <Button asChild taille="capsule" variant="secondaire">
+              <Link href="/tarifs">Voir les tarifs</Link>
+            </Button>
+          </div>
         </section>
 
-        <footer className="mx-auto mt-24 max-w-5xl border-t border-gris-700/60 px-4 py-10">
-          <Logo />
-          {/* Section 2.2 : 48 px de zone tactile, y compris dans le pied de page. */}
-          <nav className="mt-4 flex flex-wrap gap-x-6 text-xs text-gris-300">
-            {[
-              { href: '/inscription', label: 'Créer un compte' },
-              { href: '/garantie', label: 'La garantie' },
-              { href: '/legal/mentions', label: 'Mentions légales' },
-              { href: '/legal/cgv', label: 'Conditions de vente' },
-              { href: '/legal/confidentialite', label: 'Confidentialité' },
-              { href: '/connexion', label: 'Me connecter' },
-            ].map((lien) => (
-              <Link
-                key={lien.href}
-                href={lien.href}
-                className="tactile inline-flex items-center underline underline-offset-4"
-              >
-                {lien.label}
+        <footer className="border-t border-bordure">
+          <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-8 text-xs text-encre-2 sm:flex-row sm:items-center sm:justify-between">
+            <p>{MENTION_SOURCE}</p>
+            <nav className="flex gap-4">
+              <Link href="/legal/mentions" className="hover:text-encre">
+                Mentions légales
               </Link>
-            ))}
-          </nav>
-          <p className="mt-6 text-xs text-gris-300">
-            Nexteo ne promet aucun revenu. Ce que tu obtiendras dépend de ton idée, de ton marché et
-            du travail que tu y mets.
-          </p>
+              <Link href="/legal/confidentialite" className="hover:text-encre">
+                Confidentialité
+              </Link>
+              <Link href="/legal/cgv" className="hover:text-encre">
+                CGV
+              </Link>
+            </nav>
+          </div>
         </footer>
       </main>
 
-      {/* Barre d'action collée en bas (section 2.2), toujours visible. */}
-      <div
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-gris-700/60 bg-nuit-900/95 px-4 pt-3 backdrop-blur md:hidden"
-        style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))' }}
-      >
-        <Button asChild taille="bloc">
-          <Link href="/diagnostic">
-            Trouver mon idée
-            <span aria-hidden>→</span>
-          </Link>
-        </Button>
-      </div>
-    </>
+      <NavMobile />
+    </div>
   );
 }
