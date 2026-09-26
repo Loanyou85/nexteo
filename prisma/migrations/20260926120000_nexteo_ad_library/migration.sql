@@ -518,5 +518,21 @@ CREATE INDEX "Ad_searchVector_idx" ON "Ad" USING GIN ("searchVector");
 
 -- Recherche par fragment sur le nom d'annonceur (« stri » trouve « Stripe »),
 -- que le plein texte seul ne couvre pas.
-CREATE EXTENSION IF NOT EXISTS pg_trgm;
-CREATE INDEX "Advertiser_name_trgm_idx" ON "Advertiser" USING GIN ("name" gin_trgm_ops);
+--
+-- Optionnel, et volontairement. Tous les hébergeurs gérés n'autorisent pas
+-- CREATE EXTENSION au rôle applicatif, et certains installent pg_trgm dans un
+-- schéma absent du search_path — l'index échoue alors sur « operator class
+-- gin_trgm_ops does not exist ». Faire tomber toute la migration pour un index
+-- de confort serait absurde : sans lui, la recherche par fragment repose sur
+-- un ILIKE, plus lent mais correct. On note l'absence plutôt que d'échouer.
+DO $trgm$
+BEGIN
+  BEGIN
+    CREATE EXTENSION IF NOT EXISTS pg_trgm;
+    EXECUTE 'CREATE INDEX "Advertiser_name_trgm_idx" ON "Advertiser" USING GIN ("name" gin_trgm_ops)';
+    RAISE NOTICE 'Index trigramme créé : recherche par fragment accélérée.';
+  EXCEPTION WHEN OTHERS THEN
+    RAISE NOTICE 'Index trigramme ignoré (%). La recherche par fragment reste fonctionnelle.', SQLERRM;
+  END;
+END
+$trgm$;
