@@ -20,9 +20,12 @@ export function CarteAnnonceur({ a }: { a: LigneAnnonceur }) {
           <Link href={`/annonceur/${a.slug}`} className="block">
             <h3 className="truncate text-base font-semibold text-encre">{a.name}</h3>
           </Link>
-          <p className="mt-0.5 truncate text-sm text-encre-2">
+          {/* Deux lignes réservées : sans ça, une catégorie longue décale la
+              barre de signal et les cartes de la grille ne s'alignent plus. */}
+          <p className="mt-0.5 line-clamp-2 min-h-[2.75rem] text-sm text-encre-2">
             {a.categorie ?? 'Non classé'}
-            {a.pays.length > 0 ? ` · ${a.pays.slice(0, 3).join(', ')}` : ''}
+            {a.pays.length > 0 ? ` · ${a.pays.slice(0, 2).join(', ')}` : ''}
+            {a.pays.length > 2 ? ` +${a.pays.length - 2}` : ''}
           </p>
         </div>
         {a.isDemo ? <Badge ton="demo">{ETIQUETTE_DEMO}</Badge> : null}

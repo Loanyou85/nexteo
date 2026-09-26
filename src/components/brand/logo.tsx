@@ -5,7 +5,9 @@ import { cn } from '@/lib/utils';
  * droite — ce qu'on vise. Dessiné, jamais importé.
  */
 export function LogoMark({ className, variant = 'neo' }: { className?: string; variant?: 'neo' | 'mono' }) {
-  const trait = variant === 'neo' ? 'var(--color-blanc)' : 'currentColor';
+  // Sur fond clair, l'escalier se dessine à l'encre et seul le palier porte la
+  // couleur de marque : c'est lui qu'on doit voir en premier.
+  const trait = variant === 'neo' ? 'var(--color-encre)' : 'currentColor';
   const palier = variant === 'neo' ? 'var(--color-neo-500)' : 'currentColor';
   return (
     <svg viewBox="0 0 32 32" fill="none" className={cn('h-7 w-7', className)} aria-hidden="true">
@@ -24,7 +26,7 @@ export function Logo({ className, variant }: { className?: string; variant?: 'ne
   return (
     <span className={cn('inline-flex items-center gap-2', className)}>
       <LogoMark variant={variant} />
-      <span className="font-display text-lg font-extrabold tracking-[-0.03em] text-white">Nexteo</span>
+      <span className="font-display text-lg font-extrabold tracking-[-0.03em] text-encre">Nexteo</span>
     </span>
   );
 }

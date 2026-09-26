@@ -1,45 +1,40 @@
 @import 'tailwindcss';
 
 /*
- * Nexteo — tokens de design (section 5 du prompt maître).
+ * Nexteo — tokens de design.
  *
- * Deux territoires, un seul jeu de tokens.
+ * Une seule identité : blanc et bleu turquoise, sur toute la surface du
+ * produit. L'accueil et l'application partagent le même fond clair — c'est un
+ * outil de travail où on lit des tableaux vingt minutes d'affilée, et une
+ * bascule sombre au milieu du parcours casserait cette continuité.
  *
- *   L'accueil public est sombre et spectaculaire : il reçoit du trafic TikTok
- *   et doit convertir en quelques secondes. Il s'active avec `.territoire-nuit`.
- *
- *   L'application est claire et dense : c'est un outil de travail où on lit des
- *   tableaux vingt minutes d'affilée. C'est le mode par défaut du document.
- *
- * Règle non négociable : AUCUN VERT, nulle part. Dans ce secteur le vert
- * signifie l'argent, et Nexteo ne publie jamais de donnée d'argent. L'intensité
- * du signal se lit au remplissage violet de la barre, jamais à sa couleur.
+ * Le turquoise penche volontairement vers le bleu plutôt que vers le vert.
+ * Dans ce secteur le vert signifie l'argent, et Nexteo ne publie jamais de
+ * donnée d'argent : une teinte qui tirerait sur le vert ferait exactement la
+ * promesse que le produit refuse de faire. L'intensité du signal se lit au
+ * remplissage de la barre, jamais à sa couleur.
  */
 
 @theme {
-  /* Application — fond clair */
-  --color-fond: #fafafb;
+  /* Surfaces */
+  --color-fond: #f7fafb;
   --color-surface: #ffffff;
-  --color-bordure: #e6e6ec;
-  --color-encre: #14141c;
-  --color-encre-2: #5c5c70;
+  --color-bordure: #e2eaed;
+  --color-encre: #0f1a1f;
+  --color-encre-2: #566268;
 
-  /* Marque */
-  --color-neo-600: #5b43f0;
-  --color-neo-500: #6e56f8;
-  --color-neo-100: #e9e4fe;
+  /* Marque — bleu turquoise */
+  --color-neo-700: #0a7a8f;
+  --color-neo-600: #0c8fa8;
+  --color-neo-500: #10b3ce;
+  --color-neo-400: #45cbe0;
+  --color-neo-100: #e0f6fa;
 
-  /* Accueil — fond sombre */
-  --color-nuit-900: #08080f;
-  --color-nuit-800: #10101c;
-  --color-nuit-700: #1a1a2e;
-  --color-gris-300: #a0a0b8;
-
-  /* États. `--color-actif` vaut volontairement le violet de marque : une
-     annonce en cours de diffusion est le signal positif du produit, et c'est
-     la seule teinte autorisée pour le dire. */
-  --color-actif: #6e56f8;
-  --color-arrete: #9a9aad;
+  /* États. `--color-actif` vaut le turquoise de marque : une annonce en cours
+     de diffusion est le signal positif du produit, et c'est la seule teinte
+     autorisée pour le dire. */
+  --color-actif: #10b3ce;
+  --color-arrete: #93a3a9;
   --color-alerte: #e0603a;
 
   /* Typographie */
@@ -156,22 +151,6 @@
   }
 }
 
-/*
- * Territoire sombre. Redéfinit les tokens de surface plutôt que d'imposer des
- * classes de couleur à chaque composant : un composant écrit pour
- * l'application se réutilise tel quel sur l'accueil.
- */
-.territoire-nuit {
-  color-scheme: dark;
-  --color-fond: #08080f;
-  --color-surface: #10101c;
-  --color-bordure: #1a1a2e;
-  --color-encre: #ffffff;
-  --color-encre-2: #a0a0b8;
-  background-color: var(--color-fond);
-  color: var(--color-encre);
-}
-
 /* Contenu publicitaire tiers (section 5.3). Le monospace n'est pas décoratif :
    il dit au lecteur que ce texte n'a pas été écrit par Nexteo. */
 .texte-annonce {
@@ -184,7 +163,7 @@
 .halo-neo {
   background: radial-gradient(
     closest-side,
-    color-mix(in srgb, var(--color-neo-500) 16%, transparent),
+    color-mix(in srgb, var(--color-neo-500) 18%, transparent),
     transparent 100%
   );
 }

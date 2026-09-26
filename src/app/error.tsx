@@ -25,8 +25,8 @@ export default function ErrorScreen({
 
   return (
     <main className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-4">
-      <h1 className="text-xl font-extrabold text-white">Ça a coincé de notre côté.</h1>
-      <p className="mt-3 text-sm text-gris-300">
+      <h1 className="text-xl font-extrabold text-encre">Ça a coincé de notre côté.</h1>
+      <p className="mt-3 text-sm text-encre-2">
         Ta réponse n’a peut-être pas été enregistrée. Réessaie : dans la plupart des cas, ça repart.
       </p>
 
@@ -40,7 +40,7 @@ export default function ErrorScreen({
       </div>
 
       {error.digest ? (
-        <p className="mt-8 text-center font-mono text-xs text-gris-300">
+        <p className="mt-8 text-center font-mono text-xs text-encre-2">
           Incident {error.digest}
         </p>
       ) : null}

@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 /**
  * En-tête, commune aux deux territoires.
  *
- * Les couleurs viennent des tokens de surface : posée dans `.territoire-nuit`
- * elle devient sombre d'elle-même, sans variante à maintenir.
+ * Les couleurs viennent des tokens de surface : elle suit la teinte du
+ * document sans variante à maintenir.
  *
  * La navigation est masquée sous 768 px : sur téléphone, c'est la barre basse
  * à cinq entrées qui sert (section 6.9).

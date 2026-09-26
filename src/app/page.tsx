@@ -72,7 +72,7 @@ export default async function AccueilPage() {
   ]);
 
   return (
-    <div className="territoire-nuit min-h-dvh">
+    <div className="min-h-dvh">
       <TopBar connecte={Boolean(session)} />
 
       <main className="pb-20 md:pb-0">

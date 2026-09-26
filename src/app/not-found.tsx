@@ -9,8 +9,8 @@ export default function NotFound() {
     <>
       <TopBar />
       <main className="mx-auto flex min-h-[60vh] max-w-md flex-col justify-center px-4">
-        <h1 className="text-xl font-extrabold text-white">Cette page n’existe pas.</h1>
-        <p className="mt-3 text-sm text-gris-300">
+        <h1 className="text-xl font-extrabold text-encre">Cette page n’existe pas.</h1>
+        <p className="mt-3 text-sm text-encre-2">
           Le lien est peut-être ancien, ou mal recopié. Il n’y a rien à réparer de ton côté.
         </p>
         <Button asChild taille="bloc" className="mt-8">

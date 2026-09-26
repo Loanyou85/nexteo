@@ -171,7 +171,14 @@ export async function rechercherAnnonceurs(
   const lignes = await db.$queryRaw<
     (Omit<LigneAnnonceur, 'bande' | 'libelleBande'> & { valeurTri: number })[]
   >`
-    WITH agregats AS (
+    -- Deux agrégats séparés, et c'est indispensable.
+    --
+    -- Déplier trois tableaux (pays, plateformes, langues) dans la même requête
+    -- multiplie chaque annonce par le produit de leurs cardinalités : une
+    -- annonce diffusée dans 8 pays sur 4 plateformes comptait pour 32. La
+    -- liste affichait « 373 archivées » là où la fiche en montrait 23.
+    -- Les comptages se font donc sur les annonces, les tableaux à part.
+    WITH comptes AS (
       SELECT
         d."advertiserId" AS "advertiserId",
         count(*) FILTER (WHERE d."isActive")::int AS "annoncesActives",
@@ -180,7 +187,13 @@ export async function rechercherAnnonceurs(
         COALESCE(
           EXTRACT(DAY FROM now() - min(d."deliveryStartTime") FILTER (WHERE d."isActive"))::int,
           0
-        ) AS "joursDiffusion",
+        ) AS "joursDiffusion"
+      FROM "Ad" d
+      GROUP BY d."advertiserId"
+    ),
+    listes AS (
+      SELECT
+        d."advertiserId" AS "advertiserId",
         COALESCE(array_agg(DISTINCT p) FILTER (WHERE p IS NOT NULL), '{}') AS "pays",
         COALESCE(array_agg(DISTINCT pl) FILTER (WHERE pl IS NOT NULL), '{}') AS "plateformes",
         COALESCE(array_agg(DISTINCT lg) FILTER (WHERE lg IS NOT NULL), '{}') AS "langues"
@@ -189,6 +202,16 @@ export async function rechercherAnnonceurs(
       LEFT JOIN LATERAL unnest(d."publisherPlatforms") AS pl ON true
       LEFT JOIN LATERAL unnest(d."languages") AS lg ON true
       GROUP BY d."advertiserId"
+    ),
+    agregats AS (
+      SELECT
+        c."advertiserId",
+        c."annoncesActives", c."annoncesTotal", c."annoncesRetirees", c."joursDiffusion",
+        COALESCE(l."pays", '{}') AS "pays",
+        COALESCE(l."plateformes", '{}') AS "plateformes",
+        COALESCE(l."langues", '{}') AS "langues"
+      FROM comptes c
+      LEFT JOIN listes l ON l."advertiserId" = c."advertiserId"
     )
     SELECT
       a."id", a."slug", a."name", a."websiteUrl", a."signalScore", a."isDemo", a."firstSeenAt",
