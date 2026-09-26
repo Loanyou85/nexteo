@@ -1,50 +1,129 @@
 import Link from 'next/link';
+import { ExternalLink } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
 import { BarreSignal } from '@/components/signal/barre';
 import { ETIQUETTE_DEMO } from '@/lib/guardrails';
 import type { LigneAnnonceur } from '@/server/annonceurs';
 
-function dureeLisible(jours: number): string {
-  if (jours <= 0) return 'Aucune diffusion en cours';
-  if (jours < 60) return `Diffuse depuis ${jours} jours`;
-  const mois = Math.floor(jours / 30);
-  return `Diffuse depuis ${mois} mois`;
+/**
+ * Carte d'annonceur.
+ *
+ * Le bas de carte porte l'activité de diffusion mois par mois. C'est la place
+ * qu'un concurrent remplit avec une courbe de recettes estimées ; ici c'est le
+ * nombre d'annonces qui tournaient simultanément, mois après mois — un fait
+ * observé, et c'est tout l'écart entre les deux produits.
+ */
+
+function duree(jours: number): string {
+  if (jours <= 0) return '—';
+  if (jours < 60) return `${jours} j`;
+  return `${Math.floor(jours / 30)} mois`;
+}
+
+/** Initiales, à défaut de logo : on n'ira pas chercher celui de l'annonceur. */
+function initiales(nom: string): string {
+  return nom
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((m) => m[0] ?? '')
+    .join('')
+    .toUpperCase();
+}
+
+function Courbe({ valeurs }: { valeurs: number[] }) {
+  const max = Math.max(1, ...valeurs);
+  return (
+    <div className="flex h-8 items-end gap-[3px]" aria-hidden>
+      {valeurs.map((v, i) => (
+        <div
+          key={i}
+          className="flex-1 rounded-[2px] bg-neo-500/70"
+          style={{ height: `${Math.max(8, (v / max) * 100)}%` }}
+        />
+      ))}
+    </div>
+  );
 }
 
 export function CarteAnnonceur({ a }: { a: LigneAnnonceur }) {
+  const activite = a.activiteMensuelle.length > 0 ? a.activiteMensuelle : Array(12).fill(0);
+
   return (
-    <Card className="flex flex-col gap-3 transition-colors hover:border-neo-500/40">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <Link href={`/annonceur/${a.slug}`} className="block">
-            <h3 className="truncate text-base font-semibold text-encre">{a.name}</h3>
-          </Link>
-          {/* Deux lignes réservées : sans ça, une catégorie longue décale la
-              barre de signal et les cartes de la grille ne s'alignent plus. */}
-          <p className="mt-0.5 line-clamp-2 min-h-[2.75rem] text-sm text-encre-2">
+    <article className="flex flex-col rounded-card border border-bordure bg-surface transition-colors hover:border-neo-500/40">
+      <div className="flex items-start gap-3 p-4">
+        <span
+          aria-hidden
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-champ bg-neo-100 text-xs font-semibold text-neo-600"
+        >
+          {initiales(a.name)}
+        </span>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5">
+            <Link
+              href={`/annonceur/${a.slug}`}
+              className="truncate text-sm font-semibold text-encre hover:underline"
+            >
+              {a.name}
+            </Link>
+            {a.websiteUrl ? (
+              <a
+                href={a.websiteUrl}
+                target="_blank"
+                rel="noreferrer noopener nofollow"
+                aria-label={`Ouvrir le site de ${a.name}`}
+                className="text-encre-2 hover:text-encre"
+              >
+                <ExternalLink size={13} strokeWidth={1.75} />
+              </a>
+            ) : null}
+          </div>
+          <p className="mt-0.5 truncate text-2xs text-encre-2">
             {a.categorie ?? 'Non classé'}
             {a.pays.length > 0 ? ` · ${a.pays.slice(0, 2).join(', ')}` : ''}
             {a.pays.length > 2 ? ` +${a.pays.length - 2}` : ''}
           </p>
         </div>
+
+        <div className="shrink-0 text-right">
+          <p className="tabular text-sm font-semibold text-encre">{duree(a.joursDiffusion)}</p>
+          <p className="text-2xs text-encre-2">de diffusion</p>
+        </div>
+      </div>
+
+      {a.accroche ? (
+        <p className="texte-annonce line-clamp-2 min-h-[2.6rem] px-4 text-encre-2">{a.accroche}</p>
+      ) : (
+        <p className="min-h-[2.6rem] px-4 text-xs text-encre-2">Aucune annonce en diffusion.</p>
+      )}
+
+      <div className="flex flex-wrap items-center gap-1.5 px-4 pt-3">
+        <Badge ton="neo">{a.libelleBande}</Badge>
+        <Badge ton={a.annoncesActives > 0 ? 'actif' : 'arrete'}>
+          {a.annoncesActives > 0 ? `${a.annoncesActives} en cours` : 'Arrêté'}
+        </Badge>
+        {a.annoncesRetirees > 0 ? (
+          <Badge ton="neutre">{a.annoncesRetirees} retirées</Badge>
+        ) : null}
         {a.isDemo ? <Badge ton="demo">{ETIQUETTE_DEMO}</Badge> : null}
       </div>
 
-      <BarreSignal score={a.signalScore} />
-
-      <p className="text-sm text-encre">{dureeLisible(a.joursDiffusion)}</p>
-
-      <div className="mt-auto flex flex-wrap items-center gap-2 pt-1">
-        <Badge ton={a.annoncesActives > 0 ? 'actif' : 'arrete'}>
-          {a.annoncesActives > 0 ? `${a.annoncesActives} en cours` : 'Plus rien en cours'}
-        </Badge>
-        <Badge ton="neutre">{a.annoncesTotal} archivées</Badge>
-        {a.annoncesRetirees > 0 ? (
-          // L'argument de vente : ces annonces n'existent plus chez Meta.
-          <Badge ton="neo">{a.annoncesRetirees} supprimées par Meta</Badge>
-        ) : null}
+      <div className="px-4 pt-3">
+        <BarreSignal score={a.signalScore} taille="sm" sansLibelle />
       </div>
-    </Card>
+
+      <div className="mt-auto grid grid-cols-2 gap-4 border-t border-bordure p-4 pt-3">
+        <div>
+          <p className="text-2xs uppercase tracking-wide text-encre-2">Archivées</p>
+          <p className="tabular mt-1 text-base font-semibold text-encre">{a.annoncesTotal}</p>
+        </div>
+        <div className="min-w-0">
+          <p className="text-2xs uppercase tracking-wide text-encre-2">Diffusion · 12 mois</p>
+          <div className="mt-1">
+            <Courbe valeurs={activite} />
+          </div>
+        </div>
+      </div>
+    </article>
   );
 }

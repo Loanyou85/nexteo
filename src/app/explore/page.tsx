@@ -1,24 +1,28 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
-import { TopBar } from '@/components/shell/top-bar';
-import { NavMobile } from '@/components/shell/nav-mobile';
+import { Coque, EnTetePage, EtatVide } from '@/components/shell/coque';
+import { BaseAbsente } from '@/components/shell/base-absente';
 import { Button } from '@/components/ui/button';
 import { CarteAnnonceur } from '@/components/annonce/carte-annonceur';
-import { Filtres } from '@/components/explore/filtres';
-import { TableauAnnonceurs } from '@/components/explore/tableau';
+import { BarreFiltres } from '@/components/explore/barre-filtres';
 import { MENTION_SOURCE } from '@/lib/guardrails';
+import { offrePour } from '@/lib/plans';
 import type { Bande } from '@/lib/signal/score';
-import { facettes, rechercherAnnonceurs, type Filtres as TFiltres, type Tri } from '@/server/annonceurs';
+import {
+  facettes,
+  rechercherAnnonceurs,
+  type Filtres as TFiltres,
+  type Tri,
+} from '@/server/annonceurs';
 import { sessionOuNull } from '@/server/auth';
+import { db } from '@/server/db';
 import { etatBase } from '@/server/etat';
-import { BaseAbsente } from '@/components/shell/base-absente';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Explorer les annonceurs — Nexteo',
-  description:
-    'Filtre les annonceurs par signal, durée de diffusion, catégorie, pays et plateforme.',
+  title: 'Recherche — Nexteo',
+  description: 'Filtre les annonceurs par signal, durée de diffusion, catégorie et pays.',
 };
 
 type Params = Record<string, string | string[] | undefined>;
@@ -53,25 +57,33 @@ function filtresDepuisUrl(params: Params): TFiltres {
 
 export default async function ExplorePage({ searchParams }: { searchParams: Promise<Params> }) {
   const params = await searchParams;
-  const filtres = filtresDepuisUrl(params);
-  const vue = lire(params, 'vue') === 'tableau' ? 'tableau' : 'cartes';
-  const curseur = lire(params, 'curseur');
-
   const etat = await etatBase();
+
   if (!etat.pret) {
     return (
-      <>
-        <TopBar sansAction />
+      <Coque>
         <BaseAbsente etat={etat} />
-      </>
+      </Coque>
     );
   }
 
-  const [resultat, listes, session] = await Promise.all([
+  const filtres = filtresDepuisUrl(params);
+  const curseur = lire(params, 'curseur');
+
+  const [resultat, listes, session, totalAnnonceurs, totalAnnonces] = await Promise.all([
     rechercherAnnonceurs(filtres, curseur),
     facettes(),
     sessionOuNull(),
+    db.advertiser.count({ where: { excluded: false } }),
+    db.ad.count(),
   ]);
+
+  const abonnement = session?.user?.id
+    ? await db.subscription.findUnique({
+        where: { userId: session.user.id },
+        select: { plan: true },
+      })
+    : null;
 
   const suivante = new URLSearchParams(
     Object.entries(params).flatMap(([k, v]) =>
@@ -80,55 +92,67 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
   );
   if (resultat.curseurSuivant) suivante.set('curseur', resultat.curseurSuivant);
 
+  const filtre = Boolean(
+    filtres.q || filtres.bande || filtres.categorie || filtres.pays || filtres.ancienneteMin,
+  );
+
   return (
-    <>
-      <TopBar connecte={Boolean(session)} />
+    <Coque
+      compteurs={{ annonceurs: totalAnnonceurs, annonces: totalAnnonces }}
+      admin={session?.user?.role === 'admin'}
+      compte={
+        session?.user?.email
+          ? {
+              email: session.user.email,
+              plan: abonnement ? (offrePour(abonnement.plan)?.nom ?? 'Sans abonnement') : 'Sans abonnement',
+            }
+          : null
+      }
+    >
+      <EnTetePage
+        titre="Recherche"
+        compteur={
+          filtre
+            ? `${resultat.lignes.length} résultat${resultat.lignes.length > 1 ? 's' : ''} sur ${totalAnnonceurs.toLocaleString('fr-FR')} annonceurs archivés`
+            : `${totalAnnonceurs.toLocaleString('fr-FR')} annonceurs, ${totalAnnonces.toLocaleString('fr-FR')} annonces archivées`
+        }
+      />
 
-      <main className="mx-auto max-w-6xl px-4 pb-24 pt-8 md:pb-12">
-        <h1 className="text-xl">Explorer les annonceurs</h1>
-        <p className="mt-1.5 text-sm text-encre-2">{MENTION_SOURCE}</p>
+      <div className="px-5 py-5 lg:px-8">
+        <Suspense fallback={<div className="squelette h-11 w-full" />}>
+          <BarreFiltres facettes={listes} />
+        </Suspense>
 
-        <div className="mt-8 grid gap-8 md:grid-cols-[260px_1fr]">
-          <aside className="md:sticky md:top-20 md:self-start">
-            <Suspense fallback={<div className="squelette h-96 w-full" />}>
-              <Filtres facettes={listes} vue={vue} />
-            </Suspense>
-          </aside>
-
-          <section>
-            {resultat.lignes.length === 0 ? (
-              <div className="rounded-card border border-bordure bg-surface p-8 text-center">
-                <p className="text-base font-medium text-encre">Aucun annonceur ne correspond.</p>
-                <p className="mx-auto mt-2 max-w-md text-sm text-encre-2">
-                  Élargis les filtres, ou attends la prochaine exécution du pipeline : l’archive
-                  s’enrichit chaque jour et ne perd jamais ce qu’elle a vu.
-                </p>
-                <Button asChild taille="sm" variant="secondaire" className="mt-5">
+        <div className="mt-5">
+          {resultat.lignes.length === 0 ? (
+            <EtatVide
+              titre="Aucun annonceur ne correspond"
+              explication="Élargis les filtres, ou attends la prochaine exécution du pipeline : l’archive s’enrichit chaque jour et ne perd jamais ce qu’elle a vu."
+              action={
+                <Button asChild taille="sm" variant="secondaire">
                   <Link href="/explore">Réinitialiser les filtres</Link>
                 </Button>
-              </div>
-            ) : vue === 'tableau' ? (
-              <TableauAnnonceurs lignes={resultat.lignes} />
-            ) : (
-              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                {resultat.lignes.map((a) => (
-                  <CarteAnnonceur key={a.id} a={a} />
-                ))}
-              </div>
-            )}
+              }
+            />
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+              {resultat.lignes.map((a) => (
+                <CarteAnnonceur key={a.id} a={a} />
+              ))}
+            </div>
+          )}
 
-            {resultat.curseurSuivant ? (
-              <div className="mt-6 flex justify-center">
-                <Button asChild variant="secondaire" taille="md">
-                  <Link href={`/explore?${suivante.toString()}`}>Charger la suite</Link>
-                </Button>
-              </div>
-            ) : null}
-          </section>
+          {resultat.curseurSuivant ? (
+            <div className="mt-6 flex justify-center">
+              <Button asChild variant="secondaire" taille="md">
+                <Link href={`/explore?${suivante.toString()}`}>Charger la suite</Link>
+              </Button>
+            </div>
+          ) : null}
         </div>
-      </main>
 
-      <NavMobile />
-    </>
+        <p className="mt-10 border-t border-bordure pt-5 text-2xs text-encre-2">{MENTION_SOURCE}</p>
+      </div>
+    </Coque>
   );
 }

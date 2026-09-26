@@ -55,6 +55,8 @@ export type LigneAnnonceur = {
   plateformes: string[];
   /** Annonces actives mois par mois sur douze mois, du plus ancien au plus récent. */
   activiteMensuelle: number[];
+  /** Accroche de l'annonce active la plus ancienne : celle qui tient le plus longtemps. */
+  accroche: string | null;
 };
 
 const TAILLE_PAR_DEFAUT = 24;
@@ -242,6 +244,16 @@ export async function rechercherAnnonceurs(
             )
         ) AS s
       ), '{}') AS "activiteMensuelle",
+      -- L'accroche de l'annonce active la plus ancienne. Pas la plus récente :
+      -- celle qui tourne depuis le plus longtemps est celle que l'annonceur
+      -- continue de payer, donc celle qui marche.
+      (
+        SELECT left(split_part(d3."bodyText", E'\n', 1), 150)
+        FROM "Ad" d3
+        WHERE d3."advertiserId" = a."id" AND d3."isActive" AND d3."bodyText" IS NOT NULL
+        ORDER BY d3."deliveryStartTime" ASC
+        LIMIT 1
+      ) AS "accroche",
       ${COLONNE_TRI[tri]} AS "valeurTri"
     FROM "Advertiser" a
     LEFT JOIN "Category" c ON c."id" = a."categoryId"
