@@ -9,20 +9,17 @@ import { COOKIE_VISITEUR } from '@/middleware';
 /**
  * Quotas et mur payant (section 9).
  *
- * Trois principes.
+ * Il n'y a pas d'offre gratuite : une fiche complète demande un abonnement.
  *
- * Le mur n'apparaît qu'au moment où la valeur est évidente. On laisse voir
- * depuis combien de temps l'annonceur diffuse, combien d'annonces Nexteo a
- * archivées et combien Meta en a déjà effacées. Ce qui est masqué, c'est le
- * contenu — jamais la raison de payer.
+ * Le mur n'apparaît qu'au moment où la valeur est évidente, et il commence par
+ * dire ce qu'il y a derrière — depuis combien de temps l'annonceur diffuse,
+ * combien d'annonces sont archivées, combien Meta en a effacées. Ce qui est
+ * réservé est annoncé, pas flouté : flouter laisse croire qu'on cache peu de
+ * chose, et personne ne paie pour lever un flou.
  *
- * Revoir une fiche déjà ouverte ce mois-ci ne coûte rien. Recharger une page
- * ou revenir en arrière n'est pas une nouvelle consultation, et facturer un
- * aller-retour serait un piège, pas un quota.
- *
- * Si on ne sait pas compter — ni compte, ni cookie —, on laisse passer. Mieux
- * vaut offrir une fiche de trop que bloquer quelqu'un derrière un compteur
- * qu'on ne tient pas.
+ * Le compteur reste en place pour les offres qui en auraient un un jour, et
+ * parce qu'il sert au tableau de bord. Aujourd'hui, toutes les offres payantes
+ * donnent les fiches sans limite.
  */
 
 export type Acces = {

@@ -14,8 +14,8 @@ export default function InscriptionPage() {
       <main className="mx-auto max-w-md px-4 py-10">
         <h1 className="text-xl">Crée ton compte.</h1>
         <p className="mt-2 text-sm text-encre-2">
-          Prénom, adresse, mot de passe. Rien d’autre. La recherche et la liste des annonceurs
-          restent accessibles sans compte.
+          Prénom, adresse, mot de passe. Rien d’autre. Le compte seul ne donne pas accès aux
+          fiches : il faut un abonnement.
         </p>
 
         <div className="mt-8">

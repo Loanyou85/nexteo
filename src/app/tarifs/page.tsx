@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { TopBar } from '@/components/shell/top-bar';
 import { NavMobile } from '@/components/shell/nav-mobile';
 import { CartesTarifs } from '@/components/tarifs/cartes';
-import { FICHES_GRATUITES_PAR_MOIS } from '@/lib/plans';
 import { offresSansTarif } from '@/server/stripe';
 import { sessionOuNull } from '@/server/auth';
 
@@ -25,8 +24,8 @@ export default async function TarifsPage() {
         <div className="text-center">
           <h1 className="text-xl">Tarifs</h1>
           <p className="mx-auto mt-2 max-w-xl text-sm text-encre-2">
-            La recherche, la liste des annonceurs et le signal restent gratuits, sans compte, avec{' '}
-            {FICHES_GRATUITES_PAR_MOIS} fiches complètes par mois.
+            Pas d’offre gratuite. La recherche et la liste des annonceurs sont ouvertes pour que tu
+            puisses juger, les fiches complètes demandent un abonnement.
           </p>
         </div>
 

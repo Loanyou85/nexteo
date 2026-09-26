@@ -198,7 +198,7 @@ export default async function AccueilPage() {
         <section className="mx-auto max-w-4xl px-4 py-16 text-center">
           <h2 className="display text-xl">Regarde qui paie déjà, dans ton secteur.</h2>
           <p className="mx-auto mt-3 max-w-xl text-sm text-encre-2">
-            La recherche et la liste des annonceurs sont ouvertes, sans compte.
+            La recherche et la liste sont ouvertes : regarde avant de décider.
           </p>
           <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Button asChild taille="capsule">

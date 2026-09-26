@@ -6,10 +6,14 @@ import type { Plan } from '@prisma/client';
  * Les prix vivent ici, les droits dans `DROITS` : changer un prix ne touche
  * pas au gating, ouvrir un droit ne demande pas de toucher aux écrans.
  *
- * Le gratuit n'est pas une quatrième carte. C'est ce que le visiteur a déjà —
- * recherche, liste, signal visible, trois fiches complètes par mois — et on le
- * lui rappelle sous les cartes plutôt que de lui donner un choix de plus au
- * moment de décider.
+ * Il n'y a pas d'offre gratuite. La recherche et la liste des annonceurs
+ * restent ouvertes — c'est la vitrine, pas une offre : sans elle personne ne
+ * peut juger le produit ni le trouver depuis un moteur de recherche. Tout ce
+ * qui a de la valeur, à commencer par les fiches, demande un abonnement.
+ *
+ * Ce qui est réservé n'est pas flouté : c'est annoncé. Flouter laisse croire
+ * qu'on cache quelque chose de petit ; dire « il faut un abonnement » est plus
+ * honnête et se décide plus vite.
  */
 
 export type Periodicite = 'mensuel' | 'annuel';
@@ -86,8 +90,8 @@ export const OFFRES: Offre[] = [
   },
 ];
 
-/** Fiches complètes offertes par mois, sans compte (section 9.1). */
-export const FICHES_GRATUITES_PAR_MOIS = 3;
+/** Aucune fiche offerte : il n'y a pas d'offre gratuite. */
+export const FICHES_GRATUITES_PAR_MOIS = 0;
 
 /**
  * Économie annuelle affichée, en pourcentage entier.
@@ -116,8 +120,10 @@ export function offrePour(plan: Plan): Offre | null {
 
 /** Droits par plan. Le gratuit est la base, chaque offre ajoute. */
 export const DROITS = {
+  // « free » n'est pas une offre : c'est l'état d'un visiteur sans abonnement.
+  // Il peut chercher et parcourir la liste, rien de plus.
   free: {
-    fichesParMois: FICHES_GRATUITES_PAR_MOIS,
+    fichesParMois: 0,
     elementsEnregistres: 0,
     archiveHistorique: false,
     chronologie: false,

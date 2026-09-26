@@ -7,12 +7,11 @@ import { Card } from '@/components/ui/card';
 import { BarreSignal, DetailSignal } from '@/components/signal/barre';
 import { Chronologie } from '@/components/annonce/chronologie';
 import { CarteAnnonce } from '@/components/annonce/carte-annonce';
-import { MurPayant } from '@/components/annonce/mur-payant';
+import { AbonnementRequis } from '@/components/annonce/mur-payant';
 import { ETIQUETTE_DEMO, MENTION_SOURCE } from '@/lib/guardrails';
 import { ficheAnnonceur } from '@/server/annonceur-fiche';
 import { consulterFiche } from '@/server/quota';
 import { sessionOuNull } from '@/server/auth';
-import { cn } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -63,9 +62,9 @@ export default async function AnnonceurPage({ params }: Props) {
 
   const total = a.actives.length + a.archivees.length + a.retirees.length;
   const mois = Math.floor((a.detail.find((d) => d.cle === 'persistance')?.valeur ?? 0) / 30);
-  // Ce qui est masqué, c'est le contenu. Jamais les compteurs qui disent
-  // pourquoi il vaut la peine d'être lu.
-  const masque = !acces.autorise;
+  // Réservé : on n'affiche pas le contenu du tout. Le flouter le laisserait
+  // dans la page — lisible dans le code source, et donc pas vraiment réservé.
+  const reserve = !acces.autorise;
 
   return (
     <>
@@ -135,9 +134,9 @@ export default async function AnnonceurPage({ params }: Props) {
           </Card>
         </header>
 
-        {masque ? (
+        {reserve ? (
           <div className="mt-8">
-            <MurPayant
+            <AbonnementRequis
               nom={a.name}
               mois={mois}
               annonces={total}
@@ -147,16 +146,9 @@ export default async function AnnonceurPage({ params }: Props) {
           </div>
         ) : null}
 
-        <div
-          className={cn(
-            'mt-10 space-y-10',
-            // Le contenu reste dans le document pour rester indexable et
-            // accessible au clavier une fois le mur levé ; il est simplement
-            // illisible, et non cliquable.
-            masque && 'pointer-events-none select-none blur-[6px] opacity-60',
-          )}
-          aria-hidden={masque}
-        >
+        <div className="mt-10 space-y-10">
+          {reserve ? null : (
+          <>
           <Section
             titre="Détail du signal"
             aide="Chaque composante, sa mesure et ce qu’elle apporte au score. Rien n’est recalculé à l’affichage : ce que tu lis est ce qui a produit le chiffre."
@@ -311,6 +303,8 @@ export default async function AnnonceurPage({ params }: Props) {
               </div>
             </Section>
           ) : null}
+          </>
+          )}
         </div>
 
         <p className="mt-12 border-t border-bordure pt-6 text-xs text-encre-2">{MENTION_SOURCE}</p>

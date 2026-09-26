@@ -4,11 +4,17 @@ import { cn } from '@/lib/utils';
  * L'escalier : trois marches qui montent, et le palier détaché en haut à
  * droite — ce qu'on vise. Dessiné, jamais importé.
  */
-export function LogoMark({ className, variant = 'neo' }: { className?: string; variant?: 'neo' | 'mono' }) {
+export function LogoMark({ className, variant = 'neo' }: { className?: string; variant?: 'neo' | 'mono' | 'nuit' }) {
   // Sur fond clair, l'escalier se dessine à l'encre et seul le palier porte la
   // couleur de marque : c'est lui qu'on doit voir en premier.
-  const trait = variant === 'neo' ? 'var(--color-encre)' : 'currentColor';
-  const palier = variant === 'neo' ? 'var(--color-neo-500)' : 'currentColor';
+  // Sur fond clair l'escalier se dessine à l'encre, sur la barre latérale il
+  // passe en clair. Le palier garde la couleur de marque dans les deux cas :
+  // c'est lui qu'on doit voir en premier.
+  const trait =
+    variant === 'nuit' ? 'var(--color-nuit-encre)'
+    : variant === 'neo' ? 'var(--color-encre)'
+    : 'currentColor';
+  const palier = variant === 'mono' ? 'currentColor' : 'var(--color-neo-500)';
   return (
     <svg viewBox="0 0 32 32" fill="none" className={cn('h-7 w-7', className)} aria-hidden="true">
       <path
@@ -22,11 +28,24 @@ export function LogoMark({ className, variant = 'neo' }: { className?: string; v
   );
 }
 
-export function Logo({ className, variant }: { className?: string; variant?: 'neo' | 'mono' }) {
+export function Logo({
+  className,
+  variant,
+}: {
+  className?: string;
+  variant?: 'neo' | 'mono' | 'nuit';
+}) {
   return (
     <span className={cn('inline-flex items-center gap-2', className)}>
       <LogoMark variant={variant} />
-      <span className="font-display text-lg font-extrabold tracking-[-0.03em] text-encre">Nexteo</span>
+      <span
+        className={cn(
+          'font-display text-lg font-extrabold tracking-[-0.03em]',
+          variant === 'nuit' ? 'text-nuit-encre' : 'text-encre',
+        )}
+      >
+        Nexteo
+      </span>
     </span>
   );
 }

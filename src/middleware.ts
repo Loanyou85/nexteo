@@ -3,10 +3,10 @@ import { NextResponse, type NextRequest } from 'next/server';
 /**
  * Attribue un identifiant de visiteur.
  *
- * Le gratuit fonctionne sans compte : trois fiches complètes par mois. Il faut
- * donc pouvoir compter quelqu'un qui n'est pas connecté, et un composant
- * serveur ne peut pas écrire de cookie — seuls un middleware, une Server
- * Action ou une route le peuvent. D'où ce passage.
+ * Il n'y a pas d'offre gratuite, mais la liste reste ouverte et les quotas
+ * des offres payantes doivent pouvoir se compter avant même la connexion.
+ * Un composant serveur ne peut pas écrire de cookie — seuls un middleware,
+ * une Server Action ou une route le peuvent. D'où ce passage.
  *
  * Cet identifiant ne sert qu'au décompte. Il ne permet de reconnaître
  * personne ailleurs, il n'est recoupé avec rien, et la politique de

@@ -30,6 +30,14 @@
   --color-neo-400: #45cbe0;
   --color-neo-100: #e0f6fa;
 
+  /* Barre latérale — bleu nuit. Le contenu vit dans un panneau blanc posé
+     dessus, et la marge laisse voir ce fond tout autour. */
+  --color-nuit: #0d1526;
+  --color-nuit-2: #18223a;
+  --color-nuit-3: #243150;
+  --color-nuit-encre: #e8eef7;
+  --color-nuit-encre-2: #8ea0bd;
+
   /* États. `--color-actif` vaut le turquoise de marque : une annonce en cours
      de diffusion est le signal positif du produit, et c'est la seule teinte
      autorisée pour le dire. */

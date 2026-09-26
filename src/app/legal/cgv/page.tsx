@@ -1,4 +1,4 @@
-import { OFFRES, economieAnnuelle, FICHES_GRATUITES_PAR_MOIS } from '@/lib/plans';
+import { OFFRES, economieAnnuelle } from '@/lib/plans';
 import { SOCIETE } from '@/lib/societe';
 
 export const metadata = { title: 'Conditions générales de vente — Nexteo' };
@@ -34,9 +34,10 @@ export default function CgvPage() {
         ))}
       </ul>
       <p>
-        Un accès gratuit, sans compte, permet la recherche, la consultation de la liste des
-        annonceurs, la lecture du signal et {FICHES_GRATUITES_PAR_MOIS} fiches complètes par mois. Il
-        ne donne lieu à aucun paiement.
+        Il n’existe pas d’offre gratuite. La recherche et la consultation de la liste des annonceurs
+        sont ouvertes sans compte et sans paiement, mais elles ne constituent pas une offre : les
+        fiches complètes, la chronologie de diffusion, les annonces retirées par Meta, les
+        collections et le suivi d’annonceurs sont réservés aux abonnés.
       </p>
 
       <h2>Souscription et paiement</h2>

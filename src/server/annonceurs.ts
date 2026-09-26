@@ -53,6 +53,8 @@ export type LigneAnnonceur = {
   joursDiffusion: number;
   pays: string[];
   plateformes: string[];
+  /** Annonces actives mois par mois sur douze mois, du plus ancien au plus récent. */
+  activiteMensuelle: number[];
 };
 
 const TAILLE_PAR_DEFAUT = 24;
@@ -222,6 +224,24 @@ export async function rechercherAnnonceurs(
       COALESCE(g."joursDiffusion", 0) AS "joursDiffusion",
       COALESCE(g."pays", '{}') AS "pays",
       COALESCE(g."plateformes", '{}') AS "plateformes",
+      -- Activité mois par mois : combien d'annonces tournaient simultanément
+      -- à chacun des douze derniers mois. C'est la place qu'un concurrent
+      -- remplit avec une courbe de recettes estimées ; ici c'est un fait
+      -- observé, et c'est tout l'écart entre les deux produits.
+      COALESCE((
+        SELECT array_agg(s.c ORDER BY s.m DESC)
+        FROM generate_series(0, 11) AS m,
+        LATERAL (
+          SELECT m AS m, count(*)::int AS c
+          FROM "Ad" d2
+          WHERE d2."advertiserId" = a."id"
+            AND d2."deliveryStartTime" < now() - make_interval(months => m)
+            AND (
+              d2."deliveryStopTime" IS NULL
+              OR d2."deliveryStopTime" > now() - make_interval(months => m + 1)
+            )
+        ) AS s
+      ), '{}') AS "activiteMensuelle",
       ${COLONNE_TRI[tri]} AS "valeurTri"
     FROM "Advertiser" a
     LEFT JOIN "Category" c ON c."id" = a."categoryId"
