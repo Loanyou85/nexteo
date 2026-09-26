@@ -27,14 +27,62 @@ function bandeau(lignes: string[]): void {
   console.log('─'.repeat(72) + '\n');
 }
 
-function lancer(commande: string, args: string[]): { ok: boolean; sortie: string } {
+function lancer(
+  commande: string,
+  args: string[],
+  env?: Record<string, string>,
+): { ok: boolean; sortie: string } {
   try {
-    const sortie = execFileSync(commande, args, { encoding: 'utf8', stdio: 'pipe' });
+    const sortie = execFileSync(commande, args, {
+      encoding: 'utf8',
+      stdio: 'pipe',
+      env: { ...process.env, ...env },
+    });
     return { ok: true, sortie };
   } catch (e) {
     const err = e as { stdout?: string; stderr?: string; message?: string };
     return { ok: false, sortie: `${err.stdout ?? ''}${err.stderr ?? ''}` || (err.message ?? '') };
   }
+}
+
+/**
+ * Applique les migrations, en rattrapant l'erreur de configuration la plus
+ * fréquente.
+ *
+ * `DIRECT_URL` doit être la chaîne SANS « pooler » : Prisma pose un verrou
+ * consultatif que le répartiteur de connexions ne tient pas, et la migration
+ * échoue sur un message qui ne parle ni de pooler ni d'URL. Les deux chaînes
+ * se ressemblant à un mot près, l'inversion est très facile à faire.
+ *
+ * Plutôt que de renvoyer quelqu'un vérifier deux chaînes quasi identiques, on
+ * réessaie avec l'autre. C'est sans risque : le pire cas est un second échec,
+ * et on le dit.
+ */
+function migrer(): { ok: boolean; sortie: string; via: string } {
+  const directe = process.env.DIRECT_URL?.trim();
+  const poolee = process.env.DATABASE_URL?.trim();
+
+  const premier = lancer('npx', ['prisma', 'migrate', 'deploy']);
+  if (premier.ok) return { ...premier, via: 'DIRECT_URL' };
+
+  // Une seconde chance uniquement si les deux chaînes diffèrent réellement.
+  if (poolee && directe && poolee !== directe) {
+    console.log(
+      '[base] La migration a échoué avec DIRECT_URL. Nouvelle tentative avec ' +
+        'DATABASE_URL — les deux chaînes sont souvent inversées.',
+    );
+    const second = lancer('npx', ['prisma', 'migrate', 'deploy'], { DIRECT_URL: poolee });
+    if (second.ok) {
+      console.log(
+        '[base] Passée avec DATABASE_URL. Vérifie tout de même DIRECT_URL : ' +
+          'ce doit être la chaîne SANS « pooler ».',
+      );
+      return { ...second, via: 'DATABASE_URL' };
+    }
+    return { ...second, via: 'les deux' };
+  }
+
+  return { ...premier, via: 'DIRECT_URL' };
 }
 
 /** Remonte la cause réelle d'une erreur Prisma, qui l'enveloppe. */
@@ -59,29 +107,45 @@ async function main(): Promise<void> {
     return;
   }
 
-  const db = new PrismaClient({ datasources: { db: { url } } });
-  let tables: string[] = [];
+  // L'inspection tente les deux chaînes. DIRECT_URL est la bonne en principe,
+  // mais si elle est fausse — inversée avec la poolée, ou mal recopiée — on ne
+  // veut pas conclure « base injoignable » alors que l'autre répond très bien.
+  async function inspecter(cible: string): Promise<{ tables: string[] } | { erreur: string }> {
+    const client = new PrismaClient({ datasources: { db: { url: cible } } });
+    try {
+      const lignes = await client.$queryRawUnsafe<{ tablename: string }[]>(
+        `SELECT tablename FROM pg_tables WHERE schemaname = current_schema()`,
+      );
+      return { tables: lignes.map((l) => l.tablename) };
+    } catch (e) {
+      return { erreur: cause(String((e as Error).message)) };
+    } finally {
+      await client.$disconnect();
+    }
+  }
 
-  try {
-    const lignes = await db.$queryRawUnsafe<{ tablename: string }[]>(
-      `SELECT tablename FROM pg_tables WHERE schemaname = current_schema()`,
-    );
-    tables = lignes.map((l) => l.tablename);
-  } catch (e) {
-    await db.$disconnect();
+  const autre = process.env.DATABASE_URL?.trim();
+  let vue = await inspecter(url);
+
+  if ('erreur' in vue && autre && autre !== url) {
+    console.log('[base] Première chaîne injoignable, essai avec l’autre.');
+    vue = await inspecter(autre);
+  }
+
+  if ('erreur' in vue) {
     bandeau([
-      'Base injoignable : ' + cause(String((e as Error).message)),
+      'Base injoignable : ' + vue.erreur,
       '',
       'Le build continue. Vérifie DATABASE_URL et DIRECT_URL, puis redéploie.',
     ]);
     return;
   }
 
+  const tables = vue.tables;
+
   const v1 = MARQUEURS_V1.filter((t) => tables.includes(t));
   const v2 = MARQUEURS_V2.every((t) => tables.includes(t));
   const vierge = tables.length === 0 || tables.every((t) => t === '_prisma_migrations');
-
-  await db.$disconnect();
 
   // Le seul refus qu'on garde, et il compte : ne jamais poser le schéma V2
   // par-dessus la base de la V1. Ses données sont intactes, elles le restent.
@@ -111,11 +175,11 @@ async function main(): Promise<void> {
     return;
   }
 
-  const migration = lancer('npx', ['prisma', 'migrate', 'deploy']);
+  const migration = migrer();
   if (!migration.ok) {
     const bloquee = /P3009|failed migrations/i.test(migration.sortie);
     bandeau([
-      'MIGRATION EN ÉCHEC : ' + cause(migration.sortie),
+      `MIGRATION EN ÉCHEC (essayée via ${migration.via}) : ` + cause(migration.sortie),
       '',
       ...(bloquee
         ? [

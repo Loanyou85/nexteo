@@ -27,8 +27,17 @@ export function Coque({
 }) {
   return (
     <div className="flex min-h-dvh bg-nuit">
-      <div className="hidden lg:flex lg:flex-col">
+      <div className="hidden w-[272px] shrink-0 flex-col lg:flex">
         <BarreLaterale compteurs={compteurs} admin={admin} />
+        <div className="p-4">
+          <Link
+            href="/tarifs"
+            className="flex h-12 items-center justify-center rounded-capsule bg-neo-500 text-sm font-semibold text-white transition-colors hover:bg-neo-400"
+          >
+            Passer à Pro
+          </Link>
+        </div>
+
         {compte ? (
           <div className="border-t border-nuit-3/60 px-5 py-4">
             <p className="truncate text-xs text-nuit-encre">{compte.email}</p>
