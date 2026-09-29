@@ -1,0 +1,667 @@
+// Nexteo — génération de jeux UEFN par agent autonome.
+//
+// Trois familles de tables, qu'il ne faut pas confondre :
+//
+// - l'INTENTION : Project, GameSpec (versionné), BuildPlan, BuildTask. Ce que
+//   l'utilisateur veut et ce que l'orchestrateur a prévu de faire.
+// - l'ÉTAT OBSERVÉ : VerseFile, DeviceInstance, SceneEntity. Un reflet du
+//   projet UEFN tel qu'il a été relu à la dernière inspection — jamais la
+//   source de vérité. La boucle d'agent relit le vrai projet avant d'agir.
+// - la TRACE : AgentEvent, UsageEvent, BuildError, TestResult. Ce qui s'est
+//   réellement passé, conservé tel quel, y compris les messages bruts.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─── Comptes ────────────────────────────────────────────────────────────────
+
+enum Role {
+  user
+  admin
+}
+
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  emailVerified     DateTime?
+  name              String?
+  image             String?
+  passwordHash      String?
+  role              Role      @default(user)
+  consentAcceptedAt DateTime?
+  consentVersion    String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  accounts     Account[]
+  sessions     Session[]
+  subscription Subscription?
+  usageEvents  UsageEvent[]
+  usage        UsageCounter[]
+  projects     Project[]
+  localAgents  LocalAgent[]
+  apiKeys      ApiKey[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ─── Offres, quotas, coûts ─────────────────────────────────────────────────
+
+enum Plan {
+  decouverte
+  createur
+  pro
+  studio
+}
+
+enum SubscriptionStatus {
+  active
+  trialing
+  past_due
+  canceled
+  incomplete
+}
+
+/// Les offres vivent en base : un prix change sans déploiement (section 27).
+/// Les identifiants de prix Stripe restent en variables d'environnement ;
+/// seul le NOM de la variable est stocké ici.
+model PlanOffer {
+  plan              Plan    @id
+  name              String
+  monthlyPriceCents Int
+  description       String
+  features          String[]
+  /// Nom de la variable d'environnement portant l'identifiant de prix Stripe.
+  stripePriceEnv    String?
+  /// La découverte ne lance aucun build réel : un build coûte de l'argent.
+  realBuilds        Boolean
+  sortOrder         Int
+
+  budget BuildBudget?
+}
+
+/// Budgets par build, par offre (section 26). En base, pas en dur : on les
+/// ajuste quand le coût réel par build sera mesuré.
+model BuildBudget {
+  plan                 Plan @id
+  maxAgentSteps        Int  @default(150)
+  maxRetries           Int  @default(5)
+  maxBuildMinutes      Int  @default(60)
+  maxPlaytestMinutes   Int  @default(15)
+  maxTokensPerBuild    Int
+  /// Coût IA maximal d'un build, en micro-dollars.
+  maxCostMicrosPerBuild Int
+  buildsPerMonth       Int
+
+  offer PlanOffer @relation(fields: [plan], references: [plan])
+}
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  userId               String             @unique
+  plan                 Plan               @default(decouverte)
+  status               SubscriptionStatus @default(active)
+  stripeCustomerId     String?            @unique
+  stripeSubscriptionId String?            @unique
+  currentPeriodEnd     DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+/// Un appel LLM = une ligne. Sans cette mesure, impossible de fixer les prix.
+model UsageEvent {
+  id               String   @id @default(cuid())
+  userId           String
+  projectId        String?
+  sessionId        String?
+  operation        String
+  provider         String
+  model            String
+  inputTokens      Int
+  outputTokens     Int
+  cacheReadTokens  Int      @default(0)
+  /// Coût estimé en micro-dollars (1 $ = 1 000 000).
+  costMicros       Int
+  /// Vrai quand l'appel a été servi par l'IA simulée : coût nul, et ce n'est
+  /// pas une mesure de coût réel. Exclu des moyennes de l'administration.
+  simulated        Boolean
+  createdAt        DateTime @default(now())
+
+  user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project Project?      @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  session AgentSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([sessionId])
+  @@index([createdAt])
+}
+
+model UsageCounter {
+  id          String @id @default(cuid())
+  userId      String
+  /// Période au format « 2026-09 ».
+  period      String
+  builds      Int    @default(0)
+  plans       Int    @default(0)
+  costMicros  Int    @default(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, period])
+}
+
+model ApiKey {
+  id         String    @id @default(cuid())
+  userId     String
+  name       String
+  /// Empreinte de la clé ; la clé elle-même n'est montrée qu'une fois.
+  keyHash    String    @unique
+  prefix     String
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─── Référentiels éditables en administration ──────────────────────────────
+
+/// Les templates sont des données (section 7) : en ajouter un ne demande
+/// aucun déploiement.
+model GameTemplate {
+  id           String   @id
+  name         String
+  genre        String
+  pitch        String
+  /// GameSpec de départ, validé par le schéma Zod à la lecture.
+  baseSpec     Json
+  /// Modules Verse attendus, dans l'ordre de construction.
+  verseModules String[]
+  /// Pièges connus, affichés à l'utilisateur et fournis à l'IA.
+  pitfalls     String[]
+  /// Seul le scénario de référence est activé tant qu'il n'est pas fiable
+  /// dix fois de suite (section 33).
+  enabled      Boolean  @default(false)
+  sortOrder    Int
+  updatedAt    DateTime @updatedAt
+}
+
+model EnvironmentTemplate {
+  id          String   @id
+  name        String
+  description String
+  /// Zones, points d'intérêt, aires d'apparition, ancres de gameplay.
+  layout      Json
+  updatedAt   DateTime @updatedAt
+}
+
+/// Registre des devices (section 13). L'IA ne choisit que parmi ces lignes.
+model DeviceDefinition {
+  deviceType             String   @id
+  displayName            String
+  capabilities           String[]
+  configurableProperties Json
+  dependencies           String[]
+  knownConstraints       String[]
+  supportedGameTypes     String[]
+  /// Dernière confrontation au catalogue réel. Nul = jamais vérifié contre
+  /// le vrai MCP : le device ne vient que du catalogue simulé.
+  verifiedAt             DateTime?
+  /// Source de la dernière vérification : « mock » ou « mcp ».
+  verifiedBy             String?
+  updatedAt              DateTime @updatedAt
+}
+
+/// Correspondance besoin du GameSpec → device, éditable (pas de chaîne de if).
+model DeviceMapping {
+  need        String   @id
+  deviceType  String
+  defaults    Json
+  description String
+  updatedAt   DateTime @updatedAt
+}
+
+// ─── Projets et intention ──────────────────────────────────────────────────
+
+enum ProviderKind {
+  mock
+  mcp
+}
+
+model Project {
+  id                 String       @id @default(cuid())
+  userId             String
+  name               String
+  genre              String
+  templateId         String?
+  /// Palier de rareté 1 à 5 (section 4.1), recalculé depuis les faits.
+  tier               Int          @default(1)
+  currentSpecVersion Int          @default(0)
+  provider           ProviderKind @default(mock)
+  /// Niveau d'autorisation 1 à 5 (section 20).
+  permissionLevel    Int          @default(4)
+  /// Le niveau 5 exige une confirmation explicite, datée, par projet.
+  autonomyConfirmedAt DateTime?
+  /// Verrou d'exécution : un seul exécutant par projet, jamais d'appels
+  /// UEFN en parallèle (section 2.3).
+  leaseOwner         String?
+  leaseUntil         DateTime?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  specs          GameSpec[]
+  versions       ProjectVersion[]
+  plans          BuildPlan[]
+  sessions       AgentSession[]
+  verseFiles     VerseFile[]
+  devices        DeviceInstance[]
+  entities       SceneEntity[]
+  testSpecs      TestSpec[]
+  errors         BuildError[]
+  prePublish     PrePublishCheck[]
+  usageEvents    UsageEvent[]
+  simulation     SimulationState?
+
+  @@index([userId, updatedAt])
+}
+
+/// Une ligne par version : chaque modification crée une nouvelle version,
+/// comparable et restaurable (section 6).
+model GameSpec {
+  id          String   @id @default(cuid())
+  projectId   String
+  version     Int
+  specVersion String
+  data        Json
+  /// « ia », « utilisateur » ou « restauration ».
+  author      String
+  note        String?
+  createdAt   DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, version])
+}
+
+/// Photographie d'un projet après une génération (section 21).
+model ProjectVersion {
+  id          String   @id @default(cuid())
+  projectId   String
+  number      Int
+  specVersion Int
+  sessionId   String?  @unique
+  summary     String
+  tier        Int
+  /// Fichiers Verse, devices et entités relus à la fin de la génération.
+  snapshot    Json
+  createdAt   DateTime @default(now())
+
+  project Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  session AgentSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+
+  @@unique([projectId, number])
+}
+
+model BuildPlan {
+  id          String   @id @default(cuid())
+  projectId   String
+  specVersion Int
+  /// « initial » pour une première construction, « mise-a-jour » ensuite.
+  kind        String
+  request     String?
+  createdAt   DateTime @default(now())
+
+  project  Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tasks    BuildTask[]
+  sessions AgentSession[]
+}
+
+enum TaskStatus {
+  pending
+  running
+  verifying
+  done
+  failed
+  skipped
+}
+
+model BuildTask {
+  id           String     @id @default(cuid())
+  planId       String
+  /// Identifiant stable dans le plan, dérivé du GameSpec : c'est lui qui rend
+  /// la reprise idempotente.
+  key          String
+  type         String
+  description  String
+  dependsOn    String[]
+  status       TaskStatus @default(pending)
+  attempt      Int        @default(0)
+  maxAttempts  Int        @default(3)
+  order        Int
+  input        Json
+  result       Json?
+  error        Json?
+  startedAt    DateTime?
+  finishedAt   DateTime?
+  tokensUsed   Int        @default(0)
+  costMicros   Int        @default(0)
+
+  plan BuildPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, key])
+  @@index([planId, status])
+}
+
+// ─── Exécution ──────────────────────────────────────────────────────────────
+
+enum SessionStatus {
+  queued
+  running
+  paused
+  stopping
+  stopped
+  awaiting_human
+  completed
+  failed
+}
+
+/// Une génération. C'est elle que la console affiche.
+model AgentSession {
+  id            String        @id @default(cuid())
+  projectId     String
+  planId        String
+  status        SessionStatus @default(queued)
+  provider      ProviderKind
+  /// Commande humaine en attente, appliquée entre deux tâches : un Stop
+  /// n'interrompt jamais une écriture en cours (section 20).
+  pendingCommand String?
+  /// Raison d'un arrêt : budget atteint, intervention demandée, erreur.
+  stopReason    String?
+  steps         Int           @default(0)
+  retries       Int           @default(0)
+  tokensUsed    Int           @default(0)
+  costMicros    Int           @default(0)
+  startedAt     DateTime?
+  finishedAt    DateTime?
+  lastHeartbeat DateTime?
+  createdAt     DateTime      @default(now())
+
+  project     Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  plan        BuildPlan       @relation(fields: [planId], references: [id], onDelete: Cascade)
+  events      AgentEvent[]
+  usageEvents UsageEvent[]
+  testRuns    TestRun[]
+  errors      BuildError[]
+  version     ProjectVersion?
+
+  @@index([projectId, createdAt])
+  @@index([status])
+}
+
+/// Alimente la console temps réel. Grossit vite : purge des sessions
+/// anciennes prévue, et `seq` sert de curseur au flux SSE (Last-Event-ID).
+model AgentEvent {
+  seq       BigInt   @id @default(autoincrement())
+  sessionId String
+  projectId String
+  type      String
+  level     String   @default("info")
+  taskKey   String?
+  message   String
+  data      Json?
+  createdAt DateTime @default(now())
+
+  session AgentSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, seq])
+  @@index([sessionId, createdAt])
+  @@index([createdAt])
+}
+
+/// Poste local de l'utilisateur (section 9). Le jeton est révocable.
+model LocalAgent {
+  id           String    @id @default(cuid())
+  userId       String
+  machineName  String
+  machineId    String
+  version      String?
+  tokenHash    String    @unique
+  lastSeenAt   DateTime?
+  /// Derniers résultats de vérification des prérequis (section 2.2).
+  diagnostics  Json?
+  revokedAt    DateTime?
+  createdAt    DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, machineId])
+}
+
+/// Battement du worker : si personne ne tourne, la console le dit au lieu
+/// d'afficher une attente sans fin.
+model WorkerHeartbeat {
+  id        String   @id
+  host      String
+  version   String
+  seenAt    DateTime
+  startedAt DateTime
+}
+
+// ─── État observé du projet UEFN ───────────────────────────────────────────
+
+model VerseFile {
+  id          String   @id @default(cuid())
+  projectId   String
+  path        String
+  content     String
+  contentHash String
+  module      String?
+  observedAt  DateTime
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, path])
+}
+
+model DeviceInstance {
+  id           String   @id @default(cuid())
+  projectId    String
+  /// Identifiant dérivé du GameSpec, posé en étiquette dans UEFN : c'est ce
+  /// qui permet de vérifier l'existence avant de recréer.
+  stableId     String
+  uefnId       String?
+  deviceType   String
+  label        String
+  /// Position en Left-Up-Forward, jamais en XYZ (section 2.3).
+  positionLuf  Json
+  properties   Json
+  observedAt   DateTime
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, stableId])
+}
+
+model SceneEntity {
+  id          String   @id @default(cuid())
+  projectId   String
+  stableId    String
+  uefnId      String?
+  name        String
+  components  Json
+  transformLuf Json
+  observedAt  DateTime
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, stableId])
+}
+
+/// État du projet UEFN simulé. N'existe que pour le fournisseur simulé ;
+/// persisté en base pour que la reprise après interruption soit testable.
+model SimulationState {
+  projectId String   @id
+  state     Json
+  /// Compteur d'opérations : graine des pannes déterministes.
+  opCounter Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+// ─── Tests, erreurs, pré-publication ───────────────────────────────────────
+
+enum Severity {
+  blocking
+  warning
+}
+
+/// Générés depuis le GameSpec, jamais écrits à la main (section 17).
+model TestSpec {
+  id          String   @id @default(cuid())
+  projectId   String
+  specVersion Int
+  key         String
+  description String
+  trigger     String
+  assertion   String
+  expected    String
+  severity    Severity
+
+  project Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  results TestResult[]
+
+  @@unique([projectId, specVersion, key])
+}
+
+model TestRun {
+  id         String    @id @default(cuid())
+  sessionId  String
+  attempt    Int
+  startedAt  DateTime
+  finishedAt DateTime?
+  passed     Int       @default(0)
+  failed     Int       @default(0)
+  logCount   Int       @default(0)
+
+  session AgentSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  results TestResult[]
+}
+
+model TestResult {
+  id         String  @id @default(cuid())
+  runId      String
+  testSpecId String
+  passed     Boolean
+  observed   String
+  /// Lignes de log sur lesquelles le verdict s'appuie.
+  evidence   String[]
+
+  run  TestRun  @relation(fields: [runId], references: [id], onDelete: Cascade)
+  spec TestSpec @relation(fields: [testSpecId], references: [id], onDelete: Cascade)
+}
+
+enum ErrorCategory {
+  compile_error
+  verse_error
+  device_error
+  missing_asset
+  invalid_reference
+  runtime_error
+  gameplay_error
+  performance_issue
+  memory_issue
+  mcp_timeout
+  editor_hang
+}
+
+enum FixStatus {
+  proposed
+  applied
+  verified
+  failed
+}
+
+/// Nommée BuildError et non Error : une table Error produirait un type
+/// Prisma qui masquerait l'Error native de JavaScript dans tout le code.
+model BuildError {
+  id           String        @id @default(cuid())
+  projectId    String
+  sessionId    String?
+  category     ErrorCategory
+  severity     Severity
+  /// Fichier, ligne, device ou entité en cause.
+  source       Json
+  /// Le message brut, toujours conservé : une erreur reformulée sans le
+  /// texte d'origine est indébogable (section 19).
+  raw          String
+  evidence     String[]
+  suggestedFix String?
+  fixStatus    FixStatus?
+  attempt      Int           @default(1)
+  createdAt    DateTime      @default(now())
+
+  project Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  session AgentSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+
+  @@index([projectId, createdAt])
+  @@index([sessionId])
+}
+
+model PrePublishCheck {
+  id        String   @id @default(cuid())
+  projectId String
+  sessionId String?
+  ready     Boolean
+  /// Chaque contrôle : clé, libellé, verdict, détail, lien.
+  checks    Json
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, createdAt])
+}
