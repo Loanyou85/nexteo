@@ -1,6 +1,6 @@
 # Architecture — Nexteo
 
-Nexteo transforme une idée de jeu en projet UEFN construit, compilé et testé.
+Nexteo transforme une idée de map en projet UEFN construit, compilé et testé.
 Règle unique : **le LLM propose, les outils exécutent, les vérifications
 confirment.** Jamais « générer puis supposer ».
 
@@ -43,7 +43,7 @@ src/components/    interface
 | `/tarifs` | offres lues en base |
 | `/connexion`, `/inscription` | comptes |
 | `/dashboard` | projets, palier de chacun |
-| `/creer` | idée → plan de jeu éditable → lancement |
+| `/creer` | idée → plan de map éditable → lancement |
 | `/projet/[id]` | aperçu, GameSpec, Verse, devices, entités, tests, erreurs, versions, pré-publication |
 | `/projet/[id]/build/[sessionId]` | console temps réel |
 | `/connexion-uefn` | les prérequis, chacun avec son état et sa correction |

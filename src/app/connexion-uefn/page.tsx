@@ -33,7 +33,7 @@ const ETAPES_ONBOARDING = [
   'Activer UEFN MCP Toolsets dans les paramètres du projet (fonction en accès bêta).',
   'Sélectionner le projet dans l’agent : il écrit le fichier .mcp.json à la racine du projet.',
   'Lancer le test de connexion.',
-  'Créer ton premier jeu.',
+  'Créer ta première map.',
 ];
 
 type Ligne = { nom: string; ok: boolean | null; etat: string; detail?: string; correction: string[] };
@@ -65,7 +65,7 @@ async function Contenu() {
       nom: 'Fortnite',
       ok: inconnu ? null : !!d.fortnite?.installe,
       etat: inconnu ? 'non détecté' : d.fortnite?.installe ? 'installé' : 'absent',
-      correction: ['Installe Fortnite depuis le lanceur Epic Games : les playtests se lancent dans le client du jeu.'],
+      correction: ['Installe Fortnite depuis le lanceur Epic Games : les playtests se lancent dans le client Fortnite.'],
     },
     {
       nom: 'Agent Nexteo',

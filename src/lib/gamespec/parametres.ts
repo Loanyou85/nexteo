@@ -3,7 +3,7 @@ import { specZombie } from '@/lib/gamespec/modeles';
 import { ENVIRONNEMENTS, gameSpecSchema, type GameSpec } from '@/lib/gamespec/schema';
 
 /**
- * Ce que l'utilisateur modifie dans le formulaire du plan de jeu.
+ * Ce que l'utilisateur modifie dans le formulaire du plan de map.
  *
  * On n'édite pas le GameSpec champ par champ : ses parties se tiennent. Passer
  * de 4 à 6 joueurs doit ajouter deux points d'apparition ET changer le test

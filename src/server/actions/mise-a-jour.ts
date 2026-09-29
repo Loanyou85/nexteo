@@ -37,7 +37,7 @@ export async function demanderMiseAJour(projectId: string, _e: EtatMiseAJour, fo
     const r = await appelIA({ userId: user.id, projectId, type: 'plan' }, (ia) =>
       ia.structuredOutput({
         systeme:
-          'Tu modifies les paramètres d’un jeu UEFN selon une demande. Ne change QUE ce que la demande nomme ; recopie tout le reste à l’identique.',
+          'Tu modifies les paramètres d’une map UEFN selon une demande. Ne change QUE ce que la demande nomme ; recopie tout le reste à l’identique.',
         message: `Paramètres actuels : ${JSON.stringify(actuels)}\nDemande : ${demande.data}`,
         schema: parametresSchema,
         nomSchema: 'Parametres',

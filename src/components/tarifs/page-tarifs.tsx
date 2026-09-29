@@ -50,13 +50,13 @@ export type DonneesTarifs = {
 };
 
 const FAQ: [string, string][] = [
-  ['Qu’est-ce qu’un crédit ?', 'L’unité de construction. Il est calibré sur le coût réel des appels d’IA : un jeu complet en consomme environ 10, une mise à jour typique 3. Générer un plan de jeu n’en consomme aucun.'],
-  ['Que se passe-t-il si un build échoue ?', 'Si l’échec vient de la plateforme — éditeur injoignable, panne de l’agent local ou de l’orchestrateur — tes crédits sont restitués automatiquement. S’il vient de la complexité du jeu demandé, ce qui a été réellement consommé est débité, et pas un crédit de plus.'],
+  ['Qu’est-ce qu’un crédit ?', 'L’unité de construction. Il est calibré sur le coût réel des appels d’IA : une map complète en consomme environ 10, une mise à jour typique 3. Générer un plan de map n’en consomme aucun.'],
+  ['Que se passe-t-il si un build échoue ?', 'Si l’échec vient de la plateforme — éditeur injoignable, panne de l’agent local ou de l’orchestrateur — tes crédits sont restitués automatiquement. S’il vient de la complexité de la map demandée, ce qui a été réellement consommé est débité, et pas un crédit de plus.'],
   ['Mes crédits expirent-ils ?', 'Les crédits d’abonnement non utilisés sont reportés un mois, puis expirent. Les crédits de recharge n’expirent jamais. En annuel, les crédits sont versés mois par mois.'],
   ['Puis-je changer d’offre ?', 'Oui. Une montée est immédiate, facturée au prorata, et la différence de crédits est versée tout de suite. Une descente prend effet à la fin de la période en cours.'],
   ['Puis-je résilier quand je veux ?', 'Oui, en deux clics depuis le portail client. Pas de parcours de rétention, pas de faux compte à rebours. Tes crédits restent utilisables jusqu’à l’échéance, et tes recharges sont conservées.'],
   ['Et si je n’ai plus de crédits pendant un build ?', 'Le build réserve son plafond au lancement : il ne peut pas partir à découvert. S’il atteint ce plafond, il s’arrête proprement, garde son état, et te demande une confirmation explicite avant de consommer davantage.'],
-  ['Faut-il un PC Windows ?', 'Oui. UEFN ne tourne que sous Windows, et l’agent Nexteo s’installe sur le PC où UEFN est ouvert. Depuis un Mac, tu peux préparer tes plans de jeu, pas lancer de construction.'],
+  ['Faut-il un PC Windows ?', 'Oui. UEFN ne tourne que sous Windows, et l’agent Nexteo s’installe sur le PC où UEFN est ouvert. Depuis un Mac, tu peux préparer tes plans de map, pas lancer de construction.'],
 ];
 
 function libelleBouton(o: OffreVue, u: DonneesTarifs['utilisateur'], annuel: boolean): { texte: string; actuel: boolean } {
@@ -248,9 +248,9 @@ export function PageTarifs(d: DonneesTarifs) {
     <div className="mx-auto max-w-6xl px-4 pb-20 sm:px-6">
       <header className="pt-14 text-center">
         <h1 className="display text-[44px] leading-none sm:text-[64px]">Choisis ta puissance de construction.</h1>
-        <p className="mx-auto mt-4 max-w-xl text-text-2">
-          Chaque crédit fait avancer l’agent. Un jeu complet consomme environ{' '}
-          {d.bareme.find((b) => b.operation.startsWith('Jeu complet typique'))?.credits ?? 10} crédits.
+        <p className="mx-auto mt-4 max-w-2xl text-text-2">
+          Chaque crédit fait avancer l’agent. Une map complète consomme environ{' '}
+          {d.bareme.find((b) => b.operation.startsWith('Map complète typique'))?.credits ?? 10} crédits.
         </p>
         <div className="mt-8">
           <Basculeur annuel={annuel} onChange={basculer} moisOfferts={mois} />
@@ -314,7 +314,7 @@ export function PageTarifs(d: DonneesTarifs) {
                   ['Crédits par mois', (o: OffreVue) => String(o.monthlyCredits)],
                   ['Prix du crédit', (o: OffreVue) => { const p = prixCreditCents(o.monthlyPriceCents, o.monthlyCredits); return p ? euros(p, 'toujours') : '—'; }],
                   ['Crédit en recharge', (o: OffreVue) => { const p = prixCreditRechargeCents(o.monthlyPriceCents, o.monthlyCredits, d.majorationPct); return p ? euros(p, 'toujours') : '—'; }],
-                  ['Plans de jeu par mois', (o: OffreVue) => (o.monthlyGamePlans === null ? 'illimités' : String(o.monthlyGamePlans))],
+                  ['Plans de map par mois', (o: OffreVue) => (o.monthlyGamePlans === null ? 'illimités' : String(o.monthlyGamePlans))],
                   ['Projets actifs', (o: OffreVue) => (o.maxProjects === null ? 'illimités' : String(o.maxProjects))],
                   ['Builds réels', (o: OffreVue) => (o.monthlyCredits > 0 ? 'oui' : 'non')],
                   ['Historique des versions', (o: OffreVue) => (o.versionHistoryDays === null ? 'illimité' : `${o.versionHistoryDays} jours`)],
@@ -396,9 +396,9 @@ export function PageTarifs(d: DonneesTarifs) {
       </section>
 
       <section className="mt-20 text-center">
-        <h2 className="display text-[40px]">Décris ton jeu. L’agent le construit.</h2>
+        <h2 className="display text-[40px]">Décris ta map. L’agent la construit.</h2>
         <Bouton asChild variant="secondaire" taille="lg" className="mt-6">
-          <Link href={d.utilisateur.connecte ? '/creer' : '/inscription'}>Créer mon jeu</Link>
+          <Link href={d.utilisateur.connecte ? '/creer' : '/inscription'}>Créer ma map</Link>
         </Bouton>
       </section>
     </div>

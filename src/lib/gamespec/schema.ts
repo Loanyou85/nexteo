@@ -180,8 +180,8 @@ export const gameSpecSchema = z
     }),
   })
   .superRefine((s, ctx) => {
-    // Cohérences qu'un schéma de forme ne voit pas, et qui produiraient un
-    // jeu impossible à construire ou à tester.
+    // Cohérences qu'un schéma de forme ne voit pas, et qui produiraient une
+    // map impossible à construire ou à tester.
     const uniques = <T,>(liste: T[], cle: (x: T) => string, chemin: string) => {
       const vus = new Set<string>();
       for (const x of liste) {

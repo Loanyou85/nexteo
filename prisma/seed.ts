@@ -36,8 +36,8 @@ const OFFRES = [
     versionHistoryDays: 30,
     queuePriority: 0,
     realBuilds: false,
-    equivalent: '5 plans de jeu par mois, aucun build',
-    features: [f('5 plans de jeu par mois'), f('GameSpec complet et éditable'), f('Sans carte bancaire')],
+    equivalent: '5 plans de map par mois, aucun build',
+    features: [f('5 plans de map par mois'), f('GameSpec complet et éditable'), f('Sans carte bancaire')],
     isHighlighted: false,
     sortOrder: 0,
     maxCreditsPerBuild: 0,
@@ -45,7 +45,7 @@ const OFFRES = [
   {
     slug: 'createur',
     name: 'Créateur',
-    tagline: 'Pour construire ses premiers jeux.',
+    tagline: 'Pour construire ses premières maps.',
     monthlyPriceCents: 3900,
     annualPriceCents: 39000,
     monthlyCredits: 25,
@@ -55,7 +55,7 @@ const OFFRES = [
     versionHistoryDays: 30,
     queuePriority: 1,
     realBuilds: true,
-    equivalent: '2 jeux, ou 1 jeu + 5 mises à jour',
+    equivalent: '2 maps, ou 1 map + 5 mises à jour',
     features: [
       f('3 projets actifs'),
       f('Builds autonomes'),
@@ -79,7 +79,7 @@ const OFFRES = [
     versionHistoryDays: null,
     queuePriority: 2,
     realBuilds: true,
-    equivalent: '7 jeux, ou 3 jeux + 15 mises à jour',
+    equivalent: '7 maps, ou 3 maps + 15 mises à jour',
     features: [
       f('Projets illimités'),
       f('File de build prioritaire'),
@@ -104,7 +104,7 @@ const OFFRES = [
     versionHistoryDays: null,
     queuePriority: 3,
     realBuilds: true,
-    equivalent: '20 jeux, équipe jusqu’à 5 membres',
+    equivalent: '20 maps, équipe jusqu’à 5 membres',
     features: [
       // Pas encore construit : affiché « bientôt », jamais vendu comme disponible.
       f('Crédits partagés dans l’équipe, jusqu’à 5 membres', false),
@@ -137,11 +137,11 @@ const CONFIG: { key: string; value: string; description: string }[] = [
   {
     key: 'BAREME',
     value: JSON.stringify([
-      { operation: 'Plan de jeu seul', coutCents: 14, credits: 0 },
+      { operation: 'Plan de map seul', coutCents: 14, credits: 0 },
       { operation: 'Mise à jour typique (~20 étapes)', coutCents: 118, credits: 3 },
       { operation: 'Mise à jour lourde (~50 étapes)', coutCents: 282, credits: 7 },
-      { operation: 'Jeu complet typique (~70 étapes)', coutCents: 406, credits: 10 },
-      { operation: 'Jeu complet au plafond (150 étapes)', coutCents: 836, credits: 20 },
+      { operation: 'Map complète typique (~70 étapes)', coutCents: 406, credits: 10 },
+      { operation: 'Map complète au plafond (150 étapes)', coutCents: 836, credits: 20 },
     ]),
     description: 'Barème de référence affiché sur la page de tarifs (coûts estimés, en centimes).',
   },

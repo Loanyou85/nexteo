@@ -6,7 +6,7 @@ Arbitrages pris en construisant, avec leur raison. Le plus récent en bas.
    mention d'absence d'affiliation figure en pied de chaque page.
 2. **Logo : un N original**, condensé, penché, biseauté, en dégradé. Refaire le
    logo de Fortnite avec une autre lettre a été écarté : c'est l'imitation
-   d'une identité protégée, sur un produit payant qui parle de ce jeu.
+   d'une identité protégée, sur un produit payant qui parle de ce jeu vidéo.
 3. **Polices auto-hébergées** (Fontsource) plutôt que chargées chez Google :
    aucune adresse IP de visiteur transmise à un tiers.
 4. **Barre du haut plutôt que latérale** : la console a trois zones côte à côte,
@@ -22,7 +22,7 @@ Arbitrages pris en construisant, avec leur raison. Le plus récent en bas.
    partiel, en plus du bail applicatif.
 9. **Le BuildPlan est construit sans LLM.** Transformer un GameSpec validé en
    graphe de tâches est déterministe ; payer un modèle pour ça coûterait sans
-   rien apporter. Le LLM sert au plan de jeu, au Verse, à l'analyse et aux
+   rien apporter. Le LLM sert au plan de map, au Verse, à l'analyse et aux
    correctifs.
 10. **Worker dédié, plus un pilotage depuis la console pour le simulé.** Vercel
     n'héberge pas de processus permanent. Pour qu'une génération simulée
@@ -96,3 +96,10 @@ Arbitrages pris en construisant, avec leur raison. Le plus récent en bas.
 29. **Les liens entre connexion et inscription gardent `suite`**, pour qu'une
     personne qui a choisi une offre avant d'avoir un compte ne la perde pas en
     changeant de formulaire. La redirection refuse `//hote` et `/\hote`.
+30. **« Map » remplace « jeu » dans tout le texte affiché.** C'est le mot que
+    les créateurs UEFN emploient, et « jeu » prêtait à confusion avec Fortnite
+    lui-même. Les identifiants du code (`GameSpec`, `gameId`, `monthlyGamePlans`)
+    ne changent pas : les renommer aurait exigé une migration sans rien
+    apporter à l'utilisateur. Le seed ne réécrit jamais une base existante ;
+    une base déjà semée garde l'ancien vocabulaire dans les offres et le
+    barème jusqu'à mise à jour manuelle (une base neuve n'est pas concernée).

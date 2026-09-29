@@ -30,7 +30,7 @@ export type TypeTache =
   | 'verify.prepublish';
 
 export const ETAPES = [
-  { cle: 'plan', libelle: 'Plan de jeu vérifié' },
+  { cle: 'plan', libelle: 'Plan de map vérifié' },
   { cle: 'projet', libelle: 'Projet créé' },
   { cle: 'environnement', libelle: 'Environnement construit' },
   { cle: 'apparitions', libelle: 'Système d’apparition' },

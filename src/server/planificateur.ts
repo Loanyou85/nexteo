@@ -12,8 +12,8 @@ import { db } from '@/server/db';
  * enregistrée.
  */
 
-const SYSTEME = `Tu conçois des jeux pour Unreal Editor for Fortnite (UEFN).
-Tu reçois une idée de jeu et un modèle de départ. Tu produis un GameSpec qui personnalise ce modèle.
+const SYSTEME = `Tu conçois des maps pour Unreal Editor for Fortnite (UEFN).
+Tu reçois une idée de map et un modèle de départ. Tu produis un GameSpec qui personnalise ce modèle.
 Règles strictes :
 - Les devices viennent UNIQUEMENT du catalogue fourni : n'invente aucun type de device.
 - Le genre reste celui du modèle : c'est le seul activé.

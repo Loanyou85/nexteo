@@ -86,7 +86,7 @@ const SYSTEME_VERSE = `Tu écris du code Verse pour Unreal Editor for Fortnite (
 Règles :
 - Un fichier = un module, une classe principale dérivée de creative_device quand il pilote des devices.
 - Déclare chaque device utilisé en @editable, jamais de référence inventée.
-- Chaque étape observable émet une ligne Print("[NX] cle=valeur") : c'est ainsi que les tests lisent le jeu.
+- Chaque étape observable émet une ligne Print("[NX] cle=valeur") : c'est ainsi que les tests lisent la map.
 - Pas de dépendance à un module qui n'est pas listé dans le contexte.
 Réponds uniquement avec le contenu complet du fichier et un résumé d'une phrase.`;
 

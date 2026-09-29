@@ -40,7 +40,7 @@ export function verifierPrepublication(f: FaitsPrepublication): { pret: boolean;
     { cle: 'apparitions', libelle: 'Les points d’apparition existent', ok: f.apparitionsJoueur >= f.spec.playerCount, detail: `${f.apparitionsJoueur} point(s) d’apparition pour ${f.spec.playerCount} joueur(s).`, lien: 'devices' },
     { cle: 'victoire', libelle: 'Une condition de victoire existe et se déclenche', ok: f.spec.winConditions.length > 0 && f.testVictoireReussi, detail: f.testVictoireReussi ? 'Observée dans le playtest.' : 'Non observée dans le playtest.', lien: 'tests' },
     { cle: 'defaite', libelle: 'Une condition de défaite existe et se déclenche', ok: f.spec.loseConditions.length > 0 && f.testDefaiteReussi, detail: f.testDefaiteReussi ? 'Observée dans le playtest.' : 'Non observée dans le playtest.', lien: 'tests' },
-    { cle: 'boucle', libelle: 'La boucle de jeu est complète', ok: f.testsBloquants.total > 0 && f.testsBloquants.reussis === f.testsBloquants.total, detail: f.testsBloquants.echoues.length ? `Tests bloquants en échec : ${f.testsBloquants.echoues.join(', ')}.` : `${f.testsBloquants.reussis}/${f.testsBloquants.total} tests bloquants réussis.`, lien: 'tests' },
+    { cle: 'boucle', libelle: 'La boucle de gameplay est complète', ok: f.testsBloquants.total > 0 && f.testsBloquants.reussis === f.testsBloquants.total, detail: f.testsBloquants.echoues.length ? `Tests bloquants en échec : ${f.testsBloquants.echoues.join(', ')}.` : `${f.testsBloquants.reussis}/${f.testsBloquants.total} tests bloquants réussis.`, lien: 'tests' },
     { cle: 'performance', libelle: 'Contrôles de performance accessibles', ok: attendus.length <= f.spec.performanceRequirements.maxDevices, detail: `${attendus.length} devices pour un maximum de ${f.spec.performanceRequirements.maxDevices}. La mémoire réelle se mesure dans UEFN.`, lien: 'devices' },
     { cle: 'metadonnees', libelle: 'Titre, description et mots-clés complets', ok: f.metadonnees.titre.length >= 2 && f.metadonnees.description.length >= 40 && f.metadonnees.motsCles.length >= 3, detail: `${f.metadonnees.motsCles.length} mots-clés, description de ${f.metadonnees.description.length} caractères.`, lien: 'pre-publication' },
     { cle: 'vignette', libelle: 'Prompt de vignette et description générés', ok: f.metadonnees.promptVignette.length > 0, detail: 'L’image elle-même se dépose dans le Creator Portal.', lien: 'pre-publication' },
@@ -56,7 +56,7 @@ export function genererMetadonnees(spec: GameSpec) {
     titre: spec.title,
     description: spec.description.length >= 40 ? spec.description : `${spec.description} ${spec.objectives.join('. ')}.`.trim(),
     motsCles,
-    promptVignette: `Illustration verticale, style jeu vidéo coloré : ${spec.playerCount} survivants dos à dos dans un ${spec.environment.replace('_', ' ')} envahi de zombies, lumière d’urgence, titre « ${spec.title} » en lettres épaisses.`,
+    promptVignette: `Illustration verticale, style cartoon 3D coloré : ${spec.playerCount} survivants dos à dos dans un ${spec.environment.replace('_', ' ')} envahi de zombies, lumière d’urgence, titre « ${spec.title} » en lettres épaisses.`,
     textePromo: `${spec.title} — ${spec.objectives[0] ?? 'Survis'}. ${spec.rounds.count} manches, ${spec.playerCount} joueurs, une seule règle : tenir.`,
   };
 }

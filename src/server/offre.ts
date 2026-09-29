@@ -34,7 +34,7 @@ export function periodeCourante(d = new Date()): string {
   return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
 }
 
-/** Plans de jeu déjà générés ce mois-ci. */
+/** Plans de map déjà générés ce mois-ci. */
 export async function plansDuMois(userId: string): Promise<number> {
   const c = await db.usageCounter.findUnique({
     where: { userId_period: { userId, period: periodeCourante() } },

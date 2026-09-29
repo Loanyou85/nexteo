@@ -2,11 +2,11 @@
  "avertissement": "Enregistrement d’un build réel du scénario de référence, exécuté contre l’éditeur UEFN SIMULÉ avec une IA simulée. Rejoué en accéléré sur l’accueil.",
  "enregistreLe": "2026-09-29",
  "titre": "Zombie Hospital",
- "dureeMs": 59498,
+ "dureeMs": 59712,
  "etapes": [
   {
    "cle": "plan",
-   "libelle": "Plan de jeu vérifié"
+   "libelle": "Plan de map vérifié"
   },
   {
    "cle": "projet",
@@ -59,7 +59,7 @@
    "palier": null
   },
   {
-   "t": 12,
+   "t": 16,
    "type": "session",
    "niveau": "info",
    "etape": null,
@@ -67,7 +67,7 @@
    "palier": null
   },
   {
-   "t": 179,
+   "t": 188,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "plan",
@@ -75,7 +75,7 @@
    "palier": null
   },
   {
-   "t": 343,
+   "t": 352,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "plan",
@@ -83,7 +83,7 @@
    "palier": null
   },
   {
-   "t": 677,
+   "t": 689,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "projet",
@@ -91,7 +91,7 @@
    "palier": null
   },
   {
-   "t": 1295,
+   "t": 1308,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "projet",
@@ -99,7 +99,7 @@
    "palier": null
   },
   {
-   "t": 1629,
+   "t": 1640,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "environnement",
@@ -107,7 +107,7 @@
    "palier": null
   },
   {
-   "t": 2143,
+   "t": 2156,
    "type": "tache_echec",
    "niveau": "fail",
    "etape": "environnement",
@@ -115,7 +115,7 @@
    "palier": null
   },
   {
-   "t": 2150,
+   "t": 2162,
    "type": "verification",
    "niveau": "warn",
    "etape": "environnement",
@@ -123,7 +123,7 @@
    "palier": null
   },
   {
-   "t": 2478,
+   "t": 2493,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "environnement",
@@ -131,7 +131,7 @@
    "palier": null
   },
   {
-   "t": 2791,
+   "t": 2808,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "environnement",
@@ -139,7 +139,7 @@
    "palier": null
   },
   {
-   "t": 3126,
+   "t": 3145,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "environnement",
@@ -147,7 +147,7 @@
    "palier": null
   },
   {
-   "t": 3794,
+   "t": 3813,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "environnement",
@@ -155,7 +155,7 @@
    "palier": null
   },
   {
-   "t": 4130,
+   "t": 4146,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "environnement",
@@ -163,7 +163,7 @@
    "palier": null
   },
   {
-   "t": 4801,
+   "t": 4817,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "environnement",
@@ -171,7 +171,7 @@
    "palier": null
   },
   {
-   "t": 5130,
+   "t": 5151,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "environnement",
@@ -179,7 +179,7 @@
    "palier": null
   },
   {
-   "t": 5802,
+   "t": 5820,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "environnement",
@@ -187,7 +187,7 @@
    "palier": null
   },
   {
-   "t": 6137,
+   "t": 6159,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "environnement",
@@ -195,7 +195,7 @@
    "palier": null
   },
   {
-   "t": 6806,
+   "t": 6829,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "environnement",
@@ -203,7 +203,7 @@
    "palier": null
   },
   {
-   "t": 7139,
+   "t": 7165,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "apparitions",
@@ -211,7 +211,7 @@
    "palier": null
   },
   {
-   "t": 7708,
+   "t": 7734,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "apparitions",
@@ -219,7 +219,7 @@
    "palier": null
   },
   {
-   "t": 8043,
+   "t": 8078,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "apparitions",
@@ -227,7 +227,7 @@
    "palier": null
   },
   {
-   "t": 8513,
+   "t": 8546,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "apparitions",
@@ -235,7 +235,7 @@
    "palier": null
   },
   {
-   "t": 8847,
+   "t": 8887,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "apparitions",
@@ -243,7 +243,7 @@
    "palier": null
   },
   {
-   "t": 9418,
+   "t": 9455,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "apparitions",
@@ -251,7 +251,7 @@
    "palier": null
   },
   {
-   "t": 9755,
+   "t": 9795,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "apparitions",
@@ -259,7 +259,7 @@
    "palier": null
   },
   {
-   "t": 10223,
+   "t": 10263,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "apparitions",
@@ -267,7 +267,7 @@
    "palier": null
   },
   {
-   "t": 10563,
+   "t": 10605,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "apparitions",
@@ -275,7 +275,7 @@
    "palier": null
   },
   {
-   "t": 11130,
+   "t": 11172,
    "type": "tache_echec",
    "niveau": "fail",
    "etape": "apparitions",
@@ -283,7 +283,7 @@
    "palier": null
   },
   {
-   "t": 11135,
+   "t": 11177,
    "type": "verification",
    "niveau": "warn",
    "etape": "apparitions",
@@ -291,7 +291,7 @@
    "palier": null
   },
   {
-   "t": 11464,
+   "t": 11503,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "apparitions",
@@ -299,7 +299,7 @@
    "palier": null
   },
   {
-   "t": 12034,
+   "t": 12075,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "apparitions",
@@ -307,7 +307,7 @@
    "palier": null
   },
   {
-   "t": 12368,
+   "t": 12411,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "apparitions",
@@ -315,7 +315,7 @@
    "palier": null
   },
   {
-   "t": 12836,
+   "t": 12879,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "apparitions",
@@ -323,7 +323,7 @@
    "palier": null
   },
   {
-   "t": 13169,
+   "t": 13219,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "apparitions",
@@ -331,7 +331,7 @@
    "palier": null
   },
   {
-   "t": 13737,
+   "t": 13787,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "apparitions",
@@ -339,7 +339,7 @@
    "palier": null
   },
   {
-   "t": 14069,
+   "t": 14124,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "apparitions",
@@ -347,7 +347,7 @@
    "palier": null
   },
   {
-   "t": 14539,
+   "t": 14592,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "apparitions",
@@ -355,7 +355,7 @@
    "palier": null
   },
   {
-   "t": 14875,
+   "t": 14931,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "zombies",
@@ -363,7 +363,7 @@
    "palier": null
   },
   {
-   "t": 15442,
+   "t": 15500,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "zombies",
@@ -371,7 +371,7 @@
    "palier": null
   },
   {
-   "t": 15785,
+   "t": 15837,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "zombies",
@@ -379,7 +379,7 @@
    "palier": null
   },
   {
-   "t": 16253,
+   "t": 16306,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "zombies",
@@ -387,7 +387,7 @@
    "palier": null
   },
   {
-   "t": 16596,
+   "t": 16644,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "zombies",
@@ -395,7 +395,7 @@
    "palier": null
   },
   {
-   "t": 17165,
+   "t": 17214,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "zombies",
@@ -403,7 +403,7 @@
    "palier": null
   },
   {
-   "t": 17501,
+   "t": 17559,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "zombies",
@@ -411,7 +411,7 @@
    "palier": null
   },
   {
-   "t": 17969,
+   "t": 18029,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "zombies",
@@ -419,7 +419,7 @@
    "palier": null
   },
   {
-   "t": 18310,
+   "t": 18367,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "zombies",
@@ -427,7 +427,7 @@
    "palier": null
   },
   {
-   "t": 18880,
+   "t": 18938,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "zombies",
@@ -435,7 +435,7 @@
    "palier": null
   },
   {
-   "t": 19218,
+   "t": 19280,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "zombies",
@@ -443,7 +443,7 @@
    "palier": null
   },
   {
-   "t": 19686,
+   "t": 19750,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "zombies",
@@ -451,7 +451,7 @@
    "palier": null
   },
   {
-   "t": 20025,
+   "t": 20089,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "zombies",
@@ -459,7 +459,7 @@
    "palier": null
   },
   {
-   "t": 20594,
+   "t": 20660,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "zombies",
@@ -467,7 +467,7 @@
    "palier": null
   },
   {
-   "t": 20940,
+   "t": 21015,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "zombies",
@@ -475,7 +475,7 @@
    "palier": null
   },
   {
-   "t": 21409,
+   "t": 21487,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "zombies",
@@ -483,7 +483,7 @@
    "palier": null
   },
   {
-   "t": 21749,
+   "t": 21830,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "regles",
@@ -491,7 +491,7 @@
    "palier": null
   },
   {
-   "t": 22320,
+   "t": 22400,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "regles",
@@ -499,7 +499,7 @@
    "palier": null
   },
   {
-   "t": 22661,
+   "t": 22742,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "regles",
@@ -507,7 +507,7 @@
    "palier": null
   },
   {
-   "t": 23129,
+   "t": 23212,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "regles",
@@ -515,7 +515,7 @@
    "palier": null
   },
   {
-   "t": 23470,
+   "t": 23558,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "regles",
@@ -523,7 +523,7 @@
    "palier": null
   },
   {
-   "t": 24038,
+   "t": 24128,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "regles",
@@ -531,7 +531,7 @@
    "palier": null
   },
   {
-   "t": 24376,
+   "t": 24467,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "regles",
@@ -539,7 +539,7 @@
    "palier": null
   },
   {
-   "t": 24845,
+   "t": 24939,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "regles",
@@ -547,7 +547,7 @@
    "palier": null
   },
   {
-   "t": 25182,
+   "t": 25286,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "regles",
@@ -555,7 +555,7 @@
    "palier": null
   },
   {
-   "t": 25752,
+   "t": 25875,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "regles",
@@ -563,7 +563,7 @@
    "palier": null
   },
   {
-   "t": 26095,
+   "t": 26229,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "regles",
@@ -571,7 +571,7 @@
    "palier": null
   },
   {
-   "t": 26409,
+   "t": 26541,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "regles",
@@ -579,7 +579,7 @@
    "palier": null
   },
   {
-   "t": 26759,
+   "t": 26879,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "regles",
@@ -587,7 +587,7 @@
    "palier": null
   },
   {
-   "t": 27328,
+   "t": 27448,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "regles",
@@ -595,7 +595,7 @@
    "palier": null
   },
   {
-   "t": 27668,
+   "t": 27791,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "regles",
@@ -603,7 +603,7 @@
    "palier": null
   },
   {
-   "t": 28139,
+   "t": 28261,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "regles",
@@ -611,7 +611,7 @@
    "palier": null
   },
   {
-   "t": 28482,
+   "t": 28599,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "regles",
@@ -619,7 +619,7 @@
    "palier": null
   },
   {
-   "t": 29052,
+   "t": 29167,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "regles",
@@ -627,7 +627,7 @@
    "palier": null
   },
   {
-   "t": 29391,
+   "t": 29506,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "regles",
@@ -635,7 +635,7 @@
    "palier": null
   },
   {
-   "t": 29703,
+   "t": 29817,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "regles",
@@ -643,7 +643,7 @@
    "palier": null
   },
   {
-   "t": 30044,
+   "t": 30160,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "regles",
@@ -651,7 +651,7 @@
    "palier": null
   },
   {
-   "t": 30615,
+   "t": 30732,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "regles",
@@ -659,7 +659,7 @@
    "palier": null
   },
   {
-   "t": 30970,
+   "t": 31081,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "regles",
@@ -667,7 +667,7 @@
    "palier": null
   },
   {
-   "t": 31445,
+   "t": 31552,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "regles",
@@ -675,7 +675,7 @@
    "palier": null
   },
   {
-   "t": 31794,
+   "t": 31897,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "regles",
@@ -683,7 +683,7 @@
    "palier": null
   },
   {
-   "t": 32364,
+   "t": 32468,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "regles",
@@ -691,7 +691,7 @@
    "palier": null
   },
   {
-   "t": 32710,
+   "t": 32812,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "regles",
@@ -699,7 +699,7 @@
    "palier": null
   },
   {
-   "t": 33181,
+   "t": 33282,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "regles",
@@ -707,7 +707,7 @@
    "palier": null
   },
   {
-   "t": 33521,
+   "t": 33627,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "regles",
@@ -715,7 +715,7 @@
    "palier": null
   },
   {
-   "t": 34092,
+   "t": 34199,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "regles",
@@ -723,7 +723,7 @@
    "palier": null
   },
   {
-   "t": 34434,
+   "t": 34540,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "regles",
@@ -731,7 +731,7 @@
    "palier": null
   },
   {
-   "t": 34746,
+   "t": 34853,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "regles",
@@ -739,7 +739,7 @@
    "palier": null
   },
   {
-   "t": 35094,
+   "t": 35196,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "verse",
@@ -747,7 +747,7 @@
    "palier": null
   },
   {
-   "t": 35728,
+   "t": 35828,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "verse",
@@ -755,7 +755,7 @@
    "palier": null
   },
   {
-   "t": 36081,
+   "t": 36178,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "verse",
@@ -763,7 +763,7 @@
    "palier": null
   },
   {
-   "t": 36712,
+   "t": 36811,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "verse",
@@ -771,7 +771,7 @@
    "palier": null
   },
   {
-   "t": 37056,
+   "t": 37160,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "verse",
@@ -779,7 +779,7 @@
    "palier": null
   },
   {
-   "t": 37687,
+   "t": 37789,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "verse",
@@ -787,7 +787,7 @@
    "palier": null
   },
   {
-   "t": 38032,
+   "t": 38135,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "verse",
@@ -795,7 +795,7 @@
    "palier": null
   },
   {
-   "t": 38664,
+   "t": 38765,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "verse",
@@ -803,7 +803,7 @@
    "palier": null
   },
   {
-   "t": 39011,
+   "t": 39114,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "verse",
@@ -811,7 +811,7 @@
    "palier": null
   },
   {
-   "t": 39642,
+   "t": 39743,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "verse",
@@ -819,7 +819,7 @@
    "palier": null
   },
   {
-   "t": 39996,
+   "t": 40093,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "compilation",
@@ -827,7 +827,7 @@
    "palier": null
   },
   {
-   "t": 41615,
+   "t": 41712,
    "type": "erreur",
    "niveau": "fail",
    "etape": "compilation",
@@ -835,7 +835,7 @@
    "palier": null
   },
   {
-   "t": 41619,
+   "t": 41715,
    "type": "erreur",
    "niveau": "fail",
    "etape": "compilation",
@@ -843,7 +843,7 @@
    "palier": null
   },
   {
-   "t": 41622,
+   "t": 41718,
    "type": "tache_echec",
    "niveau": "fail",
    "etape": "compilation",
@@ -851,7 +851,7 @@
    "palier": null
   },
   {
-   "t": 41673,
+   "t": 41771,
    "type": "correctif",
    "niveau": "warn",
    "etape": null,
@@ -859,7 +859,7 @@
    "palier": null
   },
   {
-   "t": 42016,
+   "t": 42116,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "debogage",
@@ -867,7 +867,7 @@
    "palier": null
   },
   {
-   "t": 42185,
+   "t": 42285,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "debogage",
@@ -875,7 +875,7 @@
    "palier": null
   },
   {
-   "t": 42528,
+   "t": 42634,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "debogage",
@@ -883,7 +883,7 @@
    "palier": null
   },
   {
-   "t": 43165,
+   "t": 43267,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "debogage",
@@ -891,7 +891,7 @@
    "palier": null
   },
   {
-   "t": 43509,
+   "t": 43622,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "debogage",
@@ -899,7 +899,7 @@
    "palier": null
   },
   {
-   "t": 43675,
+   "t": 43790,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "debogage",
@@ -907,7 +907,7 @@
    "palier": null
   },
   {
-   "t": 44017,
+   "t": 44138,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "debogage",
@@ -915,7 +915,7 @@
    "palier": null
   },
   {
-   "t": 44649,
+   "t": 44770,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "debogage",
@@ -923,7 +923,7 @@
    "palier": null
   },
   {
-   "t": 44991,
+   "t": 45122,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "compilation",
@@ -931,7 +931,7 @@
    "palier": null
   },
   {
-   "t": 46611,
+   "t": 46742,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "compilation",
@@ -939,7 +939,7 @@
    "palier": null
   },
   {
-   "t": 46625,
+   "t": 46755,
    "type": "palier",
    "niveau": "ok",
    "etape": null,
@@ -947,7 +947,7 @@
    "palier": 2
   },
   {
-   "t": 46962,
+   "t": 47104,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "playtest",
@@ -955,7 +955,7 @@
    "palier": null
   },
   {
-   "t": 49399,
+   "t": 49547,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "playtest",
@@ -963,7 +963,7 @@
    "palier": null
   },
   {
-   "t": 49740,
+   "t": 49920,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "playtest",
@@ -971,7 +971,7 @@
    "palier": null
   },
   {
-   "t": 50147,
+   "t": 50328,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -979,7 +979,7 @@
    "palier": null
   },
   {
-   "t": 50149,
+   "t": 50330,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -987,7 +987,7 @@
    "palier": null
   },
   {
-   "t": 50151,
+   "t": 50332,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -995,7 +995,7 @@
    "palier": null
   },
   {
-   "t": 50153,
+   "t": 50333,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1003,7 +1003,7 @@
    "palier": null
   },
   {
-   "t": 50154,
+   "t": 50335,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1011,7 +1011,7 @@
    "palier": null
   },
   {
-   "t": 50156,
+   "t": 50336,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1019,7 +1019,7 @@
    "palier": null
   },
   {
-   "t": 50157,
+   "t": 50338,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1027,7 +1027,7 @@
    "palier": null
   },
   {
-   "t": 50159,
+   "t": 50339,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1035,7 +1035,7 @@
    "palier": null
   },
   {
-   "t": 50160,
+   "t": 50341,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1043,7 +1043,7 @@
    "palier": null
   },
   {
-   "t": 50162,
+   "t": 50342,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1051,7 +1051,7 @@
    "palier": null
   },
   {
-   "t": 50164,
+   "t": 50343,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1059,7 +1059,7 @@
    "palier": null
   },
   {
-   "t": 50165,
+   "t": 50345,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1067,7 +1067,7 @@
    "palier": null
   },
   {
-   "t": 50167,
+   "t": 50346,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1075,7 +1075,7 @@
    "palier": null
   },
   {
-   "t": 50168,
+   "t": 50348,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1083,7 +1083,7 @@
    "palier": null
   },
   {
-   "t": 50170,
+   "t": 50349,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1091,7 +1091,7 @@
    "palier": null
   },
   {
-   "t": 50171,
+   "t": 50350,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1099,7 +1099,7 @@
    "palier": null
   },
   {
-   "t": 50173,
+   "t": 50352,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1107,7 +1107,7 @@
    "palier": null
   },
   {
-   "t": 50174,
+   "t": 50353,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1115,7 +1115,7 @@
    "palier": null
   },
   {
-   "t": 50176,
+   "t": 50355,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1123,7 +1123,7 @@
    "palier": null
   },
   {
-   "t": 50177,
+   "t": 50356,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1131,7 +1131,7 @@
    "palier": null
   },
   {
-   "t": 50178,
+   "t": 50357,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1139,7 +1139,7 @@
    "palier": null
   },
   {
-   "t": 50180,
+   "t": 50359,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1147,7 +1147,7 @@
    "palier": null
   },
   {
-   "t": 50182,
+   "t": 50360,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1155,7 +1155,7 @@
    "palier": null
   },
   {
-   "t": 50183,
+   "t": 50361,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1163,7 +1163,7 @@
    "palier": null
   },
   {
-   "t": 50185,
+   "t": 50363,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1171,7 +1171,7 @@
    "palier": null
   },
   {
-   "t": 50186,
+   "t": 50364,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1179,7 +1179,7 @@
    "palier": null
   },
   {
-   "t": 50188,
+   "t": 50366,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1187,7 +1187,7 @@
    "palier": null
   },
   {
-   "t": 50189,
+   "t": 50367,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1195,7 +1195,7 @@
    "palier": null
   },
   {
-   "t": 50191,
+   "t": 50369,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1203,7 +1203,7 @@
    "palier": null
   },
   {
-   "t": 50192,
+   "t": 50370,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1211,7 +1211,7 @@
    "palier": null
   },
   {
-   "t": 50232,
+   "t": 50410,
    "type": "test",
    "niveau": "ok",
    "etape": "playtest",
@@ -1219,7 +1219,7 @@
    "palier": null
   },
   {
-   "t": 50236,
+   "t": 50414,
    "type": "test",
    "niveau": "ok",
    "etape": "playtest",
@@ -1227,7 +1227,7 @@
    "palier": null
   },
   {
-   "t": 50239,
+   "t": 50418,
    "type": "test",
    "niveau": "ok",
    "etape": "playtest",
@@ -1235,7 +1235,7 @@
    "palier": null
   },
   {
-   "t": 50242,
+   "t": 50421,
    "type": "test",
    "niveau": "fail",
    "etape": "playtest",
@@ -1243,7 +1243,7 @@
    "palier": null
   },
   {
-   "t": 50247,
+   "t": 50427,
    "type": "test",
    "niveau": "ok",
    "etape": "playtest",
@@ -1251,7 +1251,7 @@
    "palier": null
   },
   {
-   "t": 50250,
+   "t": 50430,
    "type": "test",
    "niveau": "ok",
    "etape": "playtest",
@@ -1259,7 +1259,7 @@
    "palier": null
   },
   {
-   "t": 50254,
+   "t": 50433,
    "type": "test",
    "niveau": "ok",
    "etape": "playtest",
@@ -1267,7 +1267,7 @@
    "palier": null
   },
   {
-   "t": 50257,
+   "t": 50436,
    "type": "test",
    "niveau": "ok",
    "etape": "playtest",
@@ -1275,7 +1275,7 @@
    "palier": null
   },
   {
-   "t": 50264,
+   "t": 50441,
    "type": "tache_echec",
    "niveau": "fail",
    "etape": "playtest",
@@ -1283,7 +1283,7 @@
    "palier": null
   },
   {
-   "t": 50282,
+   "t": 50457,
    "type": "palier",
    "niveau": "ok",
    "etape": null,
@@ -1291,7 +1291,7 @@
    "palier": 3
   },
   {
-   "t": 50322,
+   "t": 50513,
    "type": "correctif",
    "niveau": "warn",
    "etape": null,
@@ -1299,7 +1299,7 @@
    "palier": null
   },
   {
-   "t": 50663,
+   "t": 50875,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "debogage",
@@ -1307,7 +1307,7 @@
    "palier": null
   },
   {
-   "t": 50832,
+   "t": 51049,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "debogage",
@@ -1315,7 +1315,7 @@
    "palier": null
   },
   {
-   "t": 51182,
+   "t": 51403,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "debogage",
@@ -1323,7 +1323,7 @@
    "palier": null
   },
   {
-   "t": 51814,
+   "t": 52036,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "debogage",
@@ -1331,7 +1331,7 @@
    "palier": null
   },
   {
-   "t": 52173,
+   "t": 52398,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "compilation",
@@ -1339,7 +1339,7 @@
    "palier": null
   },
   {
-   "t": 53792,
+   "t": 54019,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "compilation",
@@ -1347,7 +1347,7 @@
    "palier": null
   },
   {
-   "t": 54140,
+   "t": 54373,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "playtest",
@@ -1355,7 +1355,7 @@
    "palier": null
   },
   {
-   "t": 56638,
+   "t": 56815,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "playtest",
@@ -1363,7 +1363,7 @@
    "palier": null
   },
   {
-   "t": 56996,
+   "t": 57162,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "playtest",
@@ -1371,7 +1371,7 @@
    "palier": null
   },
   {
-   "t": 57402,
+   "t": 57569,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1379,7 +1379,7 @@
    "palier": null
   },
   {
-   "t": 57404,
+   "t": 57571,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1387,7 +1387,7 @@
    "palier": null
   },
   {
-   "t": 57406,
+   "t": 57572,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1395,7 +1395,7 @@
    "palier": null
   },
   {
-   "t": 57408,
+   "t": 57574,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1403,7 +1403,7 @@
    "palier": null
   },
   {
-   "t": 57410,
+   "t": 57576,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1411,7 +1411,7 @@
    "palier": null
   },
   {
-   "t": 57411,
+   "t": 57577,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1419,7 +1419,7 @@
    "palier": null
   },
   {
-   "t": 57413,
+   "t": 57579,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1427,7 +1427,7 @@
    "palier": null
   },
   {
-   "t": 57414,
+   "t": 57581,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1435,7 +1435,7 @@
    "palier": null
   },
   {
-   "t": 57415,
+   "t": 57583,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1443,7 +1443,7 @@
    "palier": null
   },
   {
-   "t": 57416,
+   "t": 57585,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1451,7 +1451,7 @@
    "palier": null
   },
   {
-   "t": 57417,
+   "t": 57586,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1459,7 +1459,7 @@
    "palier": null
   },
   {
-   "t": 57419,
+   "t": 57588,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1467,7 +1467,7 @@
    "palier": null
   },
   {
-   "t": 57420,
+   "t": 57591,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1475,7 +1475,7 @@
    "palier": null
   },
   {
-   "t": 57421,
+   "t": 57592,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1483,7 +1483,7 @@
    "palier": null
   },
   {
-   "t": 57422,
+   "t": 57594,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1491,7 +1491,7 @@
    "palier": null
   },
   {
-   "t": 57424,
+   "t": 57595,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1499,7 +1499,7 @@
    "palier": null
   },
   {
-   "t": 57425,
+   "t": 57597,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1507,7 +1507,7 @@
    "palier": null
   },
   {
-   "t": 57427,
+   "t": 57598,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1515,7 +1515,7 @@
    "palier": null
   },
   {
-   "t": 57428,
+   "t": 57600,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1523,7 +1523,7 @@
    "palier": null
   },
   {
-   "t": 57429,
+   "t": 57604,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1531,7 +1531,7 @@
    "palier": null
   },
   {
-   "t": 57430,
+   "t": 57606,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1539,7 +1539,7 @@
    "palier": null
   },
   {
-   "t": 57431,
+   "t": 57608,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1547,7 +1547,7 @@
    "palier": null
   },
   {
-   "t": 57433,
+   "t": 57610,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1555,7 +1555,7 @@
    "palier": null
   },
   {
-   "t": 57434,
+   "t": 57611,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1563,7 +1563,7 @@
    "palier": null
   },
   {
-   "t": 57435,
+   "t": 57613,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1571,7 +1571,7 @@
    "palier": null
   },
   {
-   "t": 57437,
+   "t": 57616,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1579,7 +1579,7 @@
    "palier": null
   },
   {
-   "t": 57438,
+   "t": 57618,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1587,7 +1587,7 @@
    "palier": null
   },
   {
-   "t": 57439,
+   "t": 57619,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1595,7 +1595,7 @@
    "palier": null
   },
   {
-   "t": 57441,
+   "t": 57621,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1603,7 +1603,7 @@
    "palier": null
   },
   {
-   "t": 57442,
+   "t": 57622,
    "type": "log",
    "niveau": "info",
    "etape": "playtest",
@@ -1611,7 +1611,7 @@
    "palier": null
   },
   {
-   "t": 57452,
+   "t": 57636,
    "type": "test",
    "niveau": "ok",
    "etape": "playtest",
@@ -1619,7 +1619,7 @@
    "palier": null
   },
   {
-   "t": 57455,
+   "t": 57641,
    "type": "test",
    "niveau": "ok",
    "etape": "playtest",
@@ -1627,7 +1627,7 @@
    "palier": null
   },
   {
-   "t": 57458,
+   "t": 57644,
    "type": "test",
    "niveau": "ok",
    "etape": "playtest",
@@ -1635,7 +1635,7 @@
    "palier": null
   },
   {
-   "t": 57461,
+   "t": 57647,
    "type": "test",
    "niveau": "ok",
    "etape": "playtest",
@@ -1643,7 +1643,7 @@
    "palier": null
   },
   {
-   "t": 57463,
+   "t": 57650,
    "type": "test",
    "niveau": "ok",
    "etape": "playtest",
@@ -1651,7 +1651,7 @@
    "palier": null
   },
   {
-   "t": 57465,
+   "t": 57653,
    "type": "test",
    "niveau": "ok",
    "etape": "playtest",
@@ -1659,7 +1659,7 @@
    "palier": null
   },
   {
-   "t": 57468,
+   "t": 57656,
    "type": "test",
    "niveau": "ok",
    "etape": "playtest",
@@ -1667,7 +1667,7 @@
    "palier": null
   },
   {
-   "t": 57471,
+   "t": 57659,
    "type": "test",
    "niveau": "ok",
    "etape": "playtest",
@@ -1675,7 +1675,7 @@
    "palier": null
   },
   {
-   "t": 57478,
+   "t": 57667,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "playtest",
@@ -1683,15 +1683,15 @@
    "palier": null
   },
   {
-   "t": 57492,
+   "t": 57684,
    "type": "palier",
    "niveau": "ok",
    "etape": null,
-   "message": "Palier 4 — Validé. Tous les tests bloquants du plan de jeu passent.",
+   "message": "Palier 4 — Validé. Tous les tests bloquants du plan de map passent.",
    "palier": 4
   },
   {
-   "t": 57837,
+   "t": 58044,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "playtest",
@@ -1699,7 +1699,7 @@
    "palier": null
   },
   {
-   "t": 58765,
+   "t": 58978,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "playtest",
@@ -1707,7 +1707,7 @@
    "palier": null
   },
   {
-   "t": 59109,
+   "t": 59332,
    "type": "tache_debut",
    "niveau": "info",
    "etape": "validation",
@@ -1715,7 +1715,7 @@
    "palier": null
   },
   {
-   "t": 59286,
+   "t": 59501,
    "type": "tache_fin",
    "niveau": "ok",
    "etape": "validation",
@@ -1723,7 +1723,7 @@
    "palier": null
   },
   {
-   "t": 59298,
+   "t": 59514,
    "type": "palier",
    "niveau": "ok",
    "etape": null,
@@ -1731,7 +1731,7 @@
    "palier": 5
   },
   {
-   "t": 59511,
+   "t": 59727,
    "type": "session",
    "niveau": "ok",
    "etape": null,
@@ -1739,7 +1739,7 @@
    "palier": null
   },
   {
-   "t": 59513,
+   "t": 59729,
    "type": "palier",
    "niveau": "info",
    "etape": null,

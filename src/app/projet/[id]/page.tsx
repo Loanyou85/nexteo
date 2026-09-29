@@ -303,7 +303,7 @@ async function OngletContenu({ onglet, projet }: { onglet: Onglet; projet: { id:
       orderBy: { startedAt: 'desc' },
       include: { results: { include: { spec: true } } },
     });
-    if (!run) return <Vide texte="Aucun playtest pour l’instant. Les tests sont générés depuis le plan de jeu et vérifiés sur les logs." />;
+    if (!run) return <Vide texte="Aucun playtest pour l’instant. Les tests sont générés depuis le plan de map et vérifiés sur les logs." />;
     return (
       <div className="space-y-3">
         <p className="text-sm text-text-2">

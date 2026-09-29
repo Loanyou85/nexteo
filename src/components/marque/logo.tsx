@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
  *
  * Un monogramme dessiné pour ce produit : un N condensé et très gras, penché
  * vers l'avant, dont les deux angles extérieurs sont biseautés comme le reste
- * de l'interface. Il emprunte au jeu une énergie, pas une forme — aucune
+ * de l'interface. Il emprunte au monde de la map une énergie, pas une forme — aucune
  * lettre, aucune police, aucun contour n'est repris d'un logo existant.
  */
 export const TRACE_N =

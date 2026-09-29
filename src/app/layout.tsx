@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.AUTH_URL ?? `https://${MARQUE.domaine}`),
   title: { default: `${MARQUE.nom} — ${MARQUE.promesse}`, template: `%s — ${MARQUE.nom}` },
   description:
-    'Décris ton jeu. L’agent écrit le Verse, place les devices, compile, lance le playtest, lit les erreurs et les corrige — dans ton UEFN, sur ton PC.',
+    'Décris ta map. L’agent écrit le Verse, place les devices, compile, lance le playtest, lit les erreurs et les corrige — dans ton UEFN, sur ton PC.',
 };
 
 export const viewport: Viewport = {

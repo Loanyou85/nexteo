@@ -8,7 +8,7 @@ const spec = specZombie({ gameId: 'g' });
 
 describe('lecture de l’idée', () => {
   it('lit ce qui est écrit, et seulement ça', () => {
-    expect(lireIdee('Crée un jeu de survie zombie à 4 joueurs.')).toEqual({
+    expect(lireIdee('Crée une map de survie zombie à 4 joueurs.')).toEqual({
       playerCount: 4,
       rounds: undefined,
       bossRound: undefined,
@@ -26,10 +26,10 @@ describe('lecture de l’idée', () => {
   it('produit un GameSpec valide pour le scénario de référence', async () => {
     const r = await new IASimulee().structuredOutput({
       systeme: '',
-      message: 'Crée un jeu de survie zombie à 4 joueurs.',
+      message: 'Crée une map de survie zombie à 4 joueurs.',
       schema: gameSpecSchema,
       nomSchema: 'GameSpec',
-      simulation: { idee: 'Crée un jeu de survie zombie à 4 joueurs.', titre: 'Zombie Hospital', gameId: 'g1' },
+      simulation: { idee: 'Crée une map de survie zombie à 4 joueurs.', titre: 'Zombie Hospital', gameId: 'g1' },
     });
     expect(r.valeur.playerCount).toBe(4);
     expect(r.usage.inputTokens).toBeGreaterThan(0);

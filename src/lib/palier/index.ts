@@ -4,7 +4,7 @@
  * L'état d'un projet est affiché comme une rareté : gris, vert, bleu, violet,
  * or. Tout joueur lit instantanément ce que veut dire passer de l'un à
  * l'autre. Le palier est CALCULÉ à partir de faits vérifiés — jamais posé à la
- * main, jamais avancé par optimisme. Chaque palier exige le précédent : un jeu
+ * main, jamais avancé par optimisme. Chaque palier exige le précédent : une map
  * dont un test passe mais qui ne compile plus redescend au gris.
  */
 
@@ -17,7 +17,7 @@ export const PALIERS: Record<
   1: {
     cle: 'brouillon',
     libelle: 'Brouillon',
-    sens: 'Le plan de jeu existe, rien n’est construit.',
+    sens: 'Le plan de map existe, rien n’est construit.',
     couleur: '#9AA3BD',
     classeTexte: 'text-tier-1',
     classeFond: 'bg-tier-1',
@@ -41,7 +41,7 @@ export const PALIERS: Record<
   4: {
     cle: 'valide',
     libelle: 'Validé',
-    sens: 'Tous les tests bloquants du plan de jeu passent.',
+    sens: 'Tous les tests bloquants du plan de map passent.',
     couleur: '#A855F7',
     classeTexte: 'text-tier-4',
     classeFond: 'bg-tier-4',

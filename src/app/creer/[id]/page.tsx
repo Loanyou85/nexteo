@@ -15,7 +15,7 @@ import { modeUefn } from '@/server/mode';
 import { estimer } from '@/server/orchestrateur/lancement';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Plan de jeu' };
+export const metadata = { title: 'Plan de map' };
 
 export default async function PlanPage({ params }: { params: Promise<{ id: string }> }) {
   return (
@@ -44,7 +44,7 @@ async function Contenu({ params }: { params: Promise<{ id: string }> }) {
     <>
       <EnTete
         avant={<Etapes active={2} />}
-        titre="Le plan de jeu"
+        titre="Le plan de map"
         sous={
           <>
             Corrige ce qui ne va pas avant de lancer. Version {projet.currentSpecVersion}

@@ -20,7 +20,7 @@ describe('GameSpec', () => {
     if (!r.ok) expect(r.erreurs.join(' ')).toMatch(/manche 8/);
   });
 
-  it('refuse un jeu sans apparition joueur', () => {
+  it('refuse une map sans apparition joueur', () => {
     const s = specZombie({ gameId: 'g1' });
     const r = lireGameSpec({ ...s, spawnPoints: s.spawnPoints.filter((p) => p.kind !== 'player') });
     expect(r.ok).toBe(false);

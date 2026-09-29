@@ -11,11 +11,11 @@ export default function Confidentialite() {
         <p className="text-warn">Version 2026-09-uefn. Les mentions entre crochets sont à compléter par l’éditeur avant l’ouverture au public.</p>
         <section>
           <h2 className="text-lg font-medium text-text-1">Ce que nous conservons</h2>
-          <p>Ton adresse e-mail, ton prénom et une empreinte de ton mot de passe (jamais le mot de passe lui-même). Tes projets : plans de jeu, code Verse relu dans ton éditeur, devices, historique des générations, erreurs et logs de playtest. Ton registre de crédits et tes abonnements.</p>
+          <p>Ton adresse e-mail, ton prénom et une empreinte de ton mot de passe (jamais le mot de passe lui-même). Tes projets : plans de map, code Verse relu dans ton éditeur, devices, historique des générations, erreurs et logs de playtest. Ton registre de crédits et tes abonnements.</p>
         </section>
         <section>
           <h2 className="text-lg font-medium text-text-1">Ton code Verse est envoyé au fournisseur d’IA</h2>
-          <p>Pour écrire et corriger ton jeu, le plan de jeu et le code Verse de tes projets sont transmis au fournisseur d’IA (Anthropic). C’est la condition du service : sans cet envoi, l’agent ne peut ni générer ni corriger. Aucun secret, aucun mot de passe, aucune donnée de paiement n’est envoyé au modèle.</p>
+          <p>Pour construire et corriger ta map, le plan de map et le code Verse de tes projets sont transmis au fournisseur d’IA (Anthropic). C’est la condition du service : sans cet envoi, l’agent ne peut ni générer ni corriger. Aucun secret, aucun mot de passe, aucune donnée de paiement n’est envoyé au modèle.</p>
         </section>
         <section>
           <h2 className="text-lg font-medium text-text-1">Paiements</h2>

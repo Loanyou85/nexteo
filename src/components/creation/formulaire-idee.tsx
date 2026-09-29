@@ -9,7 +9,7 @@ import { genererPlan, type EtatCreation } from '@/server/actions/projets';
 
 const EXEMPLE = {
   titre: 'Zombie Hospital',
-  idee: 'Crée un jeu de survie zombie à 4 joueurs dans un hôpital : 10 manches de plus en plus dures, de l’or à chaque élimination pour s’équiper entre les vagues, et un boss à la manche 10.',
+  idee: 'Crée une map de survie zombie à 4 joueurs dans un hôpital : 10 manches de plus en plus dures, de l’or à chaque élimination pour s’équiper entre les vagues, et un boss à la manche 10.',
 };
 
 function Generer() {
@@ -17,7 +17,7 @@ function Generer() {
   return (
     <Bouton type="submit" variant="principal" taille="lg" disabled={pending}>
       <Sparkles size={17} strokeWidth={2} aria-hidden />
-      {pending ? 'L’agent rédige le plan…' : 'Générer le plan de jeu'}
+      {pending ? 'L’agent rédige le plan…' : 'Générer le plan de map'}
     </Bouton>
   );
 }
@@ -65,8 +65,8 @@ export function FormulaireIdee({ restants }: { restants: number | null }) {
         <Generer />
         <p className="text-xs text-text-3">
           {restants === null
-            ? 'Plans de jeu illimités sur ton offre. Générer un plan ne consomme aucun crédit.'
-            : `${restants} plan${restants > 1 ? 's' : ''} de jeu restant${restants > 1 ? 's' : ''} ce mois-ci. Générer un plan ne consomme aucun crédit.`}
+            ? 'Plans de map illimités sur ton offre. Générer un plan ne consomme aucun crédit.'
+            : `${restants} plan${restants > 1 ? 's' : ''} de map restant${restants > 1 ? 's' : ''} ce mois-ci. Générer un plan ne consomme aucun crédit.`}
         </p>
       </div>
     </form>

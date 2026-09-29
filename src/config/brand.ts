@@ -9,7 +9,7 @@
 export const MARQUE = {
   nom: 'Nexteo',
   domaine: 'nexteo.app',
-  promesse: 'Décris ton jeu. L’agent le construit.',
+  promesse: 'Décris ta map. L’agent la construit.',
   compatibilite: 'Pour UEFN — construit sur le MCP officiel d’Epic Games.',
   emailSupport: 'bonjour@nexteo.app',
   /**

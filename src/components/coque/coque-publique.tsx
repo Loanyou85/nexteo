@@ -39,7 +39,7 @@ export async function CoquePublique({ children, cta = true }: { children: React.
                 </Link>
                 {cta ? (
                   <Bouton asChild taille="sm">
-                    <Link href="/inscription">Créer mon jeu</Link>
+                    <Link href="/inscription">Créer ma map</Link>
                   </Bouton>
                 ) : null}
               </>

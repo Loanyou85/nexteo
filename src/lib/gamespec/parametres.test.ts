@@ -4,7 +4,7 @@ import { appliquerParametres, parametresDe } from '@/lib/gamespec/parametres';
 
 const spec = specZombie({ gameId: 'g' });
 
-describe('paramètres du plan de jeu', () => {
+describe('paramètres du plan de map', () => {
   it('relire puis réappliquer les paramètres ne change rien', () => {
     expect(appliquerParametres(spec, parametresDe(spec))).toEqual(spec);
   });

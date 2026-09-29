@@ -13,7 +13,7 @@ export default async function InscriptionPage({
   return (
     <CadreAuth
       titre="Créer un compte"
-      sous="Le plan de jeu est gratuit. Les builds réels demandent une offre payante : chacun coûte des appels d’IA."
+      sous="Le plan de map est gratuit. Les builds réels demandent une offre payante : chacun coûte des appels d’IA."
       bas={
         <>
           Déjà un compte ?{' '}

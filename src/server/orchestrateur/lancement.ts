@@ -69,7 +69,7 @@ export async function lancer(args: {
     where: { projectId_version: { projectId: projet.id, version: projet.currentSpecVersion } },
   });
   const lu = specLigne ? lireGameSpec(specLigne.data) : null;
-  if (!lu?.ok) return { ok: false, erreur: 'Le plan de jeu est illisible : corrige-le avant de lancer.' };
+  if (!lu?.ok) return { ok: false, erreur: 'Le plan de map est illisible : corrige-le avant de lancer.' };
 
   const env = await db.environmentTemplate.findUnique({ where: { id: lu.spec.environment } });
   if (!env) return { ok: false, erreur: `Environnement « ${lu.spec.environment} » absent du référentiel.` };

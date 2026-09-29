@@ -14,7 +14,7 @@ import { etatBase } from '@/server/etat';
 export const dynamic = 'force-dynamic';
 
 const ETAPES = [
-  { Icone: Sparkles, titre: 'Tu décris ton jeu', texte: 'Une phrase suffit. L’agent en tire un plan de jeu structuré — joueurs, manches, ennemis, monnaie, interface — que tu corriges avant de lancer.' },
+  { Icone: Sparkles, titre: 'Tu décris ta map', texte: 'Une phrase suffit. L’agent en tire un plan de map structuré — joueurs, manches, ennemis, monnaie, interface — que tu corriges avant de lancer.' },
   { Icone: FileCode2, titre: 'L’agent construit', texte: 'Il écrit le Verse, place et configure les devices, crée les zones du Scene Graph. Dans ton UEFN, sur ton PC.' },
   { Icone: Bug, titre: 'Il teste et corrige', texte: 'Il compile, lance un playtest, lit les logs, corrige les erreurs, recompile et reteste — jusqu’à ce que les tests générés depuis ton plan passent.' },
   { Icone: Gamepad2, titre: 'Tu publies', texte: 'Le projet est ouvrable et vérifié. La publication reste dans le Creator Portal d’Epic : Nexteo prépare, il ne publie jamais à ta place.' },
@@ -49,16 +49,16 @@ export default async function Accueil() {
               {MARQUE.compatibilite}
             </p>
             <h1 className="display anim-arrivee mt-5 text-[56px] leading-[0.95] text-text-1 sm:text-[80px]" style={{ animationDelay: '80ms' }}>
-              Décris ton jeu.
+              Décris ta map.
               <br />
-              <span className="bg-gradient-to-r from-arc-cyan via-arc-blue to-arc-violet bg-clip-text text-transparent">L’agent le construit.</span>
+              <span className="bg-gradient-to-r from-arc-cyan via-arc-blue to-arc-violet bg-clip-text text-transparent">L’agent la construit.</span>
             </h1>
             <p className="anim-arrivee mt-6 max-w-xl text-lg leading-relaxed text-text-2" style={{ animationDelay: '180ms' }}>
               {MARQUE.nom} écrit le Verse, place les devices, compile, lance le playtest, lit les erreurs et les corrige — dans ton UEFN, sur ton PC.
             </p>
             <div className="anim-arrivee mt-8 flex flex-wrap items-center gap-3" style={{ animationDelay: '280ms' }}>
               <Bouton asChild variant="principal" taille="lg">
-                <Link href="/inscription">Créer mon jeu</Link>
+                <Link href="/inscription">Créer ma map</Link>
               </Bouton>
               <Bouton asChild variant="fantome" taille="lg">
                 <Link href="#prerequis">Ce qu’il te faut</Link>
@@ -86,7 +86,7 @@ export default async function Accueil() {
             <MonitorCog className="mt-0.5 shrink-0 text-arc-cyan" size={22} aria-hidden />
             <div>
               <h2 className="text-sm font-medium text-text-1">Un PC Windows avec UEFN</h2>
-              <p className="mt-1 text-sm text-text-2">UEFN ne tourne que sous Windows. Depuis un Mac, tu peux préparer tes plans de jeu, pas construire.</p>
+              <p className="mt-1 text-sm text-text-2">UEFN ne tourne que sous Windows. Depuis un Mac, tu peux préparer tes plans de map, pas construire.</p>
             </div>
           </div>
           <div className="flex gap-3">
@@ -178,7 +178,7 @@ export default async function Accueil() {
                 </Panneau>
               ))}
             </div>
-            <p className="mt-4 text-sm text-text-3">Le plan de jeu est gratuit, sans carte bancaire. Aucun build gratuit : chacun coûte des appels d’IA réels.</p>
+            <p className="mt-4 text-sm text-text-3">Le plan de map est gratuit, sans carte bancaire. Aucun build gratuit : chacun coûte des appels d’IA réels.</p>
           </div>
         </section>
       ) : null}
@@ -187,9 +187,9 @@ export default async function Accueil() {
         <h2 className="display text-[40px]">Questions</h2>
         <div className="mt-6 divide-y divide-void-700 border-y border-void-700">
           {[
-            ['Est-ce que ça publie mon jeu ?', 'Non. Nexteo prépare : titre, description, mots-clés, prompt de vignette et liste de vérification. La publication, les tests privés et la monétisation restent dans le Creator Portal d’Epic.'],
+            ['Est-ce que ça publie ma map ?', 'Non. Nexteo prépare : titre, description, mots-clés, prompt de vignette et liste de vérification. La publication, les tests privés et la monétisation restent dans le Creator Portal d’Epic.'],
             ['Est-ce affilié à Epic Games ?', 'Non. Nexteo utilise le MCP officiel qu’Epic intègre à UEFN, mais n’est ni affilié à Epic, ni approuvé par Epic.'],
-            ['Mon jeu va-t-il rapporter de l’argent ?', 'Personne ne peut le promettre, et nous ne le promettons pas. Nexteo construit un jeu qui compile et se joue ; son succès dépend de ce que tu en fais.'],
+            ['Ma map va-t-elle rapporter de l’argent ?', 'Personne ne peut le promettre, et nous ne le promettons pas. Nexteo construit une map qui compile et se joue ; son succès dépend de ce que tu en fais.'],
             ['Où va mon code Verse ?', 'Il est envoyé au fournisseur d’IA pour être écrit et corrigé. La politique de confidentialité le dit, et tes données sont hébergées dans l’Union européenne.'],
           ].map(([q, r]) => (
             <details key={q} className="group py-4">
@@ -202,9 +202,9 @@ export default async function Accueil() {
           ))}
         </div>
         <div className="mt-16 text-center">
-          <p className="display text-[44px] sm:text-[60px]">Décris ton jeu. L’agent le construit.</p>
+          <p className="display text-[44px] sm:text-[60px]">Décris ta map. L’agent la construit.</p>
           <Bouton asChild variant="secondaire" taille="lg" className="mt-6">
-            <Link href="/inscription">Commencer — le plan de jeu est gratuit</Link>
+            <Link href="/inscription">Commencer — le plan de map est gratuit</Link>
           </Bouton>
         </div>
       </section>

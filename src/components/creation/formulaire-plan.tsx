@@ -10,7 +10,7 @@ import type { Parametres } from '@/lib/gamespec/parametres';
 import { enregistrerParametres, type EtatParametres } from '@/server/actions/projets';
 
 /**
- * Le plan de jeu en formulaire, pas en JSON (section 5.3, étape 2).
+ * Le plan de map en formulaire, pas en JSON (section 5.3, étape 2).
  * L'utilisateur corrige ce qui ne va pas AVANT de lancer quoi que ce soit.
  */
 
@@ -68,7 +68,7 @@ export function FormulairePlan({ projectId, p }: { projectId: string; p: Paramet
 
   return (
     <form action={action} className="space-y-4">
-      <Section titre="Le jeu">
+      <Section titre="La map">
         <Champ intitule="Titre" htmlFor="title" className="sm:col-span-2 lg:col-span-1">
           <Saisie id="title" name="title" defaultValue={p.title} required maxLength={60} />
         </Champ>

@@ -1,6 +1,6 @@
 # Nexteo
 
-Tu décris ton jeu, l'agent le construit dans UEFN : il écrit le Verse, place
+Tu décris ta map, l'agent la construit dans UEFN : il écrit le Verse, place
 les devices, compile, lance le playtest, lit les erreurs et les corrige, en
 passant par le MCP officiel d'UEFN (en bêta chez Epic).
 

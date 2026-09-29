@@ -18,7 +18,7 @@ const ideeSchema = z.object({
   idee: z
     .string()
     .trim()
-    .min(12, 'Décris ton jeu en une phrase au moins.')
+    .min(12, 'Décris ta map en une phrase au moins.')
     .max(1200, 'Garde l’idée sous 1 200 caractères : le détail se règle à l’étape suivante.'),
 });
 
@@ -34,7 +34,7 @@ export async function genererPlan(_e: EtatCreation, formData: FormData): Promise
   const offre = await offreDe(user.id);
   if (offre.plan.monthlyGamePlans !== null && (await plansDuMois(user.id)) >= offre.plan.monthlyGamePlans) {
     return {
-      erreur: `Tu as utilisé tes ${offre.plan.monthlyGamePlans} plans de jeu du mois en ${offre.plan.name}. Ils reviennent le mois prochain, ou dès maintenant avec une offre payante.`,
+      erreur: `Tu as utilisé tes ${offre.plan.monthlyGamePlans} plans de map du mois en ${offre.plan.name}. Ils reviennent le mois prochain, ou dès maintenant avec une offre payante.`,
     };
   }
   if (offre.plan.maxProjects !== null) {
@@ -85,7 +85,7 @@ export async function genererPlan(_e: EtatCreation, formData: FormData): Promise
     console.error('[plan] échec', e);
     return {
       erreur:
-        'Le plan de jeu n’a pas pu être généré : la réponse de l’IA n’a pas passé la validation. Rien n’a été décompté, tu peux réessayer.',
+        'Le plan de map n’a pas pu être généré : la réponse de l’IA n’a pas passé la validation. Rien n’a été décompté, tu peux réessayer.',
     };
   }
 

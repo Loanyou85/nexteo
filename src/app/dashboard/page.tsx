@@ -48,7 +48,7 @@ async function Contenu() {
         actions={
           <Bouton asChild variant="principal">
             <Link href="/creer">
-              <Plus size={16} aria-hidden /> Créer mon jeu
+              <Plus size={16} aria-hidden /> Créer ma map
             </Link>
           </Bouton>
         }
@@ -58,10 +58,10 @@ async function Contenu() {
           <Panneau className="max-w-2xl" interieur="p-8">
             <h2 className="display text-[26px]">Aucun projet pour l’instant</h2>
             <p className="mt-2 text-sm text-text-2">
-              Décris un jeu en une phrase : l’agent en tire un plan que tu pourras corriger avant de lancer quoi que ce soit.
+              Décris une map en une phrase : l’agent en tire un plan que tu pourras corriger avant de lancer quoi que ce soit.
             </p>
             <Bouton asChild variant="secondaire" className="mt-6">
-              <Link href="/creer">Décrire mon premier jeu</Link>
+              <Link href="/creer">Décrire ma première map</Link>
             </Bouton>
           </Panneau>
         ) : (

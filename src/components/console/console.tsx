@@ -23,7 +23,7 @@ import type { EtatConsole, EvenementVue } from '@/server/console';
 
 const MAX_LIGNES = 2_000;
 
-type Filtre = 'tout' | 'erreurs' | 'tests' | 'jeu';
+type Filtre = 'tout' | 'erreurs' | 'tests' | 'map';
 
 const RAISONS: Record<string, string> = {
   correctif_a_valider: 'Un correctif attend ton accord.',
@@ -149,7 +149,7 @@ export function Console({
 
   return (
     <div className="flex min-h-[calc(100dvh-7rem)] flex-col">
-      {/* En-tête : le nom du jeu et son palier, fil conducteur du produit. */}
+      {/* En-tête : le nom de la map et son palier, fil conducteur du produit. */}
       <div className="border-b border-void-700 px-4 py-5 sm:px-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="min-w-0">
@@ -221,7 +221,7 @@ export function Console({
                 ['tout', 'Tout'],
                 ['erreurs', 'Erreurs'],
                 ['tests', 'Tests'],
-                ['jeu', 'Logs du jeu'],
+                ['map', 'Logs de la map'],
               ] as [Filtre, string][]
             ).map(([f, l]) => (
               <button
@@ -253,7 +253,7 @@ export function Console({
             {visibles.map((e) => (
               <div key={e.seq} className={cn('whitespace-pre-wrap break-words py-px', classeLigne(e))}>
                 <span className="select-none text-text-3">{new Date(e.at).toLocaleTimeString('fr-FR')} </span>
-                {e.type === 'test' ? <span className="text-text-3">[test] </span> : e.type === 'log' ? <span className="text-text-3">[jeu] </span> : null}
+                {e.type === 'test' ? <span className="text-text-3">[test] </span> : e.type === 'log' ? <span className="text-text-3">[map] </span> : null}
                 {e.message}
               </div>
             ))}
