@@ -17,7 +17,7 @@ export default async function InscriptionPage({
       bas={
         <>
           Déjà un compte ?{' '}
-          <Link href="/connexion" className="text-arc-cyan underline underline-offset-4">
+          <Link href={suite ? `/connexion?suite=${encodeURIComponent(suite)}` : '/connexion'} className="text-arc-cyan underline underline-offset-4">
             Se connecter
           </Link>
         </>

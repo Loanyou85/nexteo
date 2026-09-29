@@ -13,7 +13,8 @@ function destination(formData: FormData): string {
   const suite = String(formData.get('suite') ?? '').trim();
   // Une redirection ne suit qu'un chemin interne : accepter une URL complète
   // ouvrirait une redirection ouverte vers n'importe quel site.
-  return suite.startsWith('/') && !suite.startsWith('//') ? suite : '/dashboard';
+  // « /\\hote » est lu comme « //hote » par les navigateurs.
+  return suite.startsWith('/') && !suite.startsWith('//') && !suite.startsWith('/\\') ? suite : '/dashboard';
 }
 
 export async function inscrire(_etat: AuthState, formData: FormData): Promise<AuthState> {

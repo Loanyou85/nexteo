@@ -1,5 +1,5 @@
 import NextAuth, { type DefaultSession, type NextAuthConfig } from 'next-auth';
-import { redirect } from 'next/navigation';
+import { redirect, unstable_rethrow } from 'next/navigation';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import Credentials from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
@@ -153,6 +153,8 @@ export async function sessionOuNull() {
 
     return session;
   } catch (error) {
+    // Les signaux internes de Next (rendu dynamique, redirection) ne sont pas des pannes.
+    unstable_rethrow(error);
     console.error('[auth] session indisponible, on continue en anonyme', error);
     return null;
   }

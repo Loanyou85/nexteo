@@ -75,6 +75,26 @@ export async function lancer(args: {
   if (!env) return { ok: false, erreur: `Environnement « ${lu.spec.environment} » absent du référentiel.` };
   const taches = construirePlan(lu.spec, env.layout as unknown as Environnement);
 
+  // Mise à jour : on transmet à chaque module l'empreinte de ses données et
+  // celle du fichier tels qu'à la dernière génération réussie.
+  const derniere = est.premiereConstruction
+    ? null
+    : await db.agentSession.findFirst({
+        where: { projectId: projet.id, status: 'completed' },
+        orderBy: { finishedAt: 'desc' },
+        include: { plan: { include: { tasks: { where: { type: { in: ['verse.write', 'ui.build'] } } } } }, version: true },
+      });
+  if (derniere) {
+    const fichiers = ((derniere.version?.snapshot as { fichiers?: { path: string; contentHash: string }[] } | null)?.fichiers ?? []);
+    for (const t of taches) {
+      if (t.type !== 'verse.write' && t.type !== 'ui.build') continue;
+      const avant = derniere.plan.tasks.find((x) => x.key === t.key);
+      const empreinteAvant = (avant?.input as { empreinte?: string } | null)?.empreinte;
+      const hash = fichiers.find((f) => f.path === t.input.path)?.contentHash;
+      if (empreinteAvant && hash) t.input.anterieur = { empreinte: empreinteAvant, hash };
+    }
+  }
+
   // Niveau 5 : confirmation explicite et datée, exigée aussi par la base.
   await db.project.update({
     where: { id: projet.id },

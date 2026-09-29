@@ -125,6 +125,10 @@ const CONFIG: { key: string; value: string; description: string }[] = [
   { key: 'ROLLOVER_MONTHS', value: '1', description: 'Nombre de mois pendant lesquels les crédits d’abonnement non utilisés sont reportés.' },
   { key: 'CREDITS_ESTIMATE_FULL', value: '10', description: 'Estimation annoncée avant un premier build complet.' },
   { key: 'CREDITS_ESTIMATE_UPDATE', value: '3', description: 'Estimation annoncée avant une mise à jour typique.' },
+  { key: 'TOPUP_MARKUP_PCT', value: '10', description: 'Majoration du crédit en recharge par rapport au crédit de l’offre de l’abonné, en pourcentage.' },
+  { key: 'TOPUP_MIN_CREDITS', value: '1', description: 'Quantité minimale d’une recharge.' },
+  { key: 'TOPUP_MAX_CREDITS', value: '1000', description: 'Quantité maximale d’une recharge, contre les fautes de frappe.' },
+  { key: 'TOPUP_SUGGESTIONS', value: '[10,20,50]', description: 'Quantités proposées en un clic sur la page de tarifs.' },
   { key: 'USD_EUR_RATE_PPM', value: '920000', description: 'Taux de conversion dollar → euro, en millionièmes (0,92). À mettre à jour : les tarifs d’IA sont en dollars.' },
   { key: 'VAT_RATE_BP', value: '2000', description: 'TVA incluse dans les prix, en points de base (20 %).' },
   { key: 'STRIPE_FEE_BP', value: '150', description: 'Frais Stripe proportionnels, en points de base (1,5 %).' },
@@ -215,12 +219,6 @@ async function main() {
         }),
     );
   }
-
-  await creerSiAbsent(
-    'recharge 20 crédits',
-    () => db.topUpPack.findFirst(),
-    () => db.topUpPack.create({ data: { name: 'Recharge 20 crédits', credits: 20, priceCents: 3500, sortOrder: 1 } }),
-  );
 
   for (const c of CONFIG) {
     await creerSiAbsent(`réglage ${c.key}`, () => db.pricingConfig.findUnique({ where: { key: c.key } }), () =>

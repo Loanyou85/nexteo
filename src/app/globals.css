@@ -207,3 +207,27 @@ body {
     animation: none;
   }
 }
+
+/* ─── Prix qui défilent au changement de période (200 ms) ─────────────── */
+@keyframes prix-sortie {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(-100%); opacity: 0; }
+}
+@keyframes prix-entree {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes fondu {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.anim-prix-sortie { animation: prix-sortie 200ms ease-in both; }
+.anim-prix-entree { animation: prix-entree 200ms ease-out both; }
+.anim-fondu { animation: fondu 200ms ease-out both; }
+.curseur-basculeur { transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-prix-sortie { display: none; }
+  .anim-prix-entree, .anim-fondu { animation: none; }
+  .curseur-basculeur { transition: none; }
+}

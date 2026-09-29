@@ -206,3 +206,28 @@ export async function ajusterSolde(
     client,
   );
 }
+
+/**
+ * Complément de crédits d'abonnement en cours de période (montée d'offre) :
+ * un simple versement, qui expire avec la période en cours. Il ne déclenche
+ * PAS la bascule en report, réservée au début d'une nouvelle période.
+ */
+export async function verserComplement(
+  args: { userId: string; credits: number; cle: string; expiresAt: Date; stripeEventId?: string },
+  client: typeof db = db,
+): Promise<{ verse: boolean }> {
+  if (!Number.isInteger(args.credits) || args.credits <= 0) return { verse: false };
+  return avecRegistre(
+    args.userId,
+    async (_l, tx) => {
+      const n = await ecrire(
+        tx,
+        args.userId,
+        [{ delta: args.credits, bucket: 'subscription', reason: 'grant', expiresAt: args.expiresAt, idempotencyKey: `complement:${args.cle}` }],
+        { stripeEventId: args.stripeEventId },
+      );
+      return { verse: n > 0 };
+    },
+    client,
+  );
+}

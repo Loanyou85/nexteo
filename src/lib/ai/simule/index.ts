@@ -13,6 +13,7 @@ import {
 import { specZombie } from '@/lib/gamespec/modeles';
 import { ENVIRONNEMENTS, type GameSpec } from '@/lib/gamespec/schema';
 import { genererModule, USINGS } from '@/lib/ai/simule/verse';
+import type { Parametres } from '@/lib/gamespec/parametres';
 
 /**
  * IA simulée : déterministe, gratuite, et TOUJOURS annoncée comme telle.
@@ -38,6 +39,7 @@ function usage(entree: string, sortie: string): Usage {
 }
 
 export type DonneesPlan = { idee: string; titre: string; gameId: string };
+export type DonneesMiseAJour = { parametres: Parametres; demande: string };
 export type DonneesModule = { spec: GameSpec; module: string; premiere: boolean };
 
 const MOTS_ENVIRONNEMENT: [RegExp, GameSpec['environment']][] = [
@@ -83,6 +85,28 @@ function planDepuisIdee(d: DonneesPlan): GameSpec {
     environment: env,
     description: `${d.idee.trim().replace(/\s+/g, ' ').slice(0, 400)}`,
   });
+}
+
+/**
+ * Mise à jour demandée en langage courant → nouveaux paramètres. Ne touche
+ * qu'à ce que la phrase nomme : « rends les zombies plus rapides » ne change
+ * ni les manches ni la monnaie.
+ */
+export function appliquerDemande(p: Parametres, demande: string): Parametres {
+  const n = { ...p, ui: { ...p.ui } };
+  const lu = lireIdee(demande);
+  if (lu.bossRound !== undefined) n.bossRound = lu.bossRound ?? 0;
+  if (lu.playerCount) n.playerCount = lu.playerCount;
+  if (lu.rounds) n.rounds = lu.rounds;
+  if (lu.environment) n.environment = lu.environment;
+  if (n.bossRound > n.rounds) n.rounds = n.bossRound;
+  if (/plus rapides?|acc[ée]l[èe]re/i.test(demande)) n.zombieSpeed = Math.min(5, Math.round(p.zombieSpeed * 13) / 10);
+  if (/plus lents?|ralenti/i.test(demande)) n.zombieSpeed = Math.max(0.1, Math.round((p.zombieSpeed / 1.3) * 10) / 10);
+  if (/plus (r[ée]sistants?|costauds?|solides?)/i.test(demande)) n.zombieHealth = Math.min(10_000, Math.round(p.zombieHealth * 1.5));
+  if (/classement|leaderboard/i.test(demande)) n.ui.leaderboard = true;
+  const gain = /(\d{1,5})\s*(?:d['’])?(?:or|pi[èe]ces?)\s*par\s*[ée]limination/i.exec(demande)?.[1];
+  if (gain) n.rewardElimination = Number(gain);
+  return n;
 }
 
 function distance(a: string, b: string): number {
@@ -148,7 +172,10 @@ export class IASimulee implements AIProvider {
   async structuredOutput<T>(req: RequeteStructuree<T>): Promise<Resultat<T>> {
     let brut: unknown;
     if (req.nomSchema === 'GameSpec') brut = planDepuisIdee(req.simulation as DonneesPlan);
-    else throw new SortieInvalide([`L’IA simulée ne sait pas produire « ${req.nomSchema} ».`]);
+    else if (req.nomSchema === 'Parametres') {
+      const d = req.simulation as DonneesMiseAJour;
+      brut = appliquerDemande(d.parametres, d.demande);
+    } else throw new SortieInvalide([`L’IA simulée ne sait pas produire « ${req.nomSchema} ».`]);
 
     const verif = req.schema.safeParse(brut);
     if (!verif.success) throw new SortieInvalide(verif.error.issues.map((i) => i.message));

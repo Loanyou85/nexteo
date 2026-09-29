@@ -58,6 +58,26 @@ export type TacheInitiale = {
 
 export type Environnement = { zones: string[]; anchors: Record<string, { left: number; up: number; forward: number }> };
 
+/**
+ * Ce dont dépend chaque module Verse. Une mise à jour ne régénère un module
+ * que si l'une de ces données a changé (section 21 : ne jamais tout refaire).
+ */
+const DEPENDANCES_MODULE: Record<string, (s: GameSpec) => unknown> = {
+  round_manager: (s) => [s.rounds, s.devices.filter((d) => d.need === 'round_timer').map((d) => d.stableId)],
+  zombie_spawner: (s) => [s.enemies, s.devices.filter((d) => d.need === 'enemy_spawn' || d.need === 'boss_spawn').map((d) => d.stableId)],
+  currency_system: (s) => s.currency,
+  hud_manager: (s) => s.ui,
+  game_manager: (s) => [s.playerCount, s.loseConditions],
+};
+
+/** Empreinte stable des données d'un module (djb2 sur le JSON). */
+export function empreinteModule(spec: GameSpec, module: string): string {
+  const texte = JSON.stringify(DEPENDANCES_MODULE[module]?.(spec) ?? spec);
+  let h = 5381;
+  for (let i = 0; i < texte.length; i++) h = ((h << 5) + h + texte.charCodeAt(i)) | 0;
+  return (h >>> 0).toString(16);
+}
+
 /** Espacement entre deux devices d'une même zone, en centimètres. */
 const PAS = 300;
 
@@ -135,7 +155,7 @@ export function construirePlan(spec: GameSpec, env: Environnement): TacheInitial
       etape: 'verse',
       description: m.name === 'hud_manager' ? `Construire le HUD (${m.name}.verse)` : `Écrire ${m.name}.verse`,
       dependsOn: [projet],
-      input: { module: m.name, path: `${m.name}.verse`, responsibility: m.responsibility },
+      input: { module: m.name, path: `${m.name}.verse`, responsibility: m.responsibility, empreinte: empreinteModule(spec, m.name) },
     }),
   );
 

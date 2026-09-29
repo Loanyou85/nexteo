@@ -161,16 +161,6 @@ model BuildBudget {
   plan Plan @relation(fields: [planId], references: [id], onDelete: Cascade)
 }
 
-model TopUpPack {
-  id            String  @id @default(cuid())
-  name          String
-  credits       Int
-  priceCents    Int
-  stripePriceId String?
-  isActive      Boolean @default(true)
-  sortOrder     Int
-}
-
 /// Réglages chiffrés : COST_PER_CREDIT, MAX_ANNUAL_DISCOUNT, ROLLOVER_MONTHS…
 /// Valeurs entières stockées en texte, lues par un accès typé.
 model PricingConfig {

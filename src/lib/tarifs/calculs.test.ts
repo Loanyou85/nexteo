@@ -7,6 +7,9 @@ import {
   prixCreditCents,
   validerPrixAnnuel,
   economieMonteeDeGamme,
+  prixCreditRechargeCents,
+  prixRechargeCents,
+  margeBrute,
 } from '@/lib/tarifs/calculs';
 
 // Les prix de l'offre de référence, tels que semés en base. Ils sont ici en
@@ -77,5 +80,42 @@ describe('suggestion de montée de gamme', () => {
     expect(
       economieMonteeDeGamme({ rechargesPayeesCents: 7000, creditsRecharges: 40, prixCreditSuperieurCents: 132 }),
     ).toBe(1720);
+  });
+});
+
+describe('recharge à la quantité libre (+10 % sur le crédit de l’offre)', () => {
+  it('coûte 10 % de plus que le crédit de chaque offre : 1,72 €, 1,45 €, 1,37 €', () => {
+    expect(OFFRES.map((o) => prixCreditRechargeCents(o.mensuel, o.credits, 10))).toEqual([172, 145, 137]);
+  });
+
+  it('calcule le total en une fois, sans cumuler les arrondis', () => {
+    // Créateur : 20 × 39 € × 1,10 / 25 = 34,32 €, pas 20 × 1,72 € = 34,40 €.
+    expect(prixRechargeCents({ offreMensuelCents: 3900, offreCredits: 25, quantite: 20, majorationPct: 10 })).toBe(3432);
+    // Studio : 1 000 crédits = 1 369,50 €.
+    expect(prixRechargeCents({ offreMensuelCents: 24900, offreCredits: 200, quantite: 1000, majorationPct: 10 })).toBe(136950);
+  });
+
+  it('reste toujours plus cher que le crédit de l’offre', () => {
+    for (const o of OFFRES) {
+      expect(prixCreditRechargeCents(o.mensuel, o.credits, 10)!).toBeGreaterThan(prixCreditCents(o.mensuel, o.credits)!);
+    }
+  });
+
+  it('refuse une recharge sans offre payante', () => {
+    expect(() => prixRechargeCents({ offreMensuelCents: 0, offreCredits: 0, quantite: 5, majorationPct: 10 })).toThrow();
+  });
+});
+
+describe('marge brute (section 3 de l’offre)', () => {
+  const base = { tvaBp: 2000, stripeBp: 150, stripeFixeCents: 25, hebergementCents: 100, coutParCreditCents: 42 };
+  it('reste autour de 58 % à pleine consommation et 77 % à moitié, pour Pro et Studio', () => {
+    for (const o of OFFRES.slice(1)) {
+      const plein = margeBrute({ ...base, prixTtcCents: o.mensuel, credits: o.credits, consommationPct: 100 });
+      const moitie = margeBrute({ ...base, prixTtcCents: o.mensuel, credits: o.credits, consommationPct: 50 });
+      expect(plein.pct).toBeGreaterThanOrEqual(57);
+      expect(plein.pct).toBeLessThanOrEqual(59);
+      expect(moitie.pct).toBeGreaterThanOrEqual(77);
+      expect(moitie.pct).toBeLessThanOrEqual(78);
+    }
   });
 });

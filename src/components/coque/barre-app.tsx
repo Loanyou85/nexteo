@@ -84,7 +84,9 @@ export function BarreApp({
             {etatAgent === 'connecte' ? 'Agent connecté' : 'Agent non connecté'}
           </Link>
           {email ? (
-            <span className="hidden max-w-48 truncate text-xs text-text-3 lg:block">{email}</span>
+            <Link href="/compte" className="hidden max-w-48 truncate text-xs text-text-3 hover:text-text-1 lg:block">
+              {email}
+            </Link>
           ) : null}
         </div>
       </div>

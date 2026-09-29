@@ -88,3 +88,51 @@ export function validerPrixAnnuel(args: {
   }
   return { ok: true };
 }
+
+/**
+ * Recharge à la quantité libre : le crédit de l'offre de l'abonné, majoré.
+ *
+ * Le total est calculé en une fois, arrondi au centime supérieur — pas le
+ * prix unitaire arrondi multiplié par la quantité, qui dériverait de
+ * plusieurs centimes sur une grosse recharge. Le prix unitaire affiché est
+ * indicatif.
+ */
+export function prixRechargeCents(args: {
+  offreMensuelCents: number;
+  offreCredits: number;
+  quantite: number;
+  majorationPct: number;
+}): number {
+  const { offreMensuelCents, offreCredits, quantite, majorationPct } = args;
+  if (offreCredits <= 0 || !Number.isInteger(quantite) || quantite <= 0) {
+    throw new Error('Recharge impossible sans offre payante ni quantité positive.');
+  }
+  return Math.ceil((quantite * offreMensuelCents * (100 + majorationPct)) / (100 * offreCredits));
+}
+
+export function prixCreditRechargeCents(offreMensuelCents: number, offreCredits: number, majorationPct: number): number | null {
+  if (offreCredits <= 0) return null;
+  return Math.round((offreMensuelCents * (100 + majorationPct)) / (100 * offreCredits));
+}
+
+/**
+ * Marge brute mensuelle d'un abonné, TVA, frais Stripe et hébergement
+ * déduits, pour une part de ses crédits consommée. Tout en centimes, les
+ * taux en points de base (1 % = 100).
+ */
+export function margeBrute(a: {
+  prixTtcCents: number;
+  tvaBp: number;
+  stripeBp: number;
+  stripeFixeCents: number;
+  hebergementCents: number;
+  credits: number;
+  consommationPct: number;
+  coutParCreditCents: number;
+}): { horsTaxeCents: number; margeCents: number; pct: number } {
+  const horsTaxe = Math.round((a.prixTtcCents * 10_000) / (10_000 + a.tvaBp));
+  const stripe = Math.round((a.prixTtcCents * a.stripeBp) / 10_000) + a.stripeFixeCents;
+  const ia = Math.round((a.credits * a.consommationPct * a.coutParCreditCents) / 100);
+  const marge = horsTaxe - stripe - a.hebergementCents - ia;
+  return { horsTaxeCents: horsTaxe, margeCents: marge, pct: horsTaxe > 0 ? Math.round((marge * 100) / horsTaxe) : 0 };
+}

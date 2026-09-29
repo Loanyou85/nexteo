@@ -7,7 +7,7 @@
     "dev": "next dev",
     "build": "prisma generate && tsx scripts/preparer-base.ts && next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -39,6 +39,7 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "server-only": "^0.0.1",
+    "stripe": "^22.6.2",
     "tailwind-merge": "3.3.1",
     "zod": "3.25.76"
   },

@@ -157,8 +157,30 @@ async function configurerDevice(c: Contexte): Promise<Issue> {
 }
 
 async function ecrireModule(c: Contexte): Promise<Issue> {
-  const input = c.tache.input as { module: string; path: string; responsibility: string };
+  const input = c.tache.input as {
+    module: string;
+    path: string;
+    responsibility: string;
+    empreinte?: string;
+    /** Mise à jour : empreinte des données et du fichier à la génération précédente. */
+    anterieur?: { empreinte: string; hash: string };
+  };
   const precedent = c.tache.result as { contenu?: string } | null;
+
+  // Mise à jour : si les données de ce module n'ont pas changé, on ne
+  // régénère rien. On relit le fichier réel pour savoir quoi dire.
+  if (input.anterieur && input.anterieur.empreinte === input.empreinte) {
+    const reel = await avecDelai('verse.read', c.uefn.readVerseFile(input.path));
+    if (reel !== null) {
+      const intact = empreinte(reel) === input.anterieur.hash;
+      return {
+        ok: true,
+        message: intact
+          ? `${input.path} inchangé depuis la version précédente : rien régénéré, rien réécrit.`
+          : `${input.path} a été modifié dans UEFN depuis la dernière génération : conservé tel quel.`,
+      };
+    }
+  }
 
   // Rejoué après une interruption : on réutilise le code déjà généré au lieu
   // de repayer un appel d'IA.

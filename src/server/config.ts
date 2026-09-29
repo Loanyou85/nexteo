@@ -18,6 +18,10 @@ export type CleConfig =
   | 'STRIPE_FEE_BP'
   | 'STRIPE_FEE_FIXED_CENTS'
   | 'HOSTING_COST_PER_SUB_CENTS'
+  | 'TOPUP_MARKUP_PCT'
+  | 'TOPUP_MIN_CREDITS'
+  | 'TOPUP_MAX_CREDITS'
+  | 'TOPUP_SUGGESTIONS'
   | 'BAREME';
 
 export async function configEntier(cle: CleConfig, client: Pick<typeof db, 'pricingConfig'> = db): Promise<number> {

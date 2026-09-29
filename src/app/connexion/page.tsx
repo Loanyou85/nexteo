@@ -17,7 +17,7 @@ export default async function ConnexionPage({
       bas={
         <>
           Pas encore de compte ?{' '}
-          <Link href="/inscription" className="text-arc-cyan underline underline-offset-4">
+          <Link href={suite ? `/inscription?suite=${encodeURIComponent(suite)}` : '/inscription'} className="text-arc-cyan underline underline-offset-4">
             En créer un
           </Link>
         </>

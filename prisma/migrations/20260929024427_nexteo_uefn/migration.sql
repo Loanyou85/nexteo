@@ -136,19 +136,6 @@ CREATE TABLE "BuildBudget" (
 );
 
 -- CreateTable
-CREATE TABLE "TopUpPack" (
-    "id" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "credits" INTEGER NOT NULL,
-    "priceCents" INTEGER NOT NULL,
-    "stripePriceId" TEXT,
-    "isActive" BOOLEAN NOT NULL DEFAULT true,
-    "sortOrder" INTEGER NOT NULL,
-
-    CONSTRAINT "TopUpPack_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "PricingConfig" (
     "key" TEXT NOT NULL,
     "value" TEXT NOT NULL,
@@ -827,7 +814,6 @@ ALTER TABLE "Plan" ADD CONSTRAINT "Plan_remise_annuelle_max_20"
   CHECK ("annualPriceCents" IS NULL
          OR "annualPriceCents" * 100 >= "monthlyPriceCents" * 12 * 80);
 
-ALTER TABLE "TopUpPack" ADD CONSTRAINT "TopUpPack_positif" CHECK ("credits" > 0 AND "priceCents" > 0);
 
 -- ─── Registre des crédits : ajout seul ─────────────────────────────────────
 

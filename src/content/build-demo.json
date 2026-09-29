@@ -1,0 +1,1750 @@
+{
+ "avertissement": "Enregistrement d’un build réel du scénario de référence, exécuté contre l’éditeur UEFN SIMULÉ avec une IA simulée. Rejoué en accéléré sur l’accueil.",
+ "enregistreLe": "2026-09-29",
+ "titre": "Zombie Hospital",
+ "dureeMs": 59498,
+ "etapes": [
+  {
+   "cle": "plan",
+   "libelle": "Plan de jeu vérifié"
+  },
+  {
+   "cle": "projet",
+   "libelle": "Projet créé"
+  },
+  {
+   "cle": "environnement",
+   "libelle": "Environnement construit"
+  },
+  {
+   "cle": "apparitions",
+   "libelle": "Système d’apparition"
+  },
+  {
+   "cle": "zombies",
+   "libelle": "Système de zombies"
+  },
+  {
+   "cle": "regles",
+   "libelle": "Manches, score et boutique"
+  },
+  {
+   "cle": "verse",
+   "libelle": "Verse généré"
+  },
+  {
+   "cle": "compilation",
+   "libelle": "Verse compilé"
+  },
+  {
+   "cle": "playtest",
+   "libelle": "Playtest"
+  },
+  {
+   "cle": "debogage",
+   "libelle": "Débogage"
+  },
+  {
+   "cle": "validation",
+   "libelle": "Validation finale"
+  }
+ ],
+ "evenements": [
+  {
+   "t": 2,
+   "type": "session",
+   "niveau": "info",
+   "etape": null,
+   "message": "Plan de construction : 49 tâches. Niveau d’autorisation 5 — construction autonome, correctifs appliqués sans attendre.",
+   "palier": null
+  },
+  {
+   "t": 12,
+   "type": "session",
+   "niveau": "info",
+   "etape": null,
+   "message": "Construction démarrée.",
+   "palier": null
+  },
+  {
+   "t": 179,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "plan",
+   "message": "Vérifier le plan contre le catalogue de devices",
+   "palier": null
+  },
+  {
+   "t": 343,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "plan",
+   "message": "16 devices du plan présents au catalogue (catalogue simulé, 12 devices jamais vérifiés contre le vrai MCP).",
+   "palier": null
+  },
+  {
+   "t": 677,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "projet",
+   "message": "Créer le projet « Zombie Hospital »",
+   "palier": null
+  },
+  {
+   "t": 1295,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "projet",
+   "message": "Projet « Zombie Hospital » créé et relu.",
+   "palier": null
+  },
+  {
+   "t": 1629,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "environnement",
+   "message": "Construire la zone hall",
+   "palier": null
+  },
+  {
+   "t": 2143,
+   "type": "tache_echec",
+   "niveau": "fail",
+   "etape": "environnement",
+   "message": "L’éditeur ne répond plus (délai de 30 s dépassé pendant scene_graph.create_entity).",
+   "palier": null
+  },
+  {
+   "t": 2150,
+   "type": "verification",
+   "niveau": "warn",
+   "etape": "environnement",
+   "message": "Nouvelle tentative (2/3) — la tâche est idempotente : rien ne sera créé en double.",
+   "palier": null
+  },
+  {
+   "t": 2478,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "environnement",
+   "message": "Construire la zone hall",
+   "palier": null
+  },
+  {
+   "t": 2791,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "environnement",
+   "message": "Zone hall présente (ent_09e024fe87d52a40).",
+   "palier": null
+  },
+  {
+   "t": 3126,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "environnement",
+   "message": "Construire la zone urgences",
+   "palier": null
+  },
+  {
+   "t": 3794,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "environnement",
+   "message": "Zone urgences présente (ent_2b520fc51f374f0c).",
+   "palier": null
+  },
+  {
+   "t": 4130,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "environnement",
+   "message": "Construire la zone bloc_operatoire",
+   "palier": null
+  },
+  {
+   "t": 4801,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "environnement",
+   "message": "Zone bloc_operatoire présente (ent_73e7c1a8a4b27111).",
+   "palier": null
+  },
+  {
+   "t": 5130,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "environnement",
+   "message": "Construire la zone parking",
+   "palier": null
+  },
+  {
+   "t": 5802,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "environnement",
+   "message": "Zone parking présente (ent_9bc8ab255d5e101c).",
+   "palier": null
+  },
+  {
+   "t": 6137,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "environnement",
+   "message": "Construire la zone morgue",
+   "palier": null
+  },
+  {
+   "t": 6806,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "environnement",
+   "message": "Zone morgue présente (ent_361e0032b9d97220).",
+   "palier": null
+  },
+  {
+   "t": 7139,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "apparitions",
+   "message": "Placer player_spawner_device « joueur_apparition_1 »",
+   "palier": null
+  },
+  {
+   "t": 7708,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "apparitions",
+   "message": "player_spawner_device « joueur_apparition_1 » présent (dev_1819c5b4dfd8cad3).",
+   "palier": null
+  },
+  {
+   "t": 8043,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "apparitions",
+   "message": "Configurer « joueur_apparition_1 »",
+   "palier": null
+  },
+  {
+   "t": 8513,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "apparitions",
+   "message": "« joueur_apparition_1 » configuré (1 propriété(s) relue(s)).",
+   "palier": null
+  },
+  {
+   "t": 8847,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "apparitions",
+   "message": "Placer player_spawner_device « joueur_apparition_2 »",
+   "palier": null
+  },
+  {
+   "t": 9418,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "apparitions",
+   "message": "player_spawner_device « joueur_apparition_2 » présent (dev_59bd2f5252103512).",
+   "palier": null
+  },
+  {
+   "t": 9755,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "apparitions",
+   "message": "Configurer « joueur_apparition_2 »",
+   "palier": null
+  },
+  {
+   "t": 10223,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "apparitions",
+   "message": "« joueur_apparition_2 » configuré (1 propriété(s) relue(s)).",
+   "palier": null
+  },
+  {
+   "t": 10563,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "apparitions",
+   "message": "Placer player_spawner_device « joueur_apparition_3 »",
+   "palier": null
+  },
+  {
+   "t": 11130,
+   "type": "tache_echec",
+   "niveau": "fail",
+   "etape": "apparitions",
+   "message": "L’éditeur a répondu « placé », mais « joueur_apparition_3 » est absent à la relecture.",
+   "palier": null
+  },
+  {
+   "t": 11135,
+   "type": "verification",
+   "niveau": "warn",
+   "etape": "apparitions",
+   "message": "Nouvelle tentative (2/3) — la tâche est idempotente : rien ne sera créé en double.",
+   "palier": null
+  },
+  {
+   "t": 11464,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "apparitions",
+   "message": "Placer player_spawner_device « joueur_apparition_3 »",
+   "palier": null
+  },
+  {
+   "t": 12034,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "apparitions",
+   "message": "player_spawner_device « joueur_apparition_3 » présent (dev_0b70f7655dbae416).",
+   "palier": null
+  },
+  {
+   "t": 12368,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "apparitions",
+   "message": "Configurer « joueur_apparition_3 »",
+   "palier": null
+  },
+  {
+   "t": 12836,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "apparitions",
+   "message": "« joueur_apparition_3 » configuré (1 propriété(s) relue(s)).",
+   "palier": null
+  },
+  {
+   "t": 13169,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "apparitions",
+   "message": "Placer player_spawner_device « joueur_apparition_4 »",
+   "palier": null
+  },
+  {
+   "t": 13737,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "apparitions",
+   "message": "player_spawner_device « joueur_apparition_4 » présent (dev_80e7b2c9a77bad6b).",
+   "palier": null
+  },
+  {
+   "t": 14069,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "apparitions",
+   "message": "Configurer « joueur_apparition_4 »",
+   "palier": null
+  },
+  {
+   "t": 14539,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "apparitions",
+   "message": "« joueur_apparition_4 » configuré (1 propriété(s) relue(s)).",
+   "palier": null
+  },
+  {
+   "t": 14875,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "zombies",
+   "message": "Placer creature_spawner_device « zombies_urgences »",
+   "palier": null
+  },
+  {
+   "t": 15442,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "zombies",
+   "message": "creature_spawner_device « zombies_urgences » présent (dev_8f49924dcdc2c7cc).",
+   "palier": null
+  },
+  {
+   "t": 15785,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "zombies",
+   "message": "Configurer « zombies_urgences »",
+   "palier": null
+  },
+  {
+   "t": 16253,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "zombies",
+   "message": "« zombies_urgences » configuré (2 propriété(s) relue(s)).",
+   "palier": null
+  },
+  {
+   "t": 16596,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "zombies",
+   "message": "Placer creature_spawner_device « zombies_bloc »",
+   "palier": null
+  },
+  {
+   "t": 17165,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "zombies",
+   "message": "creature_spawner_device « zombies_bloc » présent (dev_0de0d9eca7e49d50).",
+   "palier": null
+  },
+  {
+   "t": 17501,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "zombies",
+   "message": "Configurer « zombies_bloc »",
+   "palier": null
+  },
+  {
+   "t": 17969,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "zombies",
+   "message": "« zombies_bloc » configuré (2 propriété(s) relue(s)).",
+   "palier": null
+  },
+  {
+   "t": 18310,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "zombies",
+   "message": "Placer creature_spawner_device « zombies_parking »",
+   "palier": null
+  },
+  {
+   "t": 18880,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "zombies",
+   "message": "creature_spawner_device « zombies_parking » présent (dev_163362a84562c4bc).",
+   "palier": null
+  },
+  {
+   "t": 19218,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "zombies",
+   "message": "Configurer « zombies_parking »",
+   "palier": null
+  },
+  {
+   "t": 19686,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "zombies",
+   "message": "« zombies_parking » configuré (2 propriété(s) relue(s)).",
+   "palier": null
+  },
+  {
+   "t": 20025,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "zombies",
+   "message": "Placer creature_spawner_device « boss_morgue »",
+   "palier": null
+  },
+  {
+   "t": 20594,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "zombies",
+   "message": "creature_spawner_device « boss_morgue » présent (dev_93e71d700fce5028).",
+   "palier": null
+  },
+  {
+   "t": 20940,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "zombies",
+   "message": "Configurer « boss_morgue »",
+   "palier": null
+  },
+  {
+   "t": 21409,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "zombies",
+   "message": "« boss_morgue » configuré (3 propriété(s) relue(s)).",
+   "palier": null
+  },
+  {
+   "t": 21749,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "regles",
+   "message": "Placer timer_device « minuteur_manche »",
+   "palier": null
+  },
+  {
+   "t": 22320,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "regles",
+   "message": "timer_device « minuteur_manche » présent (dev_7890176d5c458472).",
+   "palier": null
+  },
+  {
+   "t": 22661,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "regles",
+   "message": "Configurer « minuteur_manche »",
+   "palier": null
+  },
+  {
+   "t": 23129,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "regles",
+   "message": "« minuteur_manche » configuré (1 propriété(s) relue(s)).",
+   "palier": null
+  },
+  {
+   "t": 23470,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "regles",
+   "message": "Placer round_settings_device « reglages_manches »",
+   "palier": null
+  },
+  {
+   "t": 24038,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "regles",
+   "message": "round_settings_device « reglages_manches » présent (dev_b0c51cf4c64deeab).",
+   "palier": null
+  },
+  {
+   "t": 24376,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "regles",
+   "message": "Configurer « reglages_manches »",
+   "palier": null
+  },
+  {
+   "t": 24845,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "regles",
+   "message": "« reglages_manches » configuré (1 propriété(s) relue(s)).",
+   "palier": null
+  },
+  {
+   "t": 25182,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "regles",
+   "message": "Placer elimination_manager_device « gestion_eliminations »",
+   "palier": null
+  },
+  {
+   "t": 25752,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "regles",
+   "message": "elimination_manager_device « gestion_eliminations » présent (dev_060d61d781d2709b).",
+   "palier": null
+  },
+  {
+   "t": 26095,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "regles",
+   "message": "Configurer « gestion_eliminations »",
+   "palier": null
+  },
+  {
+   "t": 26409,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "regles",
+   "message": "« gestion_eliminations » configuré (0 propriété(s) relue(s)).",
+   "palier": null
+  },
+  {
+   "t": 26759,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "regles",
+   "message": "Placer score_manager_device « score »",
+   "palier": null
+  },
+  {
+   "t": 27328,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "regles",
+   "message": "score_manager_device « score » présent (dev_089412d46eeaedaa).",
+   "palier": null
+  },
+  {
+   "t": 27668,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "regles",
+   "message": "Configurer « score »",
+   "palier": null
+  },
+  {
+   "t": 28139,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "regles",
+   "message": "« score » configuré (1 propriété(s) relue(s)).",
+   "palier": null
+  },
+  {
+   "t": 28482,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "regles",
+   "message": "Placer hud_message_device « hud_messages »",
+   "palier": null
+  },
+  {
+   "t": 29052,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "regles",
+   "message": "hud_message_device « hud_messages » présent (dev_54bfb335e9af13d6).",
+   "palier": null
+  },
+  {
+   "t": 29391,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "regles",
+   "message": "Configurer « hud_messages »",
+   "palier": null
+  },
+  {
+   "t": 29703,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "regles",
+   "message": "« hud_messages » configuré (0 propriété(s) relue(s)).",
+   "palier": null
+  },
+  {
+   "t": 30044,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "regles",
+   "message": "Placer item_granter_device « armes_depart »",
+   "palier": null
+  },
+  {
+   "t": 30615,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "regles",
+   "message": "item_granter_device « armes_depart » présent (dev_8a418dd339c9fa93).",
+   "palier": null
+  },
+  {
+   "t": 30970,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "regles",
+   "message": "Configurer « armes_depart »",
+   "palier": null
+  },
+  {
+   "t": 31445,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "regles",
+   "message": "« armes_depart » configuré (1 propriété(s) relue(s)).",
+   "palier": null
+  },
+  {
+   "t": 31794,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "regles",
+   "message": "Placer vending_machine_device « distributeur_hall »",
+   "palier": null
+  },
+  {
+   "t": 32364,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "regles",
+   "message": "vending_machine_device « distributeur_hall » présent (dev_2586dcb952448ea6).",
+   "palier": null
+  },
+  {
+   "t": 32710,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "regles",
+   "message": "Configurer « distributeur_hall »",
+   "palier": null
+  },
+  {
+   "t": 33181,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "regles",
+   "message": "« distributeur_hall » configuré (1 propriété(s) relue(s)).",
+   "palier": null
+  },
+  {
+   "t": 33521,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "regles",
+   "message": "Placer end_game_device « fin_de_partie »",
+   "palier": null
+  },
+  {
+   "t": 34092,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "regles",
+   "message": "end_game_device « fin_de_partie » présent (dev_6578d4d032ce8f36).",
+   "palier": null
+  },
+  {
+   "t": 34434,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "regles",
+   "message": "Configurer « fin_de_partie »",
+   "palier": null
+  },
+  {
+   "t": 34746,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "regles",
+   "message": "« fin_de_partie » configuré (0 propriété(s) relue(s)).",
+   "palier": null
+  },
+  {
+   "t": 35094,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "verse",
+   "message": "Écrire round_manager.verse",
+   "palier": null
+  },
+  {
+   "t": 35728,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "verse",
+   "message": "round_manager.verse écrit et relu (32 lignes).",
+   "palier": null
+  },
+  {
+   "t": 36081,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "verse",
+   "message": "Écrire zombie_spawner.verse",
+   "palier": null
+  },
+  {
+   "t": 36712,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "verse",
+   "message": "zombie_spawner.verse écrit et relu (34 lignes).",
+   "palier": null
+  },
+  {
+   "t": 37056,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "verse",
+   "message": "Écrire currency_system.verse",
+   "palier": null
+  },
+  {
+   "t": 37687,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "verse",
+   "message": "currency_system.verse écrit et relu (24 lignes).",
+   "palier": null
+  },
+  {
+   "t": 38032,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "verse",
+   "message": "Construire le HUD (hud_manager.verse)",
+   "palier": null
+  },
+  {
+   "t": 38664,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "verse",
+   "message": "hud_manager.verse écrit et relu (13 lignes).",
+   "palier": null
+  },
+  {
+   "t": 39011,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "verse",
+   "message": "Écrire game_manager.verse",
+   "palier": null
+  },
+  {
+   "t": 39642,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "verse",
+   "message": "game_manager.verse écrit et relu (20 lignes).",
+   "palier": null
+  },
+  {
+   "t": 39996,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "compilation",
+   "message": "Compiler le Verse",
+   "palier": null
+  },
+  {
+   "t": 41615,
+   "type": "erreur",
+   "niveau": "fail",
+   "etape": "compilation",
+   "message": "/ZombieHospital/hud_manager.verse(12,9, 12,14): Script error 3506: Unknown identifier `Print`.",
+   "palier": null
+  },
+  {
+   "t": 41619,
+   "type": "erreur",
+   "niveau": "fail",
+   "etape": "compilation",
+   "message": "/ZombieHospital/zombie_spawner.verse(25,9, 25,19): Script error 3506: Unknown identifier `SpawnZombi`.",
+   "palier": null
+  },
+  {
+   "t": 41622,
+   "type": "tache_echec",
+   "niveau": "fail",
+   "etape": "compilation",
+   "message": "2 erreur(s) de compilation.",
+   "palier": null
+  },
+  {
+   "t": 41673,
+   "type": "correctif",
+   "niveau": "warn",
+   "etape": null,
+   "message": "2 fichier(s) à corriger : hud_manager.verse, zombie_spawner.verse. Analyse, correctif, recompilation, nouveau test.",
+   "palier": null
+  },
+  {
+   "t": 42016,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "debogage",
+   "message": "Analyser l’erreur de hud_manager.verse",
+   "palier": null
+  },
+  {
+   "t": 42185,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "debogage",
+   "message": "`Print` est une fonction d’API dont le module n’est pas importé.",
+   "palier": null
+  },
+  {
+   "t": 42528,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "debogage",
+   "message": "Corriger hud_manager.verse",
+   "palier": null
+  },
+  {
+   "t": 43165,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "debogage",
+   "message": "hud_manager.verse corrigé (1 ligne(s) modifiée(s)), relu.",
+   "palier": null
+  },
+  {
+   "t": 43509,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "debogage",
+   "message": "Analyser l’erreur de zombie_spawner.verse",
+   "palier": null
+  },
+  {
+   "t": 43675,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "debogage",
+   "message": "`SpawnZombi` n’est défini nulle part : probablement une faute de frappe sur une fonction existante.",
+   "palier": null
+  },
+  {
+   "t": 44017,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "debogage",
+   "message": "Corriger zombie_spawner.verse",
+   "palier": null
+  },
+  {
+   "t": 44649,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "debogage",
+   "message": "zombie_spawner.verse corrigé (2 ligne(s) modifiée(s)), relu.",
+   "palier": null
+  },
+  {
+   "t": 44991,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "compilation",
+   "message": "Compiler le Verse",
+   "palier": null
+  },
+  {
+   "t": 46611,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "compilation",
+   "message": "Compilation réussie, 0 erreur.",
+   "palier": null
+  },
+  {
+   "t": 46625,
+   "type": "palier",
+   "niveau": "ok",
+   "etape": null,
+   "message": "Palier 2 — Compilé. Le Verse compile sans erreur.",
+   "palier": 2
+  },
+  {
+   "t": 46962,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "Lancer le playtest",
+   "palier": null
+  },
+  {
+   "t": 49399,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "playtest",
+   "message": "Client connecté (session pie_46).",
+   "palier": null
+  },
+  {
+   "t": 49740,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "Jouer et vérifier les tests générés",
+   "palier": null
+  },
+  {
+   "t": 50147,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: Session started (simulated client)",
+   "palier": null
+  },
+  {
+   "t": 50149,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] game_started",
+   "palier": null
+  },
+  {
+   "t": 50151,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] players_spawned count=4",
+   "palier": null
+  },
+  {
+   "t": 50153,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] hud_ready elements=score,health,currency,timer,round,objectives",
+   "palier": null
+  },
+  {
+   "t": 50154,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] round=1",
+   "palier": null
+  },
+  {
+   "t": 50156,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] enemies_spawned round=1 count=8",
+   "palier": null
+  },
+  {
+   "t": 50157,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] currency_before=0",
+   "palier": null
+  },
+  {
+   "t": 50159,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] currency_after=0",
+   "palier": null
+  },
+  {
+   "t": 50160,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] round=2",
+   "palier": null
+  },
+  {
+   "t": 50162,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] enemies_spawned round=2 count=12",
+   "palier": null
+  },
+  {
+   "t": 50164,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] round=3",
+   "palier": null
+  },
+  {
+   "t": 50165,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] enemies_spawned round=3 count=16",
+   "palier": null
+  },
+  {
+   "t": 50167,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] round=4",
+   "palier": null
+  },
+  {
+   "t": 50168,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] enemies_spawned round=4 count=20",
+   "palier": null
+  },
+  {
+   "t": 50170,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] round=5",
+   "palier": null
+  },
+  {
+   "t": 50171,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] enemies_spawned round=5 count=24",
+   "palier": null
+  },
+  {
+   "t": 50173,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] round=6",
+   "palier": null
+  },
+  {
+   "t": 50174,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] enemies_spawned round=6 count=28",
+   "palier": null
+  },
+  {
+   "t": 50176,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] round=7",
+   "palier": null
+  },
+  {
+   "t": 50177,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] enemies_spawned round=7 count=32",
+   "palier": null
+  },
+  {
+   "t": 50178,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] round=8",
+   "palier": null
+  },
+  {
+   "t": 50180,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] enemies_spawned round=8 count=36",
+   "palier": null
+  },
+  {
+   "t": 50182,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] round=9",
+   "palier": null
+  },
+  {
+   "t": 50183,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] enemies_spawned round=9 count=40",
+   "palier": null
+  },
+  {
+   "t": 50185,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] round=10",
+   "palier": null
+  },
+  {
+   "t": 50186,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] enemies_spawned round=10 count=44",
+   "palier": null
+  },
+  {
+   "t": 50188,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] boss_spawned round=10",
+   "palier": null
+  },
+  {
+   "t": 50189,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] win_condition=survive_rounds",
+   "palier": null
+  },
+  {
+   "t": 50191,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] lose_condition=all_eliminated",
+   "palier": null
+  },
+  {
+   "t": 50192,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: Session ended (simulated client)",
+   "palier": null
+  },
+  {
+   "t": 50232,
+   "type": "test",
+   "niveau": "ok",
+   "etape": "playtest",
+   "message": "Réussi — La manche 1 démarre quand un joueur rejoint (first_round == 1 ; observé : first_round = 1)",
+   "palier": null
+  },
+  {
+   "t": 50236,
+   "type": "test",
+   "niveau": "ok",
+   "etape": "playtest",
+   "message": "Réussi — Les 4 joueurs apparaissent dans le hall (players_spawned >= 4 ; observé : players_spawned = 4)",
+   "palier": null
+  },
+  {
+   "t": 50239,
+   "type": "test",
+   "niveau": "ok",
+   "etape": "playtest",
+   "message": "Réussi — Des zombies apparaissent à la manche 1 (enemies_round_1 > 0 ; observé : enemies_round_1 = 8)",
+   "palier": null
+  },
+  {
+   "t": 50242,
+   "type": "test",
+   "niveau": "fail",
+   "etape": "playtest",
+   "message": "Échoué — Éliminer un zombie augmente l’or (currency_after > currency_before ; observé : currency_after = 0, currency_before = 0)",
+   "palier": null
+  },
+  {
+   "t": 50247,
+   "type": "test",
+   "niveau": "ok",
+   "etape": "playtest",
+   "message": "Réussi — Le boss apparaît à la manche 10 (boss_round == 10 ; observé : boss_round = 10)",
+   "palier": null
+  },
+  {
+   "t": 50250,
+   "type": "test",
+   "niveau": "ok",
+   "etape": "playtest",
+   "message": "Réussi — Le HUD affiche ses éléments (hud_ready == true ; observé : hud_ready = true)",
+   "palier": null
+  },
+  {
+   "t": 50254,
+   "type": "test",
+   "niveau": "ok",
+   "etape": "playtest",
+   "message": "Réussi — Survivre à la manche 10 déclenche la victoire (win_after_round == 10 ; observé : win_after_round = 10)",
+   "palier": null
+  },
+  {
+   "t": 50257,
+   "type": "test",
+   "niveau": "ok",
+   "etape": "playtest",
+   "message": "Réussi — L’élimination de tous les joueurs termine la partie (lose_handler == true ; observé : lose_handler = true)",
+   "palier": null
+  },
+  {
+   "t": 50264,
+   "type": "tache_echec",
+   "niveau": "fail",
+   "etape": "playtest",
+   "message": "1 test(s) bloquant(s) en échec.",
+   "palier": null
+  },
+  {
+   "t": 50282,
+   "type": "palier",
+   "niveau": "ok",
+   "etape": null,
+   "message": "Palier 3 — Testé. Un playtest s’est lancé et a produit des logs.",
+   "palier": 3
+  },
+  {
+   "t": 50322,
+   "type": "correctif",
+   "niveau": "warn",
+   "etape": null,
+   "message": "1 fichier(s) à corriger : currency_system.verse. Analyse, correctif, recompilation, nouveau test.",
+   "palier": null
+  },
+  {
+   "t": 50663,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "debogage",
+   "message": "Analyser l’erreur de currency_system.verse",
+   "palier": null
+  },
+  {
+   "t": 50832,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "debogage",
+   "message": "L’assertion de gameplay échoue : l’état observé dans les logs ne change pas comme attendu.",
+   "palier": null
+  },
+  {
+   "t": 51182,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "debogage",
+   "message": "Corriger currency_system.verse",
+   "palier": null
+  },
+  {
+   "t": 51814,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "debogage",
+   "message": "currency_system.verse corrigé (3 ligne(s) modifiée(s)), relu.",
+   "palier": null
+  },
+  {
+   "t": 52173,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "compilation",
+   "message": "Compiler le Verse",
+   "palier": null
+  },
+  {
+   "t": 53792,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "compilation",
+   "message": "Compilation réussie, 0 erreur.",
+   "palier": null
+  },
+  {
+   "t": 54140,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "Lancer le playtest",
+   "palier": null
+  },
+  {
+   "t": 56638,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "playtest",
+   "message": "Client connecté (session pie_51).",
+   "palier": null
+  },
+  {
+   "t": 56996,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "Jouer et vérifier les tests générés",
+   "palier": null
+  },
+  {
+   "t": 57402,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: Session started (simulated client)",
+   "palier": null
+  },
+  {
+   "t": 57404,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] game_started",
+   "palier": null
+  },
+  {
+   "t": 57406,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] players_spawned count=4",
+   "palier": null
+  },
+  {
+   "t": 57408,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] hud_ready elements=score,health,currency,timer,round,objectives",
+   "palier": null
+  },
+  {
+   "t": 57410,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] round=1",
+   "palier": null
+  },
+  {
+   "t": 57411,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] enemies_spawned round=1 count=8",
+   "palier": null
+  },
+  {
+   "t": 57413,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] currency_before=0",
+   "palier": null
+  },
+  {
+   "t": 57414,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] currency_after=10",
+   "palier": null
+  },
+  {
+   "t": 57415,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] round=2",
+   "palier": null
+  },
+  {
+   "t": 57416,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] enemies_spawned round=2 count=12",
+   "palier": null
+  },
+  {
+   "t": 57417,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] round=3",
+   "palier": null
+  },
+  {
+   "t": 57419,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] enemies_spawned round=3 count=16",
+   "palier": null
+  },
+  {
+   "t": 57420,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] round=4",
+   "palier": null
+  },
+  {
+   "t": 57421,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] enemies_spawned round=4 count=20",
+   "palier": null
+  },
+  {
+   "t": 57422,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] round=5",
+   "palier": null
+  },
+  {
+   "t": 57424,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] enemies_spawned round=5 count=24",
+   "palier": null
+  },
+  {
+   "t": 57425,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] round=6",
+   "palier": null
+  },
+  {
+   "t": 57427,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] enemies_spawned round=6 count=28",
+   "palier": null
+  },
+  {
+   "t": 57428,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] round=7",
+   "palier": null
+  },
+  {
+   "t": 57429,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] enemies_spawned round=7 count=32",
+   "palier": null
+  },
+  {
+   "t": 57430,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] round=8",
+   "palier": null
+  },
+  {
+   "t": 57431,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] enemies_spawned round=8 count=36",
+   "palier": null
+  },
+  {
+   "t": 57433,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] round=9",
+   "palier": null
+  },
+  {
+   "t": 57434,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] enemies_spawned round=9 count=40",
+   "palier": null
+  },
+  {
+   "t": 57435,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] round=10",
+   "palier": null
+  },
+  {
+   "t": 57437,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] enemies_spawned round=10 count=44",
+   "palier": null
+  },
+  {
+   "t": 57438,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] boss_spawned round=10",
+   "palier": null
+  },
+  {
+   "t": 57439,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] win_condition=survive_rounds",
+   "palier": null
+  },
+  {
+   "t": 57441,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: [NX] lose_condition=all_eliminated",
+   "palier": null
+  },
+  {
+   "t": 57442,
+   "type": "log",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "LogVerse: Session ended (simulated client)",
+   "palier": null
+  },
+  {
+   "t": 57452,
+   "type": "test",
+   "niveau": "ok",
+   "etape": "playtest",
+   "message": "Réussi — La manche 1 démarre quand un joueur rejoint (first_round == 1 ; observé : first_round = 1)",
+   "palier": null
+  },
+  {
+   "t": 57455,
+   "type": "test",
+   "niveau": "ok",
+   "etape": "playtest",
+   "message": "Réussi — Les 4 joueurs apparaissent dans le hall (players_spawned >= 4 ; observé : players_spawned = 4)",
+   "palier": null
+  },
+  {
+   "t": 57458,
+   "type": "test",
+   "niveau": "ok",
+   "etape": "playtest",
+   "message": "Réussi — Des zombies apparaissent à la manche 1 (enemies_round_1 > 0 ; observé : enemies_round_1 = 8)",
+   "palier": null
+  },
+  {
+   "t": 57461,
+   "type": "test",
+   "niveau": "ok",
+   "etape": "playtest",
+   "message": "Réussi — Éliminer un zombie augmente l’or (currency_after > currency_before ; observé : currency_after = 10, currency_before = 0)",
+   "palier": null
+  },
+  {
+   "t": 57463,
+   "type": "test",
+   "niveau": "ok",
+   "etape": "playtest",
+   "message": "Réussi — Le boss apparaît à la manche 10 (boss_round == 10 ; observé : boss_round = 10)",
+   "palier": null
+  },
+  {
+   "t": 57465,
+   "type": "test",
+   "niveau": "ok",
+   "etape": "playtest",
+   "message": "Réussi — Le HUD affiche ses éléments (hud_ready == true ; observé : hud_ready = true)",
+   "palier": null
+  },
+  {
+   "t": 57468,
+   "type": "test",
+   "niveau": "ok",
+   "etape": "playtest",
+   "message": "Réussi — Survivre à la manche 10 déclenche la victoire (win_after_round == 10 ; observé : win_after_round = 10)",
+   "palier": null
+  },
+  {
+   "t": 57471,
+   "type": "test",
+   "niveau": "ok",
+   "etape": "playtest",
+   "message": "Réussi — L’élimination de tous les joueurs termine la partie (lose_handler == true ; observé : lose_handler = true)",
+   "palier": null
+  },
+  {
+   "t": 57478,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "playtest",
+   "message": "8/8 tests réussis sur 30 lignes de log.",
+   "palier": null
+  },
+  {
+   "t": 57492,
+   "type": "palier",
+   "niveau": "ok",
+   "etape": null,
+   "message": "Palier 4 — Validé. Tous les tests bloquants du plan de jeu passent.",
+   "palier": 4
+  },
+  {
+   "t": 57837,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "playtest",
+   "message": "Arrêter le playtest",
+   "palier": null
+  },
+  {
+   "t": 58765,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "playtest",
+   "message": "Session arrêtée.",
+   "palier": null
+  },
+  {
+   "t": 59109,
+   "type": "tache_debut",
+   "niveau": "info",
+   "etape": "validation",
+   "message": "Vérification de pré-publication",
+   "palier": null
+  },
+  {
+   "t": 59286,
+   "type": "tache_fin",
+   "niveau": "ok",
+   "etape": "validation",
+   "message": "PRÊT — tous les contrôles de pré-publication sont au vert.",
+   "palier": null
+  },
+  {
+   "t": 59298,
+   "type": "palier",
+   "niveau": "ok",
+   "etape": null,
+   "message": "Palier 5 — Prêt. La vérification de pré-publication est au vert.",
+   "palier": 5
+  },
+  {
+   "t": 59511,
+   "type": "session",
+   "niveau": "ok",
+   "etape": null,
+   "message": "Construction terminée — palier 5, Prêt.",
+   "palier": null
+  },
+  {
+   "t": 59513,
+   "type": "palier",
+   "niveau": "info",
+   "etape": null,
+   "message": "Palier final : 5 — Prêt.",
+   "palier": 5
+  }
+ ]
+}
