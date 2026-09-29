@@ -2,10 +2,16 @@
 CREATE TYPE "Role" AS ENUM ('user', 'admin');
 
 -- CreateEnum
-CREATE TYPE "Plan" AS ENUM ('decouverte', 'createur', 'pro', 'studio');
+CREATE TYPE "BillingInterval" AS ENUM ('month', 'year');
 
 -- CreateEnum
 CREATE TYPE "SubscriptionStatus" AS ENUM ('active', 'trialing', 'past_due', 'canceled', 'incomplete');
+
+-- CreateEnum
+CREATE TYPE "CreditBucket" AS ENUM ('subscription', 'rollover', 'topup');
+
+-- CreateEnum
+CREATE TYPE "CreditReason" AS ENUM ('grant', 'reserve', 'release', 'debit', 'refund', 'expire', 'adjust');
 
 -- CreateEnum
 CREATE TYPE "ProviderKind" AS ENUM ('mock', 'mcp');
@@ -78,42 +84,97 @@ CREATE TABLE "VerificationToken" (
 );
 
 -- CreateTable
-CREATE TABLE "PlanOffer" (
-    "plan" "Plan" NOT NULL,
+CREATE TABLE "Plan" (
+    "id" TEXT NOT NULL,
+    "slug" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "tagline" TEXT NOT NULL,
     "monthlyPriceCents" INTEGER NOT NULL,
-    "description" TEXT NOT NULL,
-    "features" TEXT[],
-    "stripePriceEnv" TEXT,
+    "annualPriceCents" INTEGER,
+    "monthlyCredits" INTEGER NOT NULL,
+    "monthlyGamePlans" INTEGER,
+    "maxProjects" INTEGER,
+    "maxMembers" INTEGER NOT NULL DEFAULT 1,
+    "versionHistoryDays" INTEGER,
+    "queuePriority" INTEGER NOT NULL DEFAULT 0,
     "realBuilds" BOOLEAN NOT NULL,
+    "equivalent" TEXT NOT NULL,
+    "features" JSONB NOT NULL,
+    "stripeMonthlyPriceId" TEXT,
+    "stripeAnnualPriceId" TEXT,
+    "isHighlighted" BOOLEAN NOT NULL DEFAULT false,
     "sortOrder" INTEGER NOT NULL,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "PlanOffer_pkey" PRIMARY KEY ("plan")
+    CONSTRAINT "Plan_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "PlanChange" (
+    "id" TEXT NOT NULL,
+    "planId" TEXT NOT NULL,
+    "actorId" TEXT NOT NULL,
+    "field" TEXT NOT NULL,
+    "before" JSONB NOT NULL,
+    "after" JSONB NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "PlanChange_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "BuildBudget" (
-    "plan" "Plan" NOT NULL,
+    "planId" TEXT NOT NULL,
     "maxAgentSteps" INTEGER NOT NULL DEFAULT 150,
     "maxRetries" INTEGER NOT NULL DEFAULT 5,
     "maxBuildMinutes" INTEGER NOT NULL DEFAULT 60,
     "maxPlaytestMinutes" INTEGER NOT NULL DEFAULT 15,
-    "maxTokensPerBuild" INTEGER NOT NULL,
-    "maxCostMicrosPerBuild" INTEGER NOT NULL,
-    "buildsPerMonth" INTEGER NOT NULL,
+    "maxCreditsPerBuild" INTEGER NOT NULL,
 
-    CONSTRAINT "BuildBudget_pkey" PRIMARY KEY ("plan")
+    CONSTRAINT "BuildBudget_pkey" PRIMARY KEY ("planId")
+);
+
+-- CreateTable
+CREATE TABLE "TopUpPack" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "credits" INTEGER NOT NULL,
+    "priceCents" INTEGER NOT NULL,
+    "stripePriceId" TEXT,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "sortOrder" INTEGER NOT NULL,
+
+    CONSTRAINT "TopUpPack_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "PricingConfig" (
+    "key" TEXT NOT NULL,
+    "value" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "PricingConfig_pkey" PRIMARY KEY ("key")
 );
 
 -- CreateTable
 CREATE TABLE "Subscription" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
-    "plan" "Plan" NOT NULL DEFAULT 'decouverte',
-    "status" "SubscriptionStatus" NOT NULL DEFAULT 'active',
+    "planId" TEXT NOT NULL,
+    "interval" "BillingInterval" NOT NULL DEFAULT 'month',
+    "status" "SubscriptionStatus" NOT NULL DEFAULT 'incomplete',
+    "priceCents" INTEGER NOT NULL,
+    "stripePriceId" TEXT,
     "stripeCustomerId" TEXT,
     "stripeSubscriptionId" TEXT,
+    "currentPeriodStart" TIMESTAMP(3),
     "currentPeriodEnd" TIMESTAMP(3),
+    "cancelAtPeriodEnd" BOOLEAN NOT NULL DEFAULT false,
+    "nextCreditGrantAt" TIMESTAMP(3),
+    "pendingPlanId" TEXT,
+    "pendingInterval" "BillingInterval",
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -121,18 +182,47 @@ CREATE TABLE "Subscription" (
 );
 
 -- CreateTable
+CREATE TABLE "CreditLedger" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "delta" INTEGER NOT NULL,
+    "bucket" "CreditBucket" NOT NULL,
+    "reason" "CreditReason" NOT NULL,
+    "buildId" TEXT,
+    "stripeEventId" TEXT,
+    "idempotencyKey" TEXT,
+    "expiresAt" TIMESTAMP(3),
+    "note" TEXT,
+    "actorId" TEXT,
+    "simulated" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "CreditLedger_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "StripeEvent" (
+    "id" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "processedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "StripeEvent_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "UsageEvent" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "projectId" TEXT,
-    "sessionId" TEXT,
-    "operation" TEXT NOT NULL,
+    "buildId" TEXT,
+    "type" TEXT NOT NULL,
     "provider" TEXT NOT NULL,
     "model" TEXT NOT NULL,
     "inputTokens" INTEGER NOT NULL,
     "outputTokens" INTEGER NOT NULL,
     "cacheReadTokens" INTEGER NOT NULL DEFAULT 0,
-    "costMicros" INTEGER NOT NULL,
+    "cacheWriteTokens" INTEGER NOT NULL DEFAULT 0,
+    "costEurMicros" INTEGER NOT NULL,
     "simulated" BOOLEAN NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -146,7 +236,6 @@ CREATE TABLE "UsageCounter" (
     "period" TEXT NOT NULL,
     "builds" INTEGER NOT NULL DEFAULT 0,
     "plans" INTEGER NOT NULL DEFAULT 0,
-    "costMicros" INTEGER NOT NULL DEFAULT 0,
 
     CONSTRAINT "UsageCounter_pkey" PRIMARY KEY ("id")
 );
@@ -298,7 +387,7 @@ CREATE TABLE "BuildTask" (
     "startedAt" TIMESTAMP(3),
     "finishedAt" TIMESTAMP(3),
     "tokensUsed" INTEGER NOT NULL DEFAULT 0,
-    "costMicros" INTEGER NOT NULL DEFAULT 0,
+    "costEurMicros" INTEGER NOT NULL DEFAULT 0,
 
     CONSTRAINT "BuildTask_pkey" PRIMARY KEY ("id")
 );
@@ -315,7 +404,13 @@ CREATE TABLE "AgentSession" (
     "steps" INTEGER NOT NULL DEFAULT 0,
     "retries" INTEGER NOT NULL DEFAULT 0,
     "tokensUsed" INTEGER NOT NULL DEFAULT 0,
-    "costMicros" INTEGER NOT NULL DEFAULT 0,
+    "costEurMicros" INTEGER NOT NULL DEFAULT 0,
+    "creditsEstimated" INTEGER NOT NULL DEFAULT 0,
+    "creditsReserved" INTEGER NOT NULL DEFAULT 0,
+    "creditsDebited" INTEGER,
+    "refunded" BOOLEAN NOT NULL DEFAULT false,
+    "stepsAllowance" INTEGER NOT NULL DEFAULT 0,
+    "minutesAllowance" INTEGER NOT NULL DEFAULT 0,
     "startedAt" TIMESTAMP(3),
     "finishedAt" TIMESTAMP(3),
     "lastHeartbeat" TIMESTAMP(3),
@@ -505,6 +600,12 @@ CREATE UNIQUE INDEX "VerificationToken_token_key" ON "VerificationToken"("token"
 CREATE UNIQUE INDEX "VerificationToken_identifier_token_key" ON "VerificationToken"("identifier", "token");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Plan_slug_key" ON "Plan"("slug");
+
+-- CreateIndex
+CREATE INDEX "PlanChange_planId_createdAt_idx" ON "PlanChange"("planId", "createdAt");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Subscription_userId_key" ON "Subscription"("userId");
 
 -- CreateIndex
@@ -514,10 +615,19 @@ CREATE UNIQUE INDEX "Subscription_stripeCustomerId_key" ON "Subscription"("strip
 CREATE UNIQUE INDEX "Subscription_stripeSubscriptionId_key" ON "Subscription"("stripeSubscriptionId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "CreditLedger_idempotencyKey_key" ON "CreditLedger"("idempotencyKey");
+
+-- CreateIndex
+CREATE INDEX "CreditLedger_userId_createdAt_idx" ON "CreditLedger"("userId", "createdAt");
+
+-- CreateIndex
+CREATE INDEX "CreditLedger_buildId_idx" ON "CreditLedger"("buildId");
+
+-- CreateIndex
 CREATE INDEX "UsageEvent_userId_createdAt_idx" ON "UsageEvent"("userId", "createdAt");
 
 -- CreateIndex
-CREATE INDEX "UsageEvent_sessionId_idx" ON "UsageEvent"("sessionId");
+CREATE INDEX "UsageEvent_buildId_idx" ON "UsageEvent"("buildId");
 
 -- CreateIndex
 CREATE INDEX "UsageEvent_createdAt_idx" ON "UsageEvent"("createdAt");
@@ -595,10 +705,19 @@ ALTER TABLE "Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId"
 ALTER TABLE "Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "BuildBudget" ADD CONSTRAINT "BuildBudget_plan_fkey" FOREIGN KEY ("plan") REFERENCES "PlanOffer"("plan") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "PlanChange" ADD CONSTRAINT "PlanChange_planId_fkey" FOREIGN KEY ("planId") REFERENCES "Plan"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "BuildBudget" ADD CONSTRAINT "BuildBudget_planId_fkey" FOREIGN KEY ("planId") REFERENCES "Plan"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_planId_fkey" FOREIGN KEY ("planId") REFERENCES "Plan"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "CreditLedger" ADD CONSTRAINT "CreditLedger_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "UsageEvent" ADD CONSTRAINT "UsageEvent_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -607,7 +726,7 @@ ALTER TABLE "UsageEvent" ADD CONSTRAINT "UsageEvent_userId_fkey" FOREIGN KEY ("u
 ALTER TABLE "UsageEvent" ADD CONSTRAINT "UsageEvent_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "UsageEvent" ADD CONSTRAINT "UsageEvent_sessionId_fkey" FOREIGN KEY ("sessionId") REFERENCES "AgentSession"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "UsageEvent" ADD CONSTRAINT "UsageEvent_buildId_fkey" FOREIGN KEY ("buildId") REFERENCES "AgentSession"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "UsageCounter" ADD CONSTRAINT "UsageCounter_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -680,8 +799,7 @@ ALTER TABLE "PrePublishCheck" ADD CONSTRAINT "PrePublishCheck_projectId_fkey" FO
 
 -- ─── Garanties que Prisma ne sait pas exprimer ─────────────────────────────
 
--- Le palier de rareté va de 1 (brouillon) à 5 (prêt). Une valeur hors bornes
--- afficherait une carte sans couleur : on la refuse à l'écriture.
+-- Le palier de rareté va de 1 (brouillon) à 5 (prêt).
 ALTER TABLE "Project" ADD CONSTRAINT "Project_tier_bornes" CHECK ("tier" BETWEEN 1 AND 5);
 ALTER TABLE "Project" ADD CONSTRAINT "Project_permission_bornes" CHECK ("permissionLevel" BETWEEN 1 AND 5);
 ALTER TABLE "ProjectVersion" ADD CONSTRAINT "ProjectVersion_tier_bornes" CHECK ("tier" BETWEEN 1 AND 5);
@@ -690,10 +808,47 @@ ALTER TABLE "ProjectVersion" ADD CONSTRAINT "ProjectVersion_tier_bornes" CHECK (
 ALTER TABLE "Project" ADD CONSTRAINT "Project_autonomie_confirmee"
   CHECK ("permissionLevel" < 5 OR "autonomyConfirmedAt" IS NOT NULL);
 
--- Une seule génération active par projet. Deux générations simultanées
--- enverraient des appels MCP en parallèle sur le même éditeur, ce qui le fige
--- (section 2.3). Le verrou applicatif le prévient ; cet index le garantit
--- même si deux requêtes passent en même temps.
+-- Une seule génération active par projet : deux générations simultanées
+-- enverraient des appels MCP en parallèle au même éditeur, ce qui le fige.
 CREATE UNIQUE INDEX "AgentSession_une_active_par_projet"
   ON "AgentSession" ("projectId")
   WHERE "status" IN ('queued', 'running', 'paused', 'stopping', 'awaiting_human');
+
+-- ─── Argent : entiers positifs, et remise annuelle plafonnée ───────────────
+
+ALTER TABLE "Plan" ADD CONSTRAINT "Plan_montants_positifs"
+  CHECK ("monthlyPriceCents" >= 0 AND ("annualPriceCents" IS NULL OR "annualPriceCents" >= 0)
+         AND "monthlyCredits" >= 0);
+
+-- Sur un produit à coût variable, chaque point de remise sort de la marge :
+-- l'abonné annuel consomme autant de crédits que le mensuel. La remise annuelle
+-- ne dépasse jamais 20 %, quoi qu'on saisisse en administration.
+ALTER TABLE "Plan" ADD CONSTRAINT "Plan_remise_annuelle_max_20"
+  CHECK ("annualPriceCents" IS NULL
+         OR "annualPriceCents" * 100 >= "monthlyPriceCents" * 12 * 80);
+
+ALTER TABLE "TopUpPack" ADD CONSTRAINT "TopUpPack_positif" CHECK ("credits" > 0 AND "priceCents" > 0);
+
+-- ─── Registre des crédits : ajout seul ─────────────────────────────────────
+
+ALTER TABLE "CreditLedger" ADD CONSTRAINT "CreditLedger_delta_non_nul" CHECK ("delta" <> 0);
+
+-- Un ajustement manuel sans motif est refusé.
+ALTER TABLE "CreditLedger" ADD CONSTRAINT "CreditLedger_ajustement_motive"
+  CHECK ("reason" <> 'adjust' OR ("note" IS NOT NULL AND length(trim("note")) > 0));
+
+-- Aucune mise à jour, aucune suppression. Seule exception : la suppression
+-- d'un compte (RGPD), qui doit emporter ses lignes. Elle se déclare dans sa
+-- transaction par SET LOCAL nexteo.suppression_compte = 'on'.
+CREATE FUNCTION "nexteo_registre_ajout_seul"() RETURNS trigger AS $$
+BEGIN
+  IF TG_OP = 'DELETE' AND current_setting('nexteo.suppression_compte', true) = 'on' THEN
+    RETURN OLD;
+  END IF;
+  RAISE EXCEPTION 'CreditLedger est en ajout seul : % refusé', TG_OP USING ERRCODE = 'P0001';
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER "CreditLedger_ajout_seul"
+  BEFORE UPDATE OR DELETE ON "CreditLedger"
+  FOR EACH ROW EXECUTE FUNCTION "nexteo_registre_ajout_seul"();

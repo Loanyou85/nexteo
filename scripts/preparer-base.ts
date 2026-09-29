@@ -17,7 +17,7 @@ import { PrismaClient } from '@prisma/client';
  * tableau de bord.
  */
 
-const MIGRATION = '20260929015855_nexteo_uefn';
+const MIGRATION = '20260929023218_nexteo_uefn';
 
 /**
  * Tables qui signent un ancien produit Nexteo. Leur présence veut dire que

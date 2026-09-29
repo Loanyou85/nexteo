@@ -67,7 +67,7 @@ export function EnTete({
   return (
     <div className="flex flex-wrap items-end justify-between gap-4 px-4 pb-6 pt-8 sm:px-6">
       <div className="min-w-0">
-        {avant}
+        {avant ? <div className="mb-5">{avant}</div> : null}
         <h1 className="display text-[34px] text-text-1 sm:text-[40px]">{titre}</h1>
         {sous ? <div className="mt-2 max-w-2xl text-sm text-text-2">{sous}</div> : null}
       </div>

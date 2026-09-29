@@ -104,20 +104,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   events: {
     // Ne concerne que les comptes créés par un fournisseur externe : une
-    // inscription par mot de passe crée tout elle-même.
+    // inscription par mot de passe crée tout elle-même. Aucun abonnement
+    // n'est créé : un compte sans abonnement est en Découverte.
     async createUser({ user }) {
       if (!user.id || !user.email) return;
-      await db.$transaction([
-        db.user.update({
-          where: { id: user.id },
-          data: {
-            role: isAdminEmail(user.email) ? Role.admin : Role.user,
-            consentAcceptedAt: new Date(),
-            consentVersion: VERSION_CONSENTEMENT,
-          },
-        }),
-        db.subscription.create({ data: { userId: user.id } }),
-      ]);
+      await db.user.update({
+        where: { id: user.id },
+        data: {
+          role: isAdminEmail(user.email) ? Role.admin : Role.user,
+          consentAcceptedAt: new Date(),
+          consentVersion: VERSION_CONSENTEMENT,
+        },
+      });
     },
   },
 });

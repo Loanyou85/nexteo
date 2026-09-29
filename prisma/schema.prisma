@@ -45,6 +45,7 @@ model User {
   subscription Subscription?
   usageEvents  UsageEvent[]
   usage        UsageCounter[]
+  credits      CreditLedger[]
   projects     Project[]
   localAgents  LocalAgent[]
   apiKeys      ApiKey[]
@@ -86,13 +87,102 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// ─── Offres, quotas, coûts ─────────────────────────────────────────────────
+// ─── Offres, crédits, coûts ────────────────────────────────────────────────
+//
+// Aucun prix, aucun quota, aucune remise en dur : tout vit ici et se modifie
+// depuis l'administration, sans déploiement. Tous les montants sont en
+// centimes entiers — jamais de flottant pour de l'argent.
 
-enum Plan {
-  decouverte
-  createur
-  pro
-  studio
+/// Une offre. « Découverte » est une ligne comme les autres, à 0 €.
+model Plan {
+  id                 String   @id @default(cuid())
+  slug               String   @unique
+  name               String
+  tagline            String
+  monthlyPriceCents  Int
+  /// Nul : pas de facturation annuelle pour cette offre.
+  annualPriceCents   Int?
+  monthlyCredits     Int
+  /// Plans de jeu par mois ; nul = illimité.
+  monthlyGamePlans   Int?
+  /// Projets actifs ; nul = illimité.
+  maxProjects        Int?
+  maxMembers         Int      @default(1)
+  /// Durée de conservation des versions ; nul = illimitée.
+  versionHistoryDays Int?
+  /// Plus c'est haut, plus la file de build passe devant.
+  queuePriority      Int      @default(0)
+  /// Faux pour Découverte : un build gratuit serait la première source de perte.
+  realBuilds         Boolean
+  /// « 2 jeux, ou 1 jeu + 5 mises à jour ».
+  equivalent         String
+  /// Liste de { label, available } : une fonctionnalité pas encore construite
+  /// est affichée « bientôt », jamais vendue comme disponible.
+  features           Json
+  /// Identifiants de prix Stripe. Renseignés par le script de création ou par
+  /// l'administration ; à défaut, lus dans les variables d'environnement.
+  stripeMonthlyPriceId String?
+  stripeAnnualPriceId  String?
+  isHighlighted      Boolean  @default(false)
+  sortOrder          Int
+  isActive           Boolean  @default(true)
+  updatedAt          DateTime @updatedAt
+
+  budget        BuildBudget?
+  subscriptions Subscription[]
+  changes       PlanChange[]
+}
+
+/// Historique des modifications d'une offre en administration.
+model PlanChange {
+  id        String   @id @default(cuid())
+  planId    String
+  actorId   String
+  field     String
+  before    Json
+  after     Json
+  createdAt DateTime @default(now())
+
+  plan Plan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@index([planId, createdAt])
+}
+
+/// Budgets d'un build, par offre (section 26 du cahier principal).
+model BuildBudget {
+  planId             String @id
+  maxAgentSteps      Int    @default(150)
+  maxRetries         Int    @default(5)
+  maxBuildMinutes    Int    @default(60)
+  maxPlaytestMinutes Int    @default(15)
+  /// Plafond de crédits d'un build : c'est lui qui est réservé au lancement.
+  maxCreditsPerBuild Int
+
+  plan Plan @relation(fields: [planId], references: [id], onDelete: Cascade)
+}
+
+model TopUpPack {
+  id            String  @id @default(cuid())
+  name          String
+  credits       Int
+  priceCents    Int
+  stripePriceId String?
+  isActive      Boolean @default(true)
+  sortOrder     Int
+}
+
+/// Réglages chiffrés : COST_PER_CREDIT, MAX_ANNUAL_DISCOUNT, ROLLOVER_MONTHS…
+/// Valeurs entières stockées en texte, lues par un accès typé.
+model PricingConfig {
+  key         String   @id
+  value       String
+  description String
+  updatedAt   DateTime @updatedAt
+}
+
+enum BillingInterval {
+  month
+  year
 }
 
 enum SubscriptionStatus {
@@ -103,52 +193,85 @@ enum SubscriptionStatus {
   incomplete
 }
 
-/// Les offres vivent en base : un prix change sans déploiement (section 27).
-/// Les identifiants de prix Stripe restent en variables d'environnement ;
-/// seul le NOM de la variable est stocké ici.
-model PlanOffer {
-  plan              Plan    @id
-  name              String
-  monthlyPriceCents Int
-  description       String
-  features          String[]
-  /// Nom de la variable d'environnement portant l'identifiant de prix Stripe.
-  stripePriceEnv    String?
-  /// La découverte ne lance aucun build réel : un build coûte de l'argent.
-  realBuilds        Boolean
-  sortOrder         Int
-
-  budget BuildBudget?
-}
-
-/// Budgets par build, par offre (section 26). En base, pas en dur : on les
-/// ajuste quand le coût réel par build sera mesuré.
-model BuildBudget {
-  plan                 Plan @id
-  maxAgentSteps        Int  @default(150)
-  maxRetries           Int  @default(5)
-  maxBuildMinutes      Int  @default(60)
-  maxPlaytestMinutes   Int  @default(15)
-  maxTokensPerBuild    Int
-  /// Coût IA maximal d'un build, en micro-dollars.
-  maxCostMicrosPerBuild Int
-  buildsPerMonth       Int
-
-  offer PlanOffer @relation(fields: [plan], references: [plan])
-}
-
+/// Un utilisateur sans ligne ici est en Découverte.
 model Subscription {
   id                   String             @id @default(cuid())
   userId               String             @unique
-  plan                 Plan               @default(decouverte)
-  status               SubscriptionStatus @default(active)
+  planId               String
+  interval             BillingInterval    @default(month)
+  status               SubscriptionStatus @default(incomplete)
+  /// Tarif figé à la souscription : un changement de prix ne touche jamais
+  /// les abonnés en cours.
+  priceCents           Int
+  stripePriceId        String?
   stripeCustomerId     String?            @unique
   stripeSubscriptionId String?            @unique
+  currentPeriodStart   DateTime?
   currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean            @default(false)
+  /// Prochain versement de crédits. Pour l'annuel, chaque mois à la date
+  /// anniversaire — jamais douze mois d'un bloc.
+  nextCreditGrantAt    DateTime?
+  /// Descente de plan ou passage au mensuel programmés à l'échéance.
+  pendingPlanId        String?
+  pendingInterval      BillingInterval?
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan Plan @relation(fields: [planId], references: [id])
+}
+
+enum CreditBucket {
+  subscription
+  rollover
+  topup
+}
+
+enum CreditReason {
+  grant
+  reserve
+  release
+  debit
+  refund
+  expire
+  adjust
+}
+
+/// Registre des crédits, en ajout seul : aucune mise à jour, aucune
+/// suppression (un déclencheur l'interdit en base). Le solde se calcule à
+/// partir d'ici ; il peut être mis en cache, le registre fait foi.
+model CreditLedger {
+  id             String       @id @default(cuid())
+  userId         String
+  delta          Int
+  bucket         CreditBucket
+  reason         CreditReason
+  /// La génération (AgentSession) concernée.
+  buildId        String?
+  stripeEventId  String?
+  /// Rend chaque écriture rejouable sans effet : un webhook reçu deux fois,
+  /// une tâche relancée le même jour, ne versent jamais deux fois.
+  idempotencyKey String?      @unique
+  expiresAt      DateTime?
+  /// Motif — obligatoire pour un ajustement manuel.
+  note           String?
+  actorId        String?
+  /// Écriture due à une génération simulée : exclue des mesures de coût réel.
+  simulated      Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([buildId])
+}
+
+/// Événements Stripe déjà traités : c'est ce qui rend le webhook idempotent.
+model StripeEvent {
+  id          String   @id
+  type        String
+  processedAt DateTime @default(now())
 }
 
 /// Un appel LLM = une ligne. Sans cette mesure, impossible de fixer les prix.
@@ -156,37 +279,39 @@ model UsageEvent {
   id               String   @id @default(cuid())
   userId           String
   projectId        String?
-  sessionId        String?
-  operation        String
+  buildId          String?
+  type             String
   provider         String
   model            String
   inputTokens      Int
   outputTokens     Int
   cacheReadTokens  Int      @default(0)
-  /// Coût estimé en micro-dollars (1 $ = 1 000 000).
-  costMicros       Int
-  /// Vrai quand l'appel a été servi par l'IA simulée : coût nul, et ce n'est
-  /// pas une mesure de coût réel. Exclu des moyennes de l'administration.
+  cacheWriteTokens Int      @default(0)
+  /// Coût en millionièmes d'euro, entier. Un appel coûte souvent moins d'un
+  /// centime : en centimes entiers, la plupart vaudraient zéro et la somme
+  /// serait fausse. On arrondit au centime à l'affichage seulement.
+  costEurMicros    Int
+  /// Vrai quand l'IA simulée a répondu : coût estimé, pas mesuré. Exclu des
+  /// moyennes de coût réel de l'administration.
   simulated        Boolean
   createdAt        DateTime @default(now())
 
   user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   project Project?      @relation(fields: [projectId], references: [id], onDelete: SetNull)
-  session AgentSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  build   AgentSession? @relation(fields: [buildId], references: [id], onDelete: SetNull)
 
   @@index([userId, createdAt])
-  @@index([sessionId])
+  @@index([buildId])
   @@index([createdAt])
 }
 
 model UsageCounter {
-  id          String @id @default(cuid())
-  userId      String
+  id     String @id @default(cuid())
+  userId String
   /// Période au format « 2026-09 ».
-  period      String
-  builds      Int    @default(0)
-  plans       Int    @default(0)
-  costMicros  Int    @default(0)
+  period String
+  builds Int    @default(0)
+  plans  Int    @default(0)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -388,7 +513,7 @@ model BuildTask {
   startedAt    DateTime?
   finishedAt   DateTime?
   tokensUsed   Int        @default(0)
-  costMicros   Int        @default(0)
+  costEurMicros Int       @default(0)
 
   plan BuildPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
 
@@ -424,7 +549,17 @@ model AgentSession {
   steps         Int           @default(0)
   retries       Int           @default(0)
   tokensUsed    Int           @default(0)
-  costMicros    Int           @default(0)
+  costEurMicros Int           @default(0)
+  /// Estimation annoncée avant lancement, plafond réservé, débit final.
+  creditsEstimated Int        @default(0)
+  creditsReserved  Int        @default(0)
+  creditsDebited   Int?
+  /// Échec imputable à la plateforme : crédits restitués.
+  refunded      Boolean       @default(false)
+  /// Étapes et minutes accordées en plus du budget, après confirmation
+  /// explicite de continuer (règle 4 de l'offre).
+  stepsAllowance   Int        @default(0)
+  minutesAllowance Int        @default(0)
   startedAt     DateTime?
   finishedAt    DateTime?
   lastHeartbeat DateTime?

@@ -50,7 +50,6 @@ export async function inscrire(_etat: AuthState, formData: FormData): Promise<Au
       role: isAdminEmail(email) ? 'admin' : 'user',
       consentAcceptedAt: new Date(),
       consentVersion: VERSION_CONSENTEMENT,
-      subscription: { create: {} },
     },
   });
 
