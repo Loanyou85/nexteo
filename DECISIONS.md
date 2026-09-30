@@ -153,3 +153,11 @@ Arbitrages pris en construisant, avec leur raison. Le plus récent en bas.
     « absent ». Seul l'état du MCP (joignable ou non, adresse, nombre
     d'outils) est mesuré. Une croix rouge pour une chose non mesurée
     enverrait l'utilisateur corriger un réglage qui n'est peut-être pas cassé.
+37. **Site public : aperçu de partage, robots, sitemap, 404 et erreurs.**
+    `AUTH_URL` mal saisie faisait tomber TOUTES les pages (`new URL()` au
+    chargement du layout) : `urlPublique()` essaie chaque candidat et retombe
+    sur le domaine de la marque. `robots.txt` exclut tout ce qui demande un
+    compte ; le sitemap ne liste que les pages publiques. Les pages 404 et
+    d'erreur n'appellent ni la base ni la session, pour rester affichables
+    quand elles sont en panne ; l'erreur n'expose qu'une référence (`digest`).
+    L'image d'aperçu utilise les polices système, sans requête vers un tiers.

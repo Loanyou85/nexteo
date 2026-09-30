@@ -7,12 +7,25 @@ import '@fontsource/inter/500.css';
 import '@fontsource/jetbrains-mono/400.css';
 import './globals.css';
 import { MARQUE } from '@/config/brand';
+import { urlPublique } from '@/config/url';
+
+const DESCRIPTION =
+  'Décris ta map. L’agent écrit le Verse, place les devices, compile, lance le playtest, lit les erreurs et les corrige — dans ton UEFN, sur ton PC.';
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.AUTH_URL ?? `https://${MARQUE.domaine}`),
+  metadataBase: urlPublique(),
   title: { default: `${MARQUE.nom} — ${MARQUE.promesse}`, template: `%s — ${MARQUE.nom}` },
-  description:
-    'Décris ta map. L’agent écrit le Verse, place les devices, compile, lance le playtest, lit les erreurs et les corrige — dans ton UEFN, sur ton PC.',
+  description: DESCRIPTION,
+  // Aperçu quand on partage le lien (messageries, réseaux). L'image est
+  // générée par `opengraph-image.tsx`.
+  openGraph: {
+    type: 'website',
+    locale: 'fr_FR',
+    siteName: MARQUE.nom,
+    title: `${MARQUE.nom} — ${MARQUE.promesse}`,
+    description: DESCRIPTION,
+  },
+  twitter: { card: 'summary_large_image' },
 };
 
 export const viewport: Viewport = {
