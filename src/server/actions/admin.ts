@@ -8,6 +8,7 @@ import { requireAdmin } from '@/server/auth';
 import { configEntier } from '@/server/config';
 import { ajusterSolde } from '@/server/credits';
 import { db } from '@/server/db';
+import { causeProbable } from '@/server/paiement-erreurs';
 import { stripe, stripeActif } from '@/server/stripe';
 
 /**
@@ -71,14 +72,21 @@ export async function modifierOffre(planId: string, _e: EtatAdmin, formData: For
   // gardent le leur.
   const nouveauxPrix: { stripeMonthlyPriceId?: string; stripeAnnualPriceId?: string } = {};
   if (stripeActif() && (changes.includes('monthlyPriceCents') || changes.includes('annualPriceCents'))) {
-    const s = stripe();
-    const existant = plan.stripeMonthlyPriceId ? await s.prices.retrieve(plan.stripeMonthlyPriceId) : null;
-    const produit = existant ? (typeof existant.product === 'string' ? existant.product : existant.product.id) : (await s.products.create({ name: `Nexteo ${plan.name}` })).id;
-    if (changes.includes('monthlyPriceCents')) {
-      nouveauxPrix.stripeMonthlyPriceId = (await s.prices.create({ product: produit, currency: 'eur', unit_amount: mensuel, tax_behavior: 'inclusive', recurring: { interval: 'month' } })).id;
-    }
-    if (changes.includes('annualPriceCents') && annuel !== null) {
-      nouveauxPrix.stripeAnnualPriceId = (await s.prices.create({ product: produit, currency: 'eur', unit_amount: annuel, tax_behavior: 'inclusive', recurring: { interval: 'year' } })).id;
+    // Si Stripe refuse, RIEN n'est enregistré : les prix du site ne doivent
+    // jamais différer de ceux que Stripe facturera.
+    try {
+      const s = stripe();
+      const existant = plan.stripeMonthlyPriceId ? await s.prices.retrieve(plan.stripeMonthlyPriceId) : null;
+      const produit = existant ? (typeof existant.product === 'string' ? existant.product : existant.product.id) : (await s.products.create({ name: `Nexteo ${plan.name}` })).id;
+      if (changes.includes('monthlyPriceCents')) {
+        nouveauxPrix.stripeMonthlyPriceId = (await s.prices.create({ product: produit, currency: 'eur', unit_amount: mensuel, tax_behavior: 'inclusive', recurring: { interval: 'month' } })).id;
+      }
+      if (changes.includes('annualPriceCents') && annuel !== null) {
+        nouveauxPrix.stripeAnnualPriceId = (await s.prices.create({ product: produit, currency: 'eur', unit_amount: annuel, tax_behavior: 'inclusive', recurring: { interval: 'year' } })).id;
+      }
+    } catch (e) {
+      console.error('[admin] création du prix Stripe impossible', e);
+      return { erreur: `Stripe a refusé la création du nouveau prix : ${causeProbable(e)}. Rien n’a été modifié.` };
     }
   }
 

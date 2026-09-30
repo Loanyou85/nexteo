@@ -175,3 +175,17 @@ Arbitrages pris en construisant, avec leur raison. Le plus récent en bas.
     dit aussi quelles variables sont présentes (jamais leur valeur) et, avec
     `?stripe=1`, si les prix existent dans le mode courant de Stripe — le
     mélange test / réel est la panne de paiement la plus fréquente.
+39. **Une erreur de paiement s'affiche, elle ne fait jamais tomber la page.**
+    Constaté en production : après l'inscription avec une offre choisie, et à
+    chaque clic sur « Choisir », tout échec de Stripe (prix inexistant dans le
+    mode courant, clé refusée, TVA non configurée, Stripe injoignable) levait
+    une exception et la page affichait « Quelque chose s'est mal passé ».
+    Les trois actions (`choisirOffre`, `recharger`, `ouvrirPortail`) rendent
+    maintenant un message ; seules les redirections traversent la protection.
+    Le visiteur lit un texte neutre ; l'administrateur lit la cause probable
+    et le lien `/api/sante?stripe=1`. Même protection sur la modification d'un
+    prix en administration : si Stripe refuse, rien n'est enregistré, pour que
+    les prix du site ne diffèrent jamais de ceux que Stripe facture.
+    Garde-fou ajouté : aucun paiement ne démarre sans `STRIPE_WEBHOOK_SECRET`.
+    Sans lui Stripe encaisse, mais le site ne reçoit jamais l'événement qui
+    verse les crédits — le client paierait sans rien recevoir.

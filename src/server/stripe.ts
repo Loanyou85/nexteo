@@ -13,6 +13,15 @@ export function stripeActif(): boolean {
   return !!process.env.STRIPE_SECRET_KEY?.trim();
 }
 
+/**
+ * Un paiement ne démarre que si le webhook est configuré aussi. Sans lui,
+ * Stripe encaisserait l'argent et le site ne saurait jamais qu'il doit
+ * verser les crédits : la pire panne possible, et la plus silencieuse.
+ */
+export function paiementConfigure(): boolean {
+  return stripeActif() && !!process.env.STRIPE_WEBHOOK_SECRET?.trim();
+}
+
 export function stripe(): Stripe {
   const cle = process.env.STRIPE_SECRET_KEY?.trim();
   if (!cle) throw new Error('STRIPE_SECRET_KEY absente : paiement non configuré.');
