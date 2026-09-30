@@ -105,7 +105,30 @@ function cause(brut: string): string {
   return lignes.find((l) => /Error|error:|P\d{4}|Can't reach|Authentication/.test(l)) ?? lignes[0] ?? brut.slice(0, 200);
 }
 
+/**
+ * Variables d'environnement qui manquent. Affiché dans le journal de build,
+ * là où on regarde en premier après un déploiement. Ne fait jamais échouer
+ * le build : le site le dit lui-même quand c'est bloquant.
+ */
+function verifierVariables(): void {
+  const vide = (n: string) => !process.env[n]?.trim();
+  const bloquantes: string[] = [];
+  const conseillees: string[] = [];
+  if (vide('AUTH_SECRET') && vide('NEXTAUTH_SECRET')) bloquantes.push('AUTH_SECRET  — sans lui, personne ne peut s’inscrire ni se connecter (openssl rand -base64 32)');
+  if (vide('AUTH_URL') && !process.env.VERCEL_URL) conseillees.push('AUTH_URL  — l’adresse publique du site, avec https://');
+  if (vide('ADMIN_EMAILS')) conseillees.push('ADMIN_EMAILS  — ton adresse : sans elle, aucun accès à l’administration');
+  if (vide('CRON_SECRET')) conseillees.push('CRON_SECRET  — sans lui, les crédits des abonnements annuels ne sont pas versés chaque mois');
+  if (vide('STRIPE_SECRET_KEY')) conseillees.push('STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET et les huit STRIPE_*_MONTHLY/ANNUAL — sans eux, aucun paiement (le site le dit)');
+  if (vide('ANTHROPIC_API_KEY')) conseillees.push('ANTHROPIC_API_KEY  — sans elle, l’IA est simulée (le site le dit sur chaque page)');
+  if (bloquantes.length === 0 && conseillees.length === 0) return;
+  bandeau([
+    ...(bloquantes.length ? ['Variables MANQUANTES, bloquantes :', ...bloquantes.map((l) => '  • ' + l), ''] : []),
+    ...(conseillees.length ? ['Variables à renseigner quand tu seras prêt :', ...conseillees.map((l) => '  • ' + l)] : []),
+  ]);
+}
+
 async function main(): Promise<void> {
+  verifierVariables();
   const url = process.env.DIRECT_URL?.trim() || process.env.DATABASE_URL?.trim();
   if (!url) {
     bandeau([

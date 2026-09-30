@@ -103,3 +103,12 @@ Arbitrages pris en construisant, avec leur raison. Le plus récent en bas.
     apporter à l'utilisateur. Le seed ne réécrit jamais une base existante ;
     une base déjà semée garde l'ancien vocabulaire dans les offres et le
     barème jusqu'à mise à jour manuelle (une base neuve n'est pas concernée).
+31. **Répétition de mise en production faite en local, sur une base vierge**
+    (build réel, `next start` en NODE_ENV=production). Elle a révélé trois
+    manques, corrigés : (a) aucun en-tête de sécurité — ajoutés dans
+    `next.config.ts`, sans CSP stricte (Next injecte des scripts en ligne) ;
+    (b) sans `AUTH_SECRET`, l'inscription créait un compte puis échouait en
+    silence à la connexion — elle refuse maintenant avant de créer quoi que
+    ce soit ; (c) rien dans le journal de build ne signalait une variable
+    manquante — `preparer-base.ts` les liste, sans jamais faire échouer le
+    build. L'hôte de `AUTH_URL` est ajouté aux origines des Server Actions.

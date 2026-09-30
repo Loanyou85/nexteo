@@ -6,6 +6,7 @@ import { db } from '@/server/db';
 import { isAdminEmail, signIn, VERSION_CONSENTEMENT } from '@/server/auth';
 import { hashPassword } from '@/lib/auth/password';
 import { loginSchema, registerSchema } from '@/lib/validation/auth';
+import { MESSAGE_SECRET_MANQUANT, secretAuthManquant } from '@/server/configuration';
 
 export type AuthState = { error?: string; champ?: 'firstName' | 'email' | 'password' };
 
@@ -18,6 +19,8 @@ function destination(formData: FormData): string {
 }
 
 export async function inscrire(_etat: AuthState, formData: FormData): Promise<AuthState> {
+  if (secretAuthManquant()) return { error: MESSAGE_SECRET_MANQUANT };
+
   const analyse = registerSchema.safeParse({
     firstName: formData.get('firstName'),
     email: formData.get('email'),
@@ -69,6 +72,8 @@ export async function inscrire(_etat: AuthState, formData: FormData): Promise<Au
 }
 
 export async function connecter(_etat: AuthState, formData: FormData): Promise<AuthState> {
+  if (secretAuthManquant()) return { error: MESSAGE_SECRET_MANQUANT };
+
   const analyse = loginSchema.safeParse({
     email: formData.get('email'),
     password: formData.get('password'),
