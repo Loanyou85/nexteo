@@ -112,3 +112,7 @@ Arbitrages pris en construisant, avec leur raison. Le plus récent en bas.
     ce soit ; (c) rien dans le journal de build ne signalait une variable
     manquante — `preparer-base.ts` les liste, sans jamais faire échouer le
     build. L'hôte de `AUTH_URL` est ajouté aux origines des Server Actions.
+32. **Flux SSE limité à 60 s (`maxDuration`), refermé à 50 s.** Une valeur
+    supérieure à la limite du plan Vercel fait refuser le DÉPLOIEMENT, et ne
+    se voit pas en local. La reconnexion automatique (`retry` + `Last-Event-ID`)
+    rend la coupure invisible : aucune ligne perdue ni rejouée.

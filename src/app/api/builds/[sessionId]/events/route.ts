@@ -14,11 +14,14 @@ import { avancer } from '@/server/orchestrateur/boucle';
  */
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 300;
+// 60 s est la limite d'une fonction sur l'offre gratuite de Vercel sans « Fluid » ;
+// au-delà, le déploiement est refusé. Le flux se referme un peu avant, et le
+// navigateur se reconnecte tout seul en reprenant à `Last-Event-ID`.
+export const maxDuration = 60;
 
 const PAUSE_MS = 400;
 const TRANCHE_MS = 2_500;
-const DUREE_FLUX_MS = 240_000;
+const DUREE_FLUX_MS = 50_000;
 
 export async function GET(req: Request, { params }: { params: Promise<{ sessionId: string }> }) {
   const { sessionId } = await params;
