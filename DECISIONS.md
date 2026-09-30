@@ -189,3 +189,20 @@ Arbitrages pris en construisant, avec leur raison. Le plus récent en bas.
     Garde-fou ajouté : aucun paiement ne démarre sans `STRIPE_WEBHOOK_SECRET`.
     Sans lui Stripe encaisse, mais le site ne reçoit jamais l'événement qui
     verse les crédits — le client paierait sans rien recevoir.
+40. **Base créée mais VIDE : le site le dit, et l'administrateur la répare d'un clic.**
+    Constaté : la page d'accueil marchait, toutes les autres plantaient. Le
+    semis (offres, réglages chiffrés) tournait sur l'adresse POOLÉE, sans les
+    protections de `db.ts` ; il pouvait échouer sans bruit, le build continuait
+    (par conception), et le site tournait avec un schéma mais sans offres.
+    Seule l'accueil n'a besoin de rien en base ; `/tarifs` levait « Réglage
+    BAREME absent ». Corrections : (a) le semis passe par `DIRECT_URL`, comme
+    les migrations, avec repli sur l'adresse poolée normalisée ; (b) le build
+    VÉRIFIE que les offres et le barème sont en base avant d'annoncer « tout
+    est prêt » ; (c) `etatBase()` détecte une base vide et toutes les pages
+    l'annoncent au lieu de lever une exception ; (d) `/reparation`, réservée aux
+    administrateurs et sans la coque habituelle (qui dépend de la base),
+    rejoue le même semis — il ne crée que ce qui manque et n'écrase rien ;
+    (e) `ADMIN_EMAILS` est relue à chaque session : un propriétaire inscrit
+    avant d'avoir défini la variable est promu, sinon il n'aurait accès ni à
+    l'administration ni à la réparation. Logique du semis dans
+    `src/server/semis.ts`, partagée par le script et la page.

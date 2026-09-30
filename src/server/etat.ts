@@ -73,6 +73,26 @@ export async function etatBase(): Promise<EtatBase> {
       };
     }
 
+    // Le schéma existe ; encore faut-il que les offres et les réglages chiffrés
+    // y soient. Un semis manqué laissait les pages qui les lisent lever une
+    // exception (« Réglage BAREME absent ») : tout plantait sauf l'accueil.
+    const [ref] = await db.$queryRaw<{ plans: bigint; bareme: bigint }[]>`
+      SELECT (SELECT count(*) FROM "Plan") AS plans,
+             (SELECT count(*) FROM "PricingConfig" WHERE "key" = 'BAREME') AS bareme`;
+    if (!ref || Number(ref.plans) === 0 || Number(ref.bareme) === 0) {
+      return {
+        pret: false,
+        titre: 'La base est créée, mais elle est vide',
+        explication:
+          'Les offres et les réglages chiffrés n’y ont pas été créés au dernier déploiement : le remplissage a échoué. ' +
+          'Sans eux, seules l’accueil, l’inscription et la connexion peuvent s’afficher.',
+        aFaire: [
+          'Connecte-toi avec l’adresse de ADMIN_EMAILS, puis ouvre /reparation et clique sur « Créer les offres et réglages manquants ». Rien n’est effacé.',
+          'Ou redéploie après avoir vérifié que DIRECT_URL est bien la chaîne SANS « pooler ».',
+        ],
+      };
+    }
+
     return { pret: true };
   } catch (e) {
     const brut = String((e as Error).message)

@@ -232,19 +232,73 @@ async function main(): Promise<void> {
 
   console.log('[base] Schéma à jour.');
 
-  const semis = lancer('npx', ['tsx', 'prisma/seed.ts']);
+  // Le semis passe par DIRECT_URL. S'il échoue, on retente avec l'adresse
+  // poolée (normalisée pour un répartiteur de connexions) : les deux chaînes
+  // sont souvent inversées ou mal recopiées, et un semis manqué laisse le site
+  // avec un schéma mais sans offres — toutes les pages sauf l'accueil tombent.
+  let semis = lancer('npx', ['tsx', 'prisma/seed.ts']);
+  if (!semis.ok && process.env.DATABASE_URL?.trim()) {
+    console.log('[base] Le semis a échoué avec DIRECT_URL. Nouvelle tentative avec DATABASE_URL.');
+    semis = lancer('npx', ['tsx', 'prisma/seed.ts'], { DIRECT_URL: versPoolee(process.env.DATABASE_URL.trim()) });
+  }
   if (!semis.ok) {
     bandeau([
       'SEMIS EN ÉCHEC : ' + cause(semis.sortie),
       '',
-      'Le schéma est en place, seuls les référentiels manquent. Le site',
-      'fonctionnera, mais les offres, les templates et le catalogue de',
-      'devices seront absents.',
+      'Le schéma est en place, mais les offres et les réglages manquent.',
+      'Le site le dira sur la page, et l\'administrateur pourra les créer',
+      'depuis /reparation (une fois connecté avec une adresse de ADMIN_EMAILS).',
+    ]);
+    return;
+  }
+
+  // Vérification : un semis qui « réussit » sans rien poser ne doit pas
+  // s'annoncer prêt.
+  const manque = await referentielsManquants(url);
+  if (manque) {
+    bandeau([
+      'SEMIS INCOMPLET : ' + manque,
+      '',
+      'Le site le dira sur la page, et l\'administrateur pourra les créer',
+      'depuis /reparation (une fois connecté avec une adresse de ADMIN_EMAILS).',
     ]);
     return;
   }
 
   console.log('[base] Référentiels semés. Tout est prêt.');
+}
+
+/** Adresse poolée prête pour un répartiteur de connexions (requêtes préparées désactivées). */
+function versPoolee(brut: string): string {
+  try {
+    const u = new URL(brut);
+    if (/(^|[.-])pooler\./.test(u.hostname)) {
+      if (!u.searchParams.has('pgbouncer')) u.searchParams.set('pgbouncer', 'true');
+      if (!u.searchParams.has('connection_limit')) u.searchParams.set('connection_limit', '1');
+      return u.toString();
+    }
+  } catch {
+    /* adresse illisible : telle quelle */
+  }
+  return brut;
+}
+
+/** Ce qui manque en base après le semis, ou null si tout y est. */
+async function referentielsManquants(url: string): Promise<string | null> {
+  const client = new PrismaClient({ datasources: { db: { url } } });
+  try {
+    const [offres, reglages] = await Promise.all([
+      client.plan.count(),
+      client.pricingConfig.count({ where: { key: 'BAREME' } }),
+    ]);
+    if (offres === 0) return 'aucune offre en base.';
+    if (reglages === 0) return 'les réglages chiffrés sont absents.';
+    return null;
+  } catch (e) {
+    return `lecture impossible (${cause(String((e as Error).message))}).`;
+  } finally {
+    await client.$disconnect();
+  }
 }
 
 // Aucun chemin ne doit faire échouer le build : c'est tout l'objet du script.

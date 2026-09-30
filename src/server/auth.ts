@@ -5,6 +5,7 @@ import Credentials from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
 import { Role } from '@prisma/client';
 import { db } from '@/server/db';
+import { adresseAdmin, roleAJour } from '@/server/roles';
 import { verifyPassword } from '@/lib/auth/password';
 import { loginSchema } from '@/lib/validation/auth';
 // L'import explicite force la résolution du module avant son augmentation.
@@ -32,14 +33,7 @@ type SessionToken = JWT;
  */
 export const VERSION_CONSENTEMENT = '2026-09-uefn';
 
-const adminEmails = (process.env.ADMIN_EMAILS ?? '')
-  .split(',')
-  .map((e) => e.trim().toLowerCase())
-  .filter(Boolean);
-
-export function isAdminEmail(email: string): boolean {
-  return adminEmails.includes(email.trim().toLowerCase());
-}
+export const isAdminEmail = adresseAdmin;
 
 const providers: NextAuthConfig['providers'] = [
   Credentials({
@@ -144,12 +138,18 @@ export async function sessionOuNull() {
 
     const existe = await db.user.findUnique({
       where: { id: session.user.id },
-      select: { id: true },
+      select: { id: true, role: true, email: true },
     });
     if (!existe) {
       console.warn('[auth] jeton valide pour un compte disparu, session ignorée');
       return null;
     }
+
+    // Le rôle du jeton date de la connexion. On le relit en base, et on
+    // promeut une adresse de ADMIN_EMAILS inscrite AVANT que la variable
+    // existe : sinon le propriétaire se retrouve sans accès à l'administration,
+    // ni à la réparation dont il a besoin quand la base est vide.
+    session.user.role = await roleAJour(existe);
 
     return session;
   } catch (error) {
