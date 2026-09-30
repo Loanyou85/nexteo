@@ -161,3 +161,17 @@ Arbitrages pris en construisant, avec leur raison. Le plus récent en bas.
     d'erreur n'appellent ni la base ni la session, pour rester affichables
     quand elles sont en panne ; l'erreur n'expose qu'une référence (`digest`).
     L'image d'aperçu utilise les polices système, sans requête vers un tiers.
+38. **Déploiement insensible aux réglages hérités, et diagnostic sans journaux.**
+    Le projet Vercel existait pour un ancien produit : un réglage de
+    tableau de bord (commande de build, dossier de sortie, version de Node,
+    variables réservées à la production) pouvait faire échouer un déploiement
+    sans que le code y soit pour rien. `vercel.json` fixe donc le framework,
+    l'installation (`--include=dev`), le build et le dossier de sortie, et
+    `engines` fixe Node 22 : ces valeurs l'emportent sur le tableau de bord.
+    Un build propre (copie du dépôt sans `.env` ni `node_modules`, base
+    vierge, variables Stripe de production factices) passe : le code n'est
+    pas en cause quand un déploiement rougit. `/api/sante` dit en clair, sans
+    ouvrir les journaux, si la base répond ; connecté en administrateur, il
+    dit aussi quelles variables sont présentes (jamais leur valeur) et, avec
+    `?stripe=1`, si les prix existent dans le mode courant de Stripe — le
+    mélange test / réel est la panne de paiement la plus fréquente.

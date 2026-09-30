@@ -44,9 +44,17 @@ async function Contenu() {
         titre="Administration"
         sous={`${utilisateurs} compte(s), ${projets} projet(s), ${m.builds} build(s) clos dont ${m.buildsReels} réel(s). ${workers.length ? `${workers.length} worker(s) actif(s).` : 'Aucun worker actif : les builds simulés avancent depuis la console.'}`}
         actions={
-          <Bouton asChild>
-            <Link href="/admin/offres">Offres, prix et soldes</Link>
-          </Bouton>
+          <div className="flex flex-wrap gap-2">
+            <Bouton asChild>
+              <Link href="/admin/offres">Offres, prix et soldes</Link>
+            </Bouton>
+            {/* Adresse de l'API, pas une page : on l'ouvre comme un simple document JSON. */}
+            <Bouton asChild variant="secondaire">
+              <a href="/api/sante?stripe=1" target="_blank" rel="noreferrer">
+                Vérifier la configuration
+              </a>
+            </Bouton>
+          </div>
         }
       />
       <div className="space-y-6 px-4 pb-12 sm:px-6">
