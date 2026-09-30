@@ -1,13 +1,13 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { headers } from 'next/headers';
 import type { BillingInterval } from '@prisma/client';
 import { prixRechargeCents } from '@/lib/tarifs/calculs';
 import { requireUser } from '@/server/auth';
 import { configEntier } from '@/server/config';
 import { db } from '@/server/db';
 import { offreDe } from '@/server/offre';
+import { origine } from '@/server/origine';
 import { prixStripe, stripe, stripeActif } from '@/server/stripe';
 
 /**
@@ -16,13 +16,6 @@ import { prixStripe, stripe, stripeActif } from '@/server/stripe';
  */
 
 export type EtatPaiement = { erreur?: string };
-
-async function origine(): Promise<string> {
-  const h = await headers();
-  const hote = h.get('x-forwarded-host') ?? h.get('host') ?? 'localhost:3000';
-  const proto = h.get('x-forwarded-proto') ?? (hote.startsWith('localhost') ? 'http' : 'https');
-  return `${proto}://${hote}`;
-}
 
 const NON_CONFIGURE = 'Le paiement n’est pas encore configuré sur ce site : aucune transaction ne peut être faite. Rien ne t’a été facturé.';
 

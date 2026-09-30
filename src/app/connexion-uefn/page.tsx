@@ -1,9 +1,11 @@
 import { Coque, EnTete } from '@/components/coque/coque';
 import { Panneau } from '@/components/ui/panneau';
 import { PointEtat } from '@/components/ui/etat';
+import { PanneauAgent, type AgentVue, type CatalogueVue } from '@/components/uefn/agent-panneau';
 import { dateHeure } from '@/lib/format';
 import { requireUser } from '@/server/auth';
 import { db } from '@/server/db';
+import { agentVivant } from '@/server/agent/canal';
 import { modeUefn } from '@/server/mode';
 
 export const dynamic = 'force-dynamic';
@@ -22,17 +24,16 @@ type Diagnostic = Partial<{
   pythonScripting: boolean;
   mcpToolsets: boolean;
   projet: { nom: string; mcpJson: boolean } | null;
-  mcp: { connecte: boolean };
+  mcp: { connecte: boolean; endpoint?: string; erreur?: string; outils?: number };
 }>;
 
 const ETAPES_ONBOARDING = [
   'Utilises-tu déjà UEFN ? Si non, installe-le depuis le lanceur Epic Games (Windows uniquement).',
   'Installer UEFN et ouvrir une fois le projet que l’agent construira.',
-  'Installer l’agent Nexteo pour Windows.',
+  'Générer un code d’appairage ici, puis lancer l’agent Nexteo sur ton PC avec ce code.',
   'Activer Python Editor Scripting dans les paramètres du projet.',
   'Activer UEFN MCP Toolsets dans les paramètres du projet (fonction en accès bêta).',
-  'Sélectionner le projet dans l’agent : il écrit le fichier .mcp.json à la racine du projet.',
-  'Lancer le test de connexion.',
+  'Laisser UEFN ouvert sur ton projet, puis cliquer sur « Découvrir les outils ».',
   'Créer ta première map.',
 ];
 
@@ -48,23 +49,35 @@ export default async function ConnexionUefnPage() {
 
 async function Contenu() {
   const user = await requireUser();
-  const agent = await db.localAgent.findFirst({ where: { userId: user.id, revokedAt: null }, orderBy: { lastSeenAt: 'desc' } });
-  const vivant = !!agent?.lastSeenAt && agent.lastSeenAt > new Date(Date.now() - 2 * 60_000);
+  const agentsBruts = await db.localAgent.findMany({ where: { userId: user.id, revokedAt: null }, orderBy: { lastSeenAt: 'desc' } });
+  const agent = agentsBruts[0] ?? null;
+  const vivant = agentVivant(agent);
+  const agents: AgentVue[] = agentsBruts.map((a) => ({
+    id: a.id,
+    nom: a.machineName,
+    version: a.version,
+    vuLe: a.lastSeenAt ? dateHeure(a.lastSeenAt) : null,
+    vivant: agentVivant(a),
+  }));
+  const cat = agent?.catalogue as { protocolVersion?: string | null; outils?: { name: string; description?: string }[] } | null | undefined;
+  const catalogue: CatalogueVue = cat?.outils
+    ? { protocole: cat.protocolVersion ?? null, le: agent?.catalogueAt ? dateHeure(agent.catalogueAt) : null, outils: cat.outils.map((o) => ({ name: String(o.name), description: typeof o.description === 'string' ? o.description : undefined })) }
+    : null;
   const d = (agent?.diagnostics ?? {}) as Diagnostic;
   const inconnu = !vivant;
 
   const lignes: Ligne[] = [
     {
       nom: 'UEFN',
-      ok: inconnu ? null : !!d.uefn?.installe,
-      etat: inconnu ? 'non détecté' : d.uefn?.installe ? 'installé' : 'absent',
+      ok: d.uefn ? d.uefn.installe : null,
+      etat: !d.uefn ? (inconnu ? 'non détecté' : 'non vérifié par l’agent') : d.uefn.installe ? 'installé' : 'absent',
       detail: d.uefn?.version,
       correction: ['Installe Unreal Editor for Fortnite depuis le lanceur Epic Games.', 'UEFN ne fonctionne que sous Windows : un Mac ne peut pas l’exécuter.'],
     },
     {
       nom: 'Fortnite',
-      ok: inconnu ? null : !!d.fortnite?.installe,
-      etat: inconnu ? 'non détecté' : d.fortnite?.installe ? 'installé' : 'absent',
+      ok: d.fortnite ? d.fortnite.installe : null,
+      etat: !d.fortnite ? (inconnu ? 'non détecté' : 'non vérifié par l’agent') : d.fortnite.installe ? 'installé' : 'absent',
       correction: ['Installe Fortnite depuis le lanceur Epic Games : les playtests se lancent dans le client Fortnite.'],
     },
     {
@@ -73,14 +86,14 @@ async function Contenu() {
       etat: vivant ? 'connecté' : agent ? 'hors ligne' : 'non installé',
       detail: agent?.lastSeenAt ? `vu le ${dateHeure(agent.lastSeenAt)}` : undefined,
       correction: [
-        'L’agent Nexteo pour Windows n’est pas encore disponible : il arrive après la validation complète du produit contre le simulateur.',
-        'En attendant, les constructions tournent contre l’éditeur simulé, et c’est affiché partout.',
+        'Génère un code d’appairage dans le panneau « Agent Nexteo » ci-dessous.',
+        'Sur ton PC, lance la commande affichée, puis « npm run agent -- run » et laisse la fenêtre ouverte.',
       ],
     },
     {
       nom: 'Python Editor Scripting',
-      ok: inconnu ? null : !!d.pythonScripting,
-      etat: inconnu ? 'non vérifiable' : d.pythonScripting ? 'activé' : 'désactivé',
+      ok: d.pythonScripting === undefined ? null : d.pythonScripting,
+      etat: d.pythonScripting === undefined ? 'non vérifié par l’agent' : d.pythonScripting ? 'activé' : 'désactivé',
       correction: [
         'Dans UEFN, ouvre les paramètres du projet (Project Settings).',
         'Recherche « Python Editor Scripting » et coche l’option.',
@@ -89,8 +102,8 @@ async function Contenu() {
     },
     {
       nom: 'UEFN MCP Toolsets',
-      ok: inconnu ? null : !!d.mcpToolsets,
-      etat: inconnu ? 'non vérifiable' : d.mcpToolsets ? 'activé' : 'désactivé',
+      ok: d.mcpToolsets === undefined ? null : d.mcpToolsets,
+      etat: d.mcpToolsets === undefined ? 'non vérifié par l’agent' : d.mcpToolsets ? 'activé' : 'désactivé',
       correction: [
         'Dans les paramètres du projet, recherche « UEFN MCP Toolsets » et coche l’option.',
         'La fonction est en accès bêta : si elle n’apparaît pas, vérifie que ton UEFN est à jour (version 42.00 ou plus).',
@@ -98,8 +111,8 @@ async function Contenu() {
     },
     {
       nom: 'Projet',
-      ok: inconnu ? null : !!d.projet?.mcpJson,
-      etat: inconnu ? 'non sélectionné' : d.projet ? (d.projet.mcpJson ? 'prêt' : '.mcp.json absent') : 'non sélectionné',
+      ok: d.projet === undefined ? null : d.projet ? d.projet.mcpJson : null,
+      etat: d.projet === undefined ? 'non vérifié par l’agent' : d.projet ? (d.projet.mcpJson ? 'prêt' : '.mcp.json absent') : 'non sélectionné',
       detail: d.projet?.nom,
       correction: [
         'Dans l’agent, choisis le projet UEFN à construire.',
@@ -108,8 +121,9 @@ async function Contenu() {
     },
     {
       nom: 'MCP',
-      ok: inconnu ? null : !!d.mcp?.connecte,
-      etat: inconnu ? 'non connecté' : d.mcp?.connecte ? 'connecté' : 'non connecté',
+      ok: inconnu || !d.mcp ? null : d.mcp.connecte,
+      etat: inconnu || !d.mcp ? 'non connecté' : d.mcp.connecte ? 'connecté' : 'injoignable',
+      detail: d.mcp?.connecte ? `${d.mcp.endpoint ?? ''}${d.mcp.outils !== undefined ? ` · ${d.mcp.outils} outils` : ''}` : d.mcp?.erreur,
       correction: [
         'Le client MCP doit être lancé DEPUIS le répertoire racine du projet : lancé d’ailleurs, rien ne se connecte, et l’erreur est peu explicite.',
         'L’agent s’en charge ; si la connexion échoue, relance le test depuis l’agent.',
@@ -128,10 +142,14 @@ async function Contenu() {
           {modeUefn() === 'mock' ? (
             <Panneau interieur="p-4" biseau={10} couleurBord="var(--color-warn)">
               <p className="text-sm text-warn">
-                Aucun agent local n’est connecté. Les constructions tournent contre l’éditeur simulé, et chaque écran l’indique.
+                {vivant
+                  ? 'Ton agent est connecté, mais les constructions restent simulées : le fournisseur MCP réel n’est pas encore écrit. Il dépend de la liste d’outils que ton éditeur annonce — relève-la ci-dessous.'
+                  : 'Aucun agent local n’est connecté. Les constructions tournent contre l’éditeur simulé, et chaque écran l’indique.'}
               </p>
             </Panneau>
           ) : null}
+
+          <PanneauAgent agents={agents} catalogue={catalogue} vivant={vivant} />
 
           <Panneau interieur="p-0 overflow-hidden">
             <ul className="divide-y divide-void-700">

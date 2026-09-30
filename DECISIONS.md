@@ -116,3 +116,40 @@ Arbitrages pris en construisant, avec leur raison. Le plus récent en bas.
     supérieure à la limite du plan Vercel fait refuser le DÉPLOIEMENT, et ne
     se voit pas en local. La reconnexion automatique (`retry` + `Last-Event-ID`)
     rend la coupure invisible : aucune ligne perdue ni rejouée.
+33. **Agent local : un programme Node, pas Tauri (écart assumé avec la phase E).**
+    Un agent Tauri demande la chaîne Rust et un Windows pour être testé ; le
+    programme Node se teste ici, sur Linux, contre un faux serveur MCP, et
+    parle exactement le même protocole. Il se lance aujourd'hui par
+    `npm run agent` (Node requis). Un exécutable Windows autonome, et
+    l'interface de détection d'UEFN, viendront une fois le fournisseur réel
+    validé — l'écart est sur l'enveloppe, pas sur le protocole.
+34. **Le site et l'agent communiquent par long-poll initié par l'agent, pas
+    par WebSocket.** Le site tourne sur des fonctions sans serveur, qui ne
+    gardent aucune connexion ouverte ; un PC domestique n'accepte aucune
+    connexion entrante. L'agent demande ses ordres (25 s d'attente au plus,
+    sous la limite de 60 s de Vercel) et poste les résultats. Appairage par
+    code à usage unique (8 caractères, 10 min), jeton propre à la machine ;
+    seules les empreintes SHA-256 sont stockées. Limite connue : pas de
+    limitation de débit sur `/api/agent/pair` — le code fait ~40 bits et
+    expire en 10 minutes, ce qui rend l'énumération irréaliste, mais une
+    limite par adresse IP reste à ajouter avant l'ouverture publique.
+35. **L'agent est un tuyau, le site porte toute la connaissance des outils.**
+    L'agent ne relaie que trois opérations (`mcp.ping`, `mcp.listTools`,
+    `mcp.callTool`), et ne parle qu'à une adresse locale (127.0.0.1,
+    localhost, ::1, http). Aucun nom d'outil n'y est écrit : quand le MCP
+    d'UEFN change — il est en bêta — on modifie le site, pas le PC de chaque
+    utilisateur. Le MCP officiel écoute sur `http://127.0.0.1:8000/mcp` et
+    expose 384 outils derrière une passerelle de 3 outils (source : résumé
+    de recherche, la documentation d'Epic est bloquée depuis
+    l'environnement de développement — À VÉRIFIER). Les noms de ces trois
+    outils sont inconnus : le fournisseur MCP réel (phase F) n'est donc PAS
+    écrit. La découverte (`tools/list`, conservée dans `LocalAgent.catalogue`
+    et affichée dans /connexion-uefn) est là pour les relever sur un vrai
+    UEFN au lieu de les deviner. `modeUefn()` reste `mock` : un agent
+    connecté ne rend pas un build réel, et l'écran le dit.
+36. **Le diagnostic n'affiche que ce que l'agent a mesuré.** UEFN installé,
+    Fortnite, Python Editor Scripting, MCP Toolsets, projet : l'agent ne les
+    mesure pas encore, la page affiche « non vérifié par l'agent » et jamais
+    « absent ». Seul l'état du MCP (joignable ou non, adresse, nombre
+    d'outils) est mesuré. Une croix rouge pour une chose non mesurée
+    enverrait l'utilisateur corriger un réglage qui n'est peut-être pas cassé.

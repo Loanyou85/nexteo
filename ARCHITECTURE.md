@@ -76,18 +76,35 @@ ajouter un template ou changer un prix.
    **entre** deux tâches, jamais au milieu d'une écriture.
 6. Chaque événement devient un `AgentEvent`, lu par la console en SSE.
 
-## Protocole de l'agent local (phase E)
-
-WebSocket authentifié par un jeton par machine, révocable. Messages typés :
-`hello` (version, machine, diagnostics), `exec` (lot d'instructions, `userId`,
-`projectId`, délai), `result` (réponse brute du MCP), `log` (flux continu),
-`heartbeat`. L'agent refuse tout type inconnu et toute écriture hors du
-répertoire de projet déclaré. Il n'appelle jamais de LLM. Le serveur WebSocket
-vit dans le worker, pas sur Vercel (qui ne tient pas de connexion longue).
-
 ## Coordonnées
 
 Le MCP parle XYZ, UEFN raisonne en Left-Up-Forward. `src/lib/uefn/coordinates.ts`
 est **le seul fichier autorisé à convertir**. Les types `XYZVector` et
 `LUFVector` sont marqués : TypeScript refuse de passer l'un pour l'autre. Le
 reste du code ne manipule que du LUF.
+
+
+## Protocole de l'agent local (phase E)
+
+Remplace le WebSocket d'abord prévu : le site tourne sans serveur et ne peut pas en tenir un (DECISIONS n° 34).
+
+```
+Navigateur ──► Site (Vercel) ◄──── long-poll HTTPS ──── Agent (PC de l'utilisateur) ──► MCP d'UEFN (127.0.0.1)
+                  │                                          ▲
+              AgentCommand (file en base)              relais de 3 opérations
+```
+
+- `src/server/agent/canal.ts` : appairage, authentification, file d'ordres
+  (`envoyerOrdre` attend le résultat, `prendreOrdres` est le long-poll,
+  `enregistrerResultat` rend la réponse). Les pannes de la plateforme
+  (agent muet, éditeur fermé, outil trop lent) sortent en `PanneEditeur`,
+  comme pour le simulateur : l'orchestrateur les rejoue et rembourse.
+- `src/app/api/agent/{pair,heartbeat,poll,result}` : les quatre routes. Seule
+  `pair` est ouverte sans jeton.
+- `src/agent/` : l'agent. `mcp.ts` (client MCP Streamable HTTP, JSON et SSE,
+  pagination, session perdue), `agent.ts` (boucle, liste blanche de trois
+  opérations), `cli.ts` (`pair`, `run`, `test`, `unpair`), `config.ts`.
+- `scripts/faux-mcp.ts` : faux serveur MCP pour développer sans UEFN. Ses
+  noms d'outils sont inventés.
+- Tests : `src/agent/agent.test.ts` (24 tests, vraie base, vraies routes,
+  faux MCP), dont les garde-fous vérifiés par mutation.

@@ -23,6 +23,10 @@ npm run dev
 
 Pour les builds en arrière-plan (facultatif en simulation) : `npm run worker`.
 
+Pour essayer l'agent local sans UEFN : `npx tsx scripts/faux-mcp.ts` (faux éditeur),
+puis, depuis la page Connexion UEFN, générer un code et lancer
+`npm run agent -- pair CODE --site http://localhost:3000` puis `npm run agent -- run`.
+
 ## Vérifier
 
 ```bash
